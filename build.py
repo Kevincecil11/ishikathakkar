@@ -245,7 +245,7 @@ def project(p, idx):
     if p.get("gallery"):
         g = p["gallery"]
         figs = "".join(f'<figure class="reveal" style="--i:{i % 4}"><img src="{rel}assets/img/{src}" alt="" loading="lazy"></figure>' for i, src in enumerate(g["items"]))
-        gal = f"""<section class="gallery">{sec_head(e(g["title"]), f'({pad(len(g["items']))})', f'<span class="mono muted">{e(g["note"])}</span>')}
+        gal = f"""<section class="gallery">{sec_head(e(g["title"]), f'({pad(len(g["items"]))})', f'<span class="mono muted">{e(g["note"])}</span>')}
   <div class="ggrid" style="--cols:{g["cols"]}">{figs}</div></section>"""
     learned = f'<p class="learned reveal">{e(p["learned"])}</p>' if p.get("learned") else ""
     related = ""
