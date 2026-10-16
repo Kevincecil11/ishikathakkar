@@ -82,7 +82,11 @@ jobs:
                   '<a class="pill dark version-switch" href="' + other_url + '" '
                   'aria-label="Switch to version ' + other_version + '" '
                   'style="padding:0 14px;flex-shrink:0;text-decoration:none">'
-                  'V' + other_version + ' ↗</a>'
+                  'V' + other_version + '</a>'
+              )
+              mobile_style = (
+                  '<style>@media(max-width:600px){.hdr .version-switch{'
+                  'position:absolute;right:var(--pad);top:12px}}</style>'
               )
               for page in target.rglob("*.html"):
                   text = page.read_text(encoding="utf-8")
@@ -92,6 +96,7 @@ jobs:
                       text, count=1, flags=re.S,
                   )
                   assert count == 1, f"Main navigation missing: {page}"
+                  text = text.replace("</head>", mobile_style + "</head>", 1)
                   page.write_text(text, encoding="utf-8")
           assert 'id="glance-h"' in (root / "index.html").read_text()
           assert 'id="glance-h"' in (root / "version-2/index.html").read_text()
