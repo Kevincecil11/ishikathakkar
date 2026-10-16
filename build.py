@@ -123,21 +123,21 @@ def home():
     rel = ""
     out = [head(SITE["title"], SITE["description"], rel), header(rel, "home")]
     roles = "".join(f"<li>{e(r.split(', ')[0])}, <span>{e(r.split(', ')[1])}</span></li>" for r in SITE["roles"])
-    lanes = []
-    for l in LANES:
-        ps = [p for p in PROJECTS if p["lane"] == l["id"]]
-        names = " · ".join(e(p["name"]) for p in ps)
-        lanes.append(f"""<a class="lane-card" href="#{l["id"]}" style="--c:{l["color"]};--on:{l["on"]}">
-  <div class="top"><span class="mono">({pad(len(ps))})</span><em aria-hidden="true">↘</em></div>
-  <div><h2>{e(l["name"])}</h2><p>{e(l["short"])}</p><p class="names">{names}</p></div>
-</a>""")
     out.append(f"""<section class="hero wrap" aria-labelledby="name">
   <h1 class="fit" id="name"><span>{e(SITE["name"])}</span></h1>
   <div class="hero-row">
     <p class="positioning">{e(SITE["positioning"])}</p>
     <ul class="hero-roles">{roles}</ul>
   </div>
-  <nav class="lanes" aria-label="What I do">{''.join(lanes)}</nav>
+</section>""")
+
+    stubs = "".join(
+        f'<div class="reveal" style="--i:{i}">{go(rel, h["slug"], "stub")}<b>{e(h["n"])}</b>'
+        f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} →</small></span></a></div>'
+        for i, h in enumerate(C["highlights"]))
+    out.append(f"""<section class="wrap" style="padding-top:16px" aria-labelledby="glance-h">
+  {sec_head('<span id="glance-h">At a glance</span>', f'({pad(len(C["highlights"]))})', '<span class="mono muted">Results from the work</span>')}
+  <div class="stubs">{stubs}</div>
 </section>""")
 
     a = C["about"]
@@ -157,15 +157,6 @@ def home():
   </div>
 </section>""")
 
-    stubs = "".join(
-        f'<div class="reveal" style="--i:{i}">{go(rel, h["slug"], "stub")}<b>{e(h["n"])}</b>'
-        f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} →</small></span></a></div>'
-        for i, h in enumerate(C["highlights"]))
-    highlights_section = f"""<section class="sec wrap" aria-labelledby="glance-h">
-  {sec_head('<span id="glance-h">At a glance</span>', f'({pad(len(C["highlights"]))})', '<span class="mono muted">Results from the work</span>')}
-  <div class="stubs">{stubs}</div>
-</section>"""
-
     blocks = []
     for l in LANES:
         ps = [p for p in PROJECTS if p["lane"] == l["id"]]
@@ -178,7 +169,6 @@ def home():
   {sec_head('<span id="work-h">Work</span>', f"({pad(len(PROJECTS))})", '<span class="mono muted">By discipline</span>')}
   {''.join(blocks)}
 </section>""")
-    out.append(highlights_section)
     out.append(brands(rel))
     out.append(footer(rel))
     return "".join(out)
@@ -255,7 +245,7 @@ def project(p, idx):
     if p.get("gallery"):
         g = p["gallery"]
         figs = "".join(f'<figure class="reveal" style="--i:{i % 4}"><img src="{rel}assets/img/{src}" alt="" loading="lazy"></figure>' for i, src in enumerate(g["items"]))
-        gal = f"""<section class="gallery">{sec_head(e(g["title"]), f'({pad(len(g["items"]))})', f'<span class="mono muted">{e(g["note"])}</span>')}
+        gal = f"""<section class="gallery">{sec_head(e(g["title"]), f'({pad(len(g["items']))})', f'<span class="mono muted">{e(g["note"])}</span>')}
   <div class="ggrid" style="--cols:{g["cols"]}">{figs}</div></section>"""
     learned = f'<p class="learned reveal">{e(p["learned"])}</p>' if p.get("learned") else ""
     related = ""
