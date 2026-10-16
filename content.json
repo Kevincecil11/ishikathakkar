@@ -1,0 +1,654 @@
+{
+  "site": {
+    "name": "Ishika Thakkar",
+    "title": "Ishika Thakkar · Brand strategist, founder & co-founder",
+    "description": "Ishika Thakkar builds brands, communities and stories. Founder & Creative Director of The Loud Table, co-founder of MTRX Digital, founder of Women of Ahmedabad.",
+    "positioning": "I build brands, communities and stories.",
+    "roles": [
+      "Founder & Creative Director, The Loud Table",
+      "Co-founder, MTRX Digital"
+    ],
+    "contact": {
+      "email": "",
+      "linkedin": "",
+      "instagram": "",
+      "website": "https://mtrxdigital.com"
+    },
+    "note": "Project photographs marked as placeholders are illustrative stand-ins. Portrait, hosting photo and logos are real.",
+    "url": "https://kevincecil11.github.io/ishikathakkar/"
+  },
+  "lanes": [
+    {
+      "id": "ventures",
+      "name": "Ventures",
+      "color": "#FFB81C",
+      "on": "#121211",
+      "blurb": "The companies I founded and co-founded.",
+      "short": "Founder & co-founder"
+    },
+    {
+      "id": "brand",
+      "name": "Brand & Marketing",
+      "color": "#E5361F",
+      "on": "#FFFFFF",
+      "blurb": "Client work through The Loud Table: research, positioning, content and PR.",
+      "short": "Strategy, content, PR"
+    },
+    {
+      "id": "community",
+      "name": "Community & Events",
+      "color": "#7BDC9E",
+      "on": "#121211",
+      "blurb": "Rooms I built: a women’s network, a café’s events calendar, a university fest and a preschool’s first annual day.",
+      "short": "Networks, events, teaching"
+    },
+    {
+      "id": "stage",
+      "name": "Stage & Writing",
+      "color": "#E83E8C",
+      "on": "#FFFFFF",
+      "blurb": "Hosting live stages, and a play I wrote, directed and starred in.",
+      "short": "Hosting, theatre"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "the-loud-table",
+      "lane": "ventures",
+      "name": "The Loud Table",
+      "role": "Founder & Creative Director",
+      "org": "The Loud Table, my marketing firm",
+      "summary": "The marketing and brand studio I founded and run.",
+      "result": "My own marketing firm",
+      "image": "ishika-hosting.webp",
+      "pos": "50% 30%",
+      "placeholder": false,
+      "logo": "logo-loud-table.webp",
+      "sections": [
+        [
+          "What it is",
+          "The Loud Table is my own marketing firm. I ask what a brand stands for, beneath what looks good in a deck."
+        ],
+        [
+          "How I work",
+          "I build on instinct already proven, ahead of promises still being tested. I sell trust you can leave alone, the kind that needs no checking up on."
+        ]
+      ],
+      "did_title": "What the studio does",
+      "did": [
+        "Brand strategy",
+        "Personal branding",
+        "Market research",
+        "Social media management",
+        "End-to-end creative direction",
+        "Community building & events",
+        "PR & outreach",
+        "Influencer marketing"
+      ],
+      "module": "clients"
+    },
+    {
+      "slug": "mtrx-digital",
+      "lane": "ventures",
+      "name": "MTRX Digital",
+      "role": "Co-founder",
+      "org": "MTRX Digital, a design and development studio",
+      "summary": "Co-founder of a studio building websites, apps, brand systems and automation.",
+      "result": "Clients, marketing, design",
+      "image": "mtrx.webp",
+      "pos": "50% 50%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The studio",
+          "MTRX is a design and development studio creating websites, applications, brand systems, and practical automation. The name comes from Matrix: the systems beneath the surface."
+        ],
+        [
+          "The idea",
+          "Bring clarity, structure, and purpose to brands and products, as a response to overdesigned, underbuilt digital work."
+        ]
+      ],
+      "did_title": "What I do as co-founder",
+      "did": [
+        "Client management",
+        "Marketing and studio positioning",
+        "Design across studio projects"
+      ],
+      "module": "mtrx"
+    },
+    {
+      "slug": "stax-living",
+      "lane": "brand",
+      "name": "Stax Living",
+      "role": "Market research, creative direction, social media",
+      "org": "Stax Living, furniture collections",
+      "summary": "A furniture campaign where the colour only arrives when you get home.",
+      "result": "42% more enquiries for the collection",
+      "image": "stax-sofa.webp",
+      "pos": "50% 60%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The brief",
+          "Consistent social media posting, with themes and concepts for new furniture collections that use storytelling as a promotional tool."
+        ],
+        [
+          "The approach",
+          "Storytelling concepts built on human emotion. The day outside is black and white: the commute, the traffic, the noise of Bombay, routine without colour. Then you get home, and there is red. That is the furniture."
+        ]
+      ],
+      "did": [
+        "Market research",
+        "Creative direction",
+        "Social media management"
+      ],
+      "stats": [
+        [
+          "42%",
+          "Increase in enquiries for the collection"
+        ]
+      ],
+      "module": "daynight",
+      "gallery": {
+        "title": "The campaign",
+        "note": "Every frame stays grey until the furniture arrives.",
+        "cols": 3,
+        "items": [
+          "stax-grid-1.webp",
+          "stax-grid-2.webp",
+          "stax-grid-3.webp",
+          "stax-grid-4.webp",
+          "stax-grid-5.webp",
+          "stax-grid-6.webp"
+        ]
+      }
+    },
+    {
+      "slug": "indravansh",
+      "lane": "brand",
+      "name": "Indravansh",
+      "role": "Personal branding & creative direction",
+      "org": "Harshita, Founder of Indravansh Multi Designer Store",
+      "summary": "Turning a store’s founder into the face of her brand.",
+      "result": "115k-follower collaboration in 15 days",
+      "image": "indravansh.webp",
+      "pos": "50% 30%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The brief",
+          "The founder wanted to become the face of her brand, increase digital engagement, attract collaborations, and position the brand at the intersection of heritage and luxury."
+        ],
+        [
+          "The approach",
+          "We began by identifying the founder’s personal voice and visual sensibility, then built a content and presentation strategy around it, positioning her as the storyteller behind the brand rather than a separate marketing entity."
+        ]
+      ],
+      "did": [
+        "Personal branding",
+        "Creative direction",
+        "Three end-to-end shoots a month"
+      ],
+      "stats": [
+        [
+          "115k",
+          "Follower account collaboration, secured within 15 days"
+        ],
+        [
+          "900+",
+          "New followers within 30 days"
+        ],
+        [
+          "15+",
+          "Collaborations delivering strong cost value"
+        ],
+        [
+          "3",
+          "End-to-end shoots per month"
+        ]
+      ],
+      "gallery": {
+        "title": "Three shoots a month",
+        "note": "Heritage, detail, and the work behind every frame.",
+        "cols": 4,
+        "items": [
+          "indravansh-grid-1.webp",
+          "indravansh-grid-2.webp",
+          "indravansh-grid-3.webp",
+          "indravansh-grid-4.webp",
+          "indravansh-grid-5.webp",
+          "indravansh-grid-6.webp",
+          "indravansh-grid-7.webp",
+          "indravansh-grid-8.webp"
+        ]
+      }
+    },
+    {
+      "slug": "designecho",
+      "lane": "brand",
+      "name": "DesignEcho",
+      "role": "Brand strategy & creative direction",
+      "org": "DesignEcho Communications, a writing service based in Ahmedabad",
+      "summary": "Repositioning a writer as an editorial strategist.",
+      "result": "From writer to editorial strategist",
+      "image": "designecho.webp",
+      "pos": "50% 50%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The brief",
+          "To develop brand guidelines that communicate a premium, luxury look and elevate the founder’s positioning from writer to editorial strategist."
+        ],
+        [
+          "The approach",
+          "A detailed questionnaire covering goals, service details, styling preferences, and references, followed by logo development and full brand positioning."
+        ],
+        [
+          "What came of it",
+          "A premium, cohesive brand identity that repositioned DesignEcho as an editorial strategy consultancy rather than a freelance writing service."
+        ]
+      ],
+      "did": [
+        "Brand strategy",
+        "Brand guidelines",
+        "Logo development",
+        "Brand positioning"
+      ],
+      "module": "shift"
+    },
+    {
+      "slug": "finance-solutions",
+      "lane": "brand",
+      "name": "Finance Solutions",
+      "role": "Brand strategy, PR & outreach",
+      "org": "Finance Solutions, a finance consultancy based in Ahmedabad",
+      "summary": "Building a consultancy’s credibility through awards.",
+      "result": "3 awards won from 5 nominations",
+      "image": "finance.webp",
+      "pos": "50% 50%",
+      "placeholder": true,
+      "logo": "logo-finance.webp",
+      "sections": [
+        [
+          "The brief",
+          "Build credibility and visibility through award nominations."
+        ],
+        [
+          "The approach",
+          "Built a cold email list for relevant award nominations, drafted outreach emails and award forms, gathered the required data, and followed up where necessary."
+        ]
+      ],
+      "did": [
+        "Award research",
+        "Outreach emails",
+        "Award forms and data",
+        "Follow-ups"
+      ],
+      "stats": [
+        [
+          "5",
+          "Award nominations in the year"
+        ],
+        [
+          "3",
+          "Awards won"
+        ],
+        [
+          "2",
+          "Speaker opportunities"
+        ]
+      ],
+      "flow": true
+    },
+    {
+      "slug": "women-of-ahmedabad",
+      "lane": "community",
+      "name": "Women of Ahmedabad",
+      "role": "Founder, curator & moderator",
+      "org": "Mitti Lifestyle Store & Café",
+      "summary": "Open conversations between women from every industry in the city.",
+      "result": "Four editions · newspaper coverage",
+      "image": "woa.webp",
+      "pos": "50% 55%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The idea",
+          "A community initiative bringing together women from every industry in the city. Four editions to date."
+        ],
+        [
+          "The approach",
+          "Independent speaker identification, outreach, and session structuring, followed by moderating each conversation. Sessions brought together women from unrelated fields for open conversation."
+        ],
+        [
+          "What came of it",
+          "Lasting professional connections between attendees and growing local recognition, including newspaper coverage."
+        ]
+      ],
+      "did": [
+        "Speaker identification",
+        "Outreach",
+        "Session structuring",
+        "Moderating each conversation"
+      ],
+      "stats": [
+        [
+          "4",
+          "Editions to date"
+        ]
+      ],
+      "learned": "Curating and moderating four editions built my ability to structure meaningful conversations, speak to a room, and adapt in real time.",
+      "related": [
+        "mitti"
+      ]
+    },
+    {
+      "slug": "mitti",
+      "lane": "community",
+      "name": "Mitti",
+      "role": "Events Manager",
+      "org": "Mitti Lifestyle Store & Café",
+      "summary": "Building a café’s events programme from the ground up.",
+      "result": "₹4,00,000+ through experiential programming",
+      "image": "mitti.webp",
+      "pos": "50% 50%",
+      "placeholder": true,
+      "logo": "logo-mitti.webp",
+      "sections": [
+        [
+          "The role",
+          "Built Mitti’s experiential programming from the ground up, including the flagship initiative Women of Ahmedabad."
+        ],
+        [
+          "The approach",
+          "Conceptualized and hosted 4-5 events a month across formats: workshops, raves, screenings, lectures, community brunches. Handled artist management, outreach, and session structuring independently; oversaw execution on the day."
+        ],
+        [
+          "What came of it",
+          "Positioned Mitti as a recognized community space in Ahmedabad; sharpened leadership, communication, and adaptability through hands-on curation."
+        ]
+      ],
+      "did": [
+        "Programming 4–5 events a month",
+        "Artist management",
+        "Outreach",
+        "Execution on the day"
+      ],
+      "stats": [
+        [
+          "₹4,00,000+",
+          "Revenue through experiential programming"
+        ],
+        [
+          "11k → 19k",
+          "Instagram following"
+        ]
+      ],
+      "module": "posters",
+      "related": [
+        "women-of-ahmedabad"
+      ]
+    },
+    {
+      "slug": "tech-kaushalya",
+      "lane": "community",
+      "name": "Tech Kaushalya",
+      "role": "Organiser, then supervised every department",
+      "org": "Tech Kaushalya, a large-scale university tech fest",
+      "summary": "Four years running every part of a university tech fest.",
+      "result": "Four years · every department",
+      "image": "tech.webp",
+      "pos": "50% 45%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The role",
+          "During my four years of university, I did everything and supervised every department, including promotions, sponsorships, social media, and on-ground operations."
+        ],
+        [
+          "The process",
+          "Chaotic. Every tiny detail matters and cannot be overlooked."
+        ]
+      ],
+      "did": [
+        "Inauguration",
+        "Sponsorship",
+        "Social media management",
+        "Operations"
+      ],
+      "did_title": "Departments",
+      "learned": "At that scale, one missed follow-up or overlooked logistic can stall the entire event. This lesson has carried into every initiative I have undertaken since.",
+      "related": [
+        "just-a-khwab"
+      ],
+      "module": "words",
+      "words": [
+        "Inauguration",
+        "Sponsorship",
+        "Social media",
+        "Operations"
+      ],
+      "words_label": "Departments I supervised"
+    },
+    {
+      "slug": "trinity-preschool",
+      "lane": "community",
+      "name": "Trinity Preschool",
+      "role": "Teaching, marketing & outreach",
+      "org": "Trinity Preschool",
+      "summary": "Teaching, marketing, and the school’s first annual day.",
+      "result": "Hosted the first annual function",
+      "image": "trinity.webp",
+      "pos": "50% 45%",
+      "placeholder": true,
+      "logo": "logo-trinity.webp",
+      "sections": [
+        [
+          "The role",
+          "Handled marketing, customer outreach, and teaching young children, and organized and hosted the school’s first annual function."
+        ]
+      ],
+      "did": [
+        "Teaching young children",
+        "Marketing & customer outreach",
+        "Organised and hosted the first annual function"
+      ],
+      "learned": "Marketing for education demanded a different kind of empathy, since I was speaking to parents entrusting their child’s education to the school. It broadened my understanding of what good marketing can mean."
+    },
+    {
+      "slug": "on-stage",
+      "lane": "stage",
+      "name": "On Stage",
+      "role": "Executive Host · Emcee",
+      "org": "TEDx · GUSEC HerStart Acceleration Programme 2025",
+      "summary": "Hosting live stages, from TEDx to a startup programme.",
+      "result": "TEDx Executive Host · GUSEC Emcee",
+      "image": "onstage.webp",
+      "pos": "50% 50%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The stages",
+          "Executive Host at TEDx. Emcee for GUSEC’s HerStart Acceleration Programme 2025."
+        ],
+        [
+          "What it took",
+          "I learned to introduce spontaneity into a pre-written script while managing the nervousness that comes with live, unscripted moments."
+        ]
+      ],
+      "did": [
+        "TEDx, Executive Host",
+        "GUSEC, Emcee, HerStart Acceleration Programme 2025"
+      ],
+      "did_title": "Stages",
+      "learned": "It built my confidence and comfort speaking in unfamiliar situations, and shaped my continued interest in hosting and organizing events."
+    },
+    {
+      "slug": "just-a-khwab",
+      "lane": "stage",
+      "name": "Just a Khwab",
+      "role": "Writer, director & lead",
+      "org": "A play staged at Tech Kaushalya",
+      "summary": "A play I wrote, directed and starred in.",
+      "result": "Wrote it · directed it · starred in it",
+      "image": "khwab.webp",
+      "pos": "50% 45%",
+      "placeholder": true,
+      "sections": [
+        [
+          "The play",
+          "I wrote, directed, and starred in this play during Tech Kaushalya."
+        ],
+        [
+          "The process",
+          "It required me to organize scattered ideas into a coherent, engaging narrative and to communicate that vision clearly to the cast and crew."
+        ]
+      ],
+      "did": [
+        "Wrote the script",
+        "Directed the cast and crew",
+        "Starred in it"
+      ],
+      "learned": "A smoothly operating team matters more than individual talent.",
+      "related": [
+        "tech-kaushalya"
+      ],
+      "module": "words",
+      "words": [
+        "Wrote.",
+        "Directed.",
+        "Starred."
+      ],
+      "words_label": "Three jobs, one play"
+    }
+  ],
+  "highlights": [
+    {
+      "n": "42%",
+      "label": "More enquiries for a furniture collection",
+      "slug": "stax-living"
+    },
+    {
+      "n": "115k",
+      "label": "Follower collaboration landed in 15 days",
+      "slug": "indravansh"
+    },
+    {
+      "n": "3",
+      "label": "Awards won from 5 nominations",
+      "slug": "finance-solutions"
+    },
+    {
+      "n": "₹4L+",
+      "label": "Revenue from café events",
+      "slug": "mitti"
+    },
+    {
+      "n": "4",
+      "label": "Editions of Women of Ahmedabad",
+      "slug": "women-of-ahmedabad"
+    }
+  ],
+  "about": {
+    "statement": "I think in stories before I think in strategy.",
+    "short": "Give me a brand, a fest, a room full of five-year-olds, or a stage, and I’m doing the same thing every time: looking for what’s actually underneath it. People keep handing me the thing they can’t afford to get wrong, and trusting that once it’s mine, it’s handled.",
+    "paragraphs": [
+      "Give me a brand, a fest, a room full of five-year-olds, or a stage, and I’m doing the same thing every time: looking for what’s actually underneath it, not settling for the obvious read.",
+      "I don’t wait around for permission or certainty. I move, and I figure it out as I go, whether that means chasing down a sponsor who’s already said no once, calming a room of children through their first annual day, or standing on a stage I wrote myself with no idea if the audience would laugh in the right places.",
+      "What ties all of it together isn’t a job title. It’s that people keep handing me the thing they can’t afford to get wrong, and trusting that once it’s mine, it’s handled. I’ve run departments, not just projects. I’ve built brands, not just posts.",
+      "And none of it happened alone. I’d rather build something with the right people around me than take credit for doing it by myself, because the work is always better that way."
+    ],
+    "roles": [
+      [
+        "Founder & Creative Director",
+        "The Loud Table",
+        "the-loud-table"
+      ],
+      [
+        "Co-founder",
+        "MTRX Digital",
+        "mtrx-digital"
+      ],
+      [
+        "Founder",
+        "Women of Ahmedabad",
+        "women-of-ahmedabad"
+      ],
+      [
+        "Events Manager",
+        "Mitti Lifestyle Store & Café",
+        "mitti"
+      ],
+      [
+        "Executive Host",
+        "TEDx",
+        "on-stage"
+      ],
+      [
+        "Emcee, HerStart 2025",
+        "GUSEC",
+        "on-stage"
+      ],
+      [
+        "Supervised every department",
+        "Tech Kaushalya",
+        "tech-kaushalya"
+      ],
+      [
+        "Teacher & marketing",
+        "Trinity Preschool",
+        "trinity-preschool"
+      ]
+    ],
+    "skills": [
+      "Brand strategy",
+      "Personal branding",
+      "Market research",
+      "Social media management",
+      "Creative direction",
+      "Community building & events",
+      "PR & outreach",
+      "Influencer marketing",
+      "Client management",
+      "Hosting & public speaking"
+    ]
+  },
+  "brands": [
+    {
+      "name": "Stax Living",
+      "slug": "stax-living"
+    },
+    {
+      "name": "Indravansh",
+      "slug": "indravansh",
+      "logo": "logo-indravansh.webp"
+    },
+    {
+      "name": "DesignEcho",
+      "slug": "designecho"
+    },
+    {
+      "name": "Finance Solutions",
+      "slug": "finance-solutions",
+      "logo": "logo-finance.webp"
+    },
+    {
+      "name": "Mitti",
+      "slug": "mitti",
+      "logo": "logo-mitti.webp"
+    },
+    {
+      "name": "Trinity Preschool",
+      "slug": "trinity-preschool",
+      "logo": "logo-trinity.webp"
+    },
+    {
+      "name": "TEDx",
+      "slug": "on-stage"
+    },
+    {
+      "name": "GUSEC",
+      "slug": "on-stage"
+    }
+  ]
+}
