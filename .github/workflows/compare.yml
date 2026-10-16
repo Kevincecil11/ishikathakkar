@@ -1,0 +1,98 @@
+name: Publish both portfolio versions
+
+on:
+  push:
+    branches: [main, version-2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-pages
+  cancel-in-progress: false
+
+jobs:
+  refresh-main:
+    if: github.ref == 'refs/heads/version-2'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Rebuild the combined site from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
+
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out version 1
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source-v1
+          persist-credentials: false
+      - name: Check out version 2
+        uses: actions/checkout@v4
+        with:
+          ref: version-2
+          path: source-v2
+          persist-credentials: false
+      - name: Build both versions
+        run: |
+          python3 source-v1/build.py
+          python3 source-v2/build_version2.py
+      - name: Assemble one Pages site with two independent paths
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import shutil
+
+          root = Path("_site")
+          base = "/" + "${{ github.event.repository.name }}" + "/"
+          for source, target, prefix in [
+              (Path("source-v1"), root, base),
+              (Path("source-v2"), root / "version-2", base + "version-2/"),
+          ]:
+              target.mkdir(parents=True, exist_ok=True)
+              for directory in ["assets", "about", "work"]:
+                  shutil.copytree(source / directory, target / directory)
+              for name in ["index.html", "404.html", ".nojekyll"]:
+                  shutil.copy2(source / name, target / name)
+              # Missing URLs must resolve assets and Home within their variant.
+              notfound = target / "404.html"
+              html = notfound.read_text(encoding="utf-8")
+              html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
+              notfound.write_text(html, encoding="utf-8")
+          assert 'id="glance-h"' in (root / "index.html").read_text()
+          assert 'id="glance-h"' not in (root / "version-2/index.html").read_text()
+          assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
+          PY
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload both versions
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish version 1 and version 2 together
+        id: deployment
+        uses: actions/deploy-pages@v4
