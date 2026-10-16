@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, version-2]
   workflow_dispatch:
+  workflow_run:
+    workflows: [pages-build-deployment]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -66,7 +70,6 @@ jobs:
                   shutil.copytree(source / directory, target / directory)
               for name in ["index.html", "404.html", ".nojekyll"]:
                   shutil.copy2(source / name, target / name)
-              # Missing URLs must resolve assets and Home within their variant.
               notfound = target / "404.html"
               html = notfound.read_text(encoding="utf-8")
               html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
@@ -74,6 +77,7 @@ jobs:
           assert 'id="glance-h"' in (root / "index.html").read_text()
           assert 'id="glance-h"' in (root / "version-2/index.html").read_text()
           assert 'id="work"' in (root / "version-2/index.html").read_text()
+          assert (root / "version-2/assets/css/version2.css").is_file()
           assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
           PY
       - name: Configure Pages
@@ -88,12 +92,26 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Let the legacy branch publisher finish before publishing both versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 40); do
+            active=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?per_page=30" --jq '[.workflow_runs[] | select(.name == "pages-build-deployment" and .status != "completed")] | length')
+            if [ "$active" = "0" ]; then break; fi
+            sleep 10
+          done
+          if [ "$active" != "0" ]; then
+            echo "Legacy publisher still running; refusing a conflicting deployment"
+            exit 1
+          fi
       - name: Publish version 1 and version 2 together
         id: deployment
         uses: actions/deploy-pages@v4
