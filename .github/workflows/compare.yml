@@ -74,9 +74,30 @@ jobs:
               html = notfound.read_text(encoding="utf-8")
               html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
               notfound.write_text(html, encoding="utf-8")
+              # Comparison controls live in the shared publisher so both
+              # branch designs keep their original structure and content.
+              other_version = "2" if source.name == "source-v1" else "1"
+              other_url = base + "version-2/" if other_version == "2" else base
+              button = (
+                  '<a class="pill dark version-switch" href="' + other_url + '" '
+                  'aria-label="Switch to version ' + other_version + '" '
+                  'style="padding:0 14px;flex-shrink:0;text-decoration:none">'
+                  'V' + other_version + ' ↗</a>'
+              )
+              for page in target.rglob("*.html"):
+                  text = page.read_text(encoding="utf-8")
+                  text, count = re.subn(
+                      r'(<nav\b[^>]*aria-label="Main"[^>]*>)(.*?)(</nav>)',
+                      lambda match: match.group(1) + match.group(2) + button + match.group(3),
+                      text, count=1, flags=re.S,
+                  )
+                  assert count == 1, f"Main navigation missing: {page}"
+                  page.write_text(text, encoding="utf-8")
           assert 'id="glance-h"' in (root / "index.html").read_text()
           assert 'id="glance-h"' in (root / "version-2/index.html").read_text()
           assert 'id="work"' in (root / "version-2/index.html").read_text()
+          assert 'aria-label="Switch to version 2"' in (root / "index.html").read_text()
+          assert 'aria-label="Switch to version 1"' in (root / "version-2/index.html").read_text()
           assert (root / "version-2/assets/css/version2.css").is_file()
           assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
           PY
