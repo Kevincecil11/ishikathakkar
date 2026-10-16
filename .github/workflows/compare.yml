@@ -1,0 +1,19 @@
+name: Refresh portfolio comparison
+
+on:
+  push:
+    branches: [version-2]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish both versions using the main-branch workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
