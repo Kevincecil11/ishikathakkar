@@ -1,0 +1,43 @@
+name: Build site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-site
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Import site bundle (one-time)
+        run: |
+          if [ -f .github/import-url ]; then
+            curl -fsSL --retry 3 "$(tr -d '\r\n' < .github/import-url)" -o /tmp/site.zip
+            unzip -o -q /tmp/site.zip -d .
+            rm -f .github/import-url
+          fi
+
+      - name: Build pages from content.json
+        run: |
+          if [ -f build.py ] && [ -f content.json ]; then python3 build.py; fi
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Build site from content.json"
+            git push
+          fi
