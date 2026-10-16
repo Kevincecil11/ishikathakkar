@@ -5,6 +5,7 @@ Biography, outcomes and existing cases come from content.json.
 MTRX client credits are studio-level, not individual authorship claims.
 """
 from pathlib import Path
+import hashlib
 import re
 import runpy
 
@@ -50,11 +51,12 @@ for group_id, slugs in MEMBERS.items():
 C["lanes"] = GROUPS
 g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for s in ids])
 original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
+STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexdigest()[:12]
 
 
 def head(title, desc, rel):
     return original_head(title, desc, rel).replace(
-        "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css">\n</head>'
+        "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n</head>'
     )
 
 
