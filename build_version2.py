@@ -86,7 +86,7 @@ def loud_clients(rel):
 
 
 def client_ribbon():
-    """A compact, pausable reel of existing clients and collaborators.
+    """A pausable circular reel with four visible badges at a time.
 
     Missing logo files use their real names, never invented logo artwork.
     This is cross-portfolio work, not a claim that these are WOA clients.
@@ -102,21 +102,23 @@ def client_ribbon():
         ("TEDx", None),
         ("GUSEC", None),
     ]
-    def reel(duplicate=False):
-        tiles = "".join(
-            '<span class="reel-brand">' +
-            (f'<img src="assets/img/{logo}" alt="{e(name)}" loading="lazy">' if logo else
-             f'<span class="reel-wordmark">{e(name)}</span>') + "</span>"
-            for name, logo in brands
+    tiles = []
+    for i, (name, logo) in enumerate(brands):
+        mark = (f'<img src="assets/img/{logo}" alt="{e(name)}" loading="lazy">' if logo else
+                '<span class="reel-wordmark">' + re.sub(r'(?<=[a-z])(?=[A-Z])', '<wbr>', e(name)) + '</span>')
+        tiles.append(
+            f'<li class="orbit-slot orbit-position-{i % 4}" style="--batch:{i // 4}">'
+            f'<span class="orbit-upright"><span class="reel-brand">{mark}</span></span></li>'
         )
-        hidden = ' aria-hidden="true"' if duplicate else ""
-        return f'<div class="reel-set"{hidden}>{tiles}</div>'
     return f'''<section class="client-ribbon" aria-label="Clients and collaborators across my work">
       <input class="reel-toggle" id="pause-client-reel" type="checkbox">
       <div class="reel-head"><p>Clients &amp; collaborators <span>Across my work</span></p>
         <label class="reel-control" for="pause-client-reel"><span class="when-playing">Pause</span><span class="when-paused">Play</span><span class="visually-hidden"> logo animation</span></label>
       </div>
-      <div class="reel-window"><div class="reel-track">{reel()}{reel(True)}</div></div>
+      <div class="orbit-window">
+        <div class="orbit-center" aria-hidden="true">Across<br>my work</div>
+        <ul class="orbit-track" aria-label="Clients and collaborators">{"".join(tiles)}</ul>
+      </div>
     </section>'''
 
 
@@ -185,7 +187,7 @@ def group_top(group_id, role, summary):
 
 def category_heading(title, anchor=None):
     attr = f' id="{anchor}"' if anchor else ""
-    color = {"ventures": "#FFB81C", "community": "#7BDC9E", "more": "#E83E8C"}.get(anchor, "#ED691D")
+    color = {"ventures": "#101D40", "community": "#121211", "more": "#E83E8C"}.get(anchor, "#ED691D")
     return f'<div class="category-heading"{attr} style="--category:{color}"><i aria-hidden="true"></i><h2>{e(title)}</h2></div>'
 
 
@@ -195,19 +197,29 @@ def footer(rel):
     contact = '''<section class="wrap v2-contact" id="contact" aria-labelledby="contact-heading">
       <div class="contact-grid contact-sheet">
         <div class="contact-intro">
-          <div class="contact-kicker"><span class="contact-dots" aria-hidden="true"><i></i><i></i><i></i></span><p class="mono">A note, an idea, an invitation</p></div>
-          <h2 id="contact-heading">Good things<br>start here.</h2>
-          <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
-          <span class="contact-signature">Let's find the story.</span>
+          <div class="contact-kicker"><span class="contact-dots" aria-hidden="true"><i></i><i></i><i></i></span><p class="mono">An invitation to connect</p></div>
+          <h2 id="contact-heading">Let's start<br>a conversation.</h2>
+          <p>A collaboration, a speaking or hosting invitation, an opportunity, or simply a hello. I'd love to hear from you.</p>
+          <span class="contact-signature">Say hello.</span>
         </div>
         <form class="contact-form" aria-label="Contact Ishika" aria-describedby="contact-preview-note">
           <fieldset disabled>
             <legend class="visually-hidden">Contact details</legend>
             <div class="form-two">
-              <label>Your name<input type="text" autocomplete="name" placeholder="The name behind the idea"></label>
+              <label>Your name<input type="text" autocomplete="name" placeholder="What should I call you?"></label>
               <label>Email address<input type="email" autocomplete="email" placeholder="you@example.com"></label>
             </div>
-            <label>What's on your mind?<textarea rows="4" placeholder="A little about what you have in mind..."></textarea></label>
+            <label>I'm reaching out about
+              <select aria-label="Reason for reaching out">
+                <option value="">Choose a reason</option>
+                <option>Collaboration</option>
+                <option>Speaking or hosting invitation</option>
+                <option>Opportunity</option>
+                <option>General connection</option>
+                <option>Something else</option>
+              </select>
+            </label>
+            <label>Your message<textarea rows="4" placeholder="Tell me a little about yourself and why you'd like to connect."></textarea></label>
             <div class="form-bottom"><button type="button" disabled>Send message <span aria-hidden="true">↗</span></button>
               <p id="contact-preview-note">Preview only. Sending isn't connected yet.</p>
             </div>
