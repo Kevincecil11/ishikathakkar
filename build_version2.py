@@ -39,6 +39,7 @@ MEMBERS = {
 CLIENTS = [
     {"id": "swati-interiors", "name": "Swati Interiors", "credit": "Website design", "detail": "Website design and Next.js development."},
     {"id": "spaces-and-design", "name": "Spaces & Design", "credit": "Website design", "detail": "Website design and WordPress."},
+    {"id": "birc", "name": "BIRC", "credit": "", "detail": ""},
     {"id": "mordevs-seeds", "name": "Mordevs Seeds", "credit": "Brand identity", "detail": "Brand identity and Next.js development."},
     {"id": "hanswild", "name": "HansWild", "credit": "Wildlife website", "detail": "Website design and Next.js development for a wildlife photographer."},
 ]
@@ -102,15 +103,18 @@ def client_ribbon():
         ("TEDx", None),
         ("GUSEC", None),
     ]
+    batch_count = (len(brands) + 3) // 4
+    padded = brands + brands[:batch_count * 4 - len(brands)]
     tiles = []
-    for i, (name, logo) in enumerate(brands):
+    for i, (name, logo) in enumerate(padded):
         mark = (f'<img src="assets/img/{logo}" alt="{e(name)}" loading="lazy">' if logo else
                 '<span class="reel-wordmark">' + re.sub(r'(?<=[a-z])(?=[A-Z])', '<wbr>', e(name)) + '</span>')
+        duplicate = ' aria-hidden="true"' if i >= len(brands) else ""
         tiles.append(
-            f'<li class="orbit-slot orbit-position-{i % 4}" style="--batch:{i // 4}">'
+            f'<li class="orbit-slot orbit-position-{i % 4}" style="--batch:{i // 4}"{duplicate}>'
             f'<span class="orbit-upright"><span class="reel-brand">{mark}</span></span></li>'
         )
-    return f'''<section class="client-ribbon" aria-label="Clients and collaborators across my work">
+    return f'''<section class="client-ribbon" style="--batch-cycle:{batch_count * 12}s" aria-label="Clients and collaborators across my work">
       <input class="reel-toggle" id="pause-client-reel" type="checkbox">
       <div class="reel-head"><p>Clients &amp; collaborators <span>Across my work</span></p>
         <label class="reel-control" for="pause-client-reel"><span class="when-playing">Pause</span><span class="when-paused">Play</span><span class="visually-hidden"> logo animation</span></label>
@@ -119,7 +123,23 @@ def client_ribbon():
         <div class="orbit-center" aria-hidden="true">Across<br>my work</div>
         <ul class="orbit-track" aria-label="Clients and collaborators">{"".join(tiles)}</ul>
       </div>
-    </section>'''
+    </section>
+    <script>
+    (function(){{
+      var panel = document.currentScript.previousElementSibling;
+      var toggle = panel.querySelector(".reel-toggle");
+      var preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+      function respectPreference(){{
+        toggle.checked = preference.matches;
+        panel.classList.toggle("motion-enabled", !preference.matches);
+      }}
+      respectPreference();
+      toggle.addEventListener("change", function(){{
+        if (!toggle.checked) panel.classList.add("motion-enabled");
+      }});
+      if (preference.addEventListener) preference.addEventListener("change", respectPreference);
+    }})();
+    </script>'''
 
 
 def women_card():
@@ -143,7 +163,7 @@ def mtrx_clients(rel):
         cards.append(f'''<a class="client-tile" href="{href}" {transition}>
           {logo_slot(client["name"], rel, client.get("logo"))}
           <span class="logo-caption"><strong>{e(client["name"])}</strong><span aria-hidden="true">↗</span></span>
-          <span class="logo-result">{e(client["credit"])}</span>
+          {f'<span class="logo-result">{e(client["credit"])}</span>' if client["credit"] else ""}
         </a>''')
     return '<div class="mtrx-clients">' + "".join(cards) + "</div>"
 
@@ -156,11 +176,12 @@ def module(rel, p):
         </section>'''
     if p.get("module") == "mtrx":
         credits = "".join(
-            f'<div class="row client-credit" id="{x["id"]}"><h2>{e(x["name"])}</h2><p>{e(x["detail"])}</p></div>'
+            f'<div class="row client-credit" id="{x["id"]}"><h2>{e(x["name"])}</h2>'
+            + (f'<p>{e(x["detail"])}</p>' if x["detail"] else "") + "</div>"
             for x in CLIENTS
         )
         return original_module(rel, p) + f'''<section class="gallery" id="studio-work">
-          {sec_head("Work from MTRX", "(04)", '<span class="mono muted">Studio portfolio</span>')}
+          {sec_head("Work from MTRX", f"({len(CLIENTS):02d})", '<span class="mono muted">Studio portfolio</span>')}
           <p class="v2-credit-note">These are MTRX studio projects. My co-founder role spans client management,
           marketing and design; individual project contributions will be added separately.</p>
           {mtrx_clients(rel)}{credits}
@@ -197,29 +218,19 @@ def footer(rel):
     contact = '''<section class="wrap v2-contact" id="contact" aria-labelledby="contact-heading">
       <div class="contact-grid contact-sheet">
         <div class="contact-intro">
-          <div class="contact-kicker"><span class="contact-dots" aria-hidden="true"><i></i><i></i><i></i></span><p class="mono">An invitation to connect</p></div>
-          <h2 id="contact-heading">Let's start<br>a conversation.</h2>
-          <p>A collaboration, a speaking or hosting invitation, an opportunity, or simply a hello. I'd love to hear from you.</p>
-          <span class="contact-signature">Say hello.</span>
+          <div class="contact-kicker"><span class="contact-dots" aria-hidden="true"><i></i><i></i><i></i></span><p class="mono">A note, an idea, an invitation</p></div>
+          <h2 id="contact-heading">Good things<br>start here.</h2>
+          <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
+          <span class="contact-signature">Let's find the story.</span>
         </div>
         <form class="contact-form" aria-label="Contact Ishika" aria-describedby="contact-preview-note">
           <fieldset disabled>
             <legend class="visually-hidden">Contact details</legend>
             <div class="form-two">
-              <label>Your name<input type="text" autocomplete="name" placeholder="What should I call you?"></label>
+              <label>Your name<input type="text" autocomplete="name" placeholder="The name behind the idea"></label>
               <label>Email address<input type="email" autocomplete="email" placeholder="you@example.com"></label>
             </div>
-            <label>I'm reaching out about
-              <select aria-label="Reason for reaching out">
-                <option value="">Choose a reason</option>
-                <option>Collaboration</option>
-                <option>Speaking or hosting invitation</option>
-                <option>Opportunity</option>
-                <option>General connection</option>
-                <option>Something else</option>
-              </select>
-            </label>
-            <label>Your message<textarea rows="4" placeholder="Tell me a little about yourself and why you'd like to connect."></textarea></label>
+            <label>What's on your mind?<textarea rows="4" placeholder="A little about what you have in mind..."></textarea></label>
             <div class="form-bottom"><button type="button" disabled>Send message <span aria-hidden="true">↗</span></button>
               <p id="contact-preview-note">Preview only. Sending isn't connected yet.</p>
             </div>
