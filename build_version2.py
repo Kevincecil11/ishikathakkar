@@ -130,6 +130,15 @@ def home():
       <div class="pills hero-actions"><a class="pill dark" href="#work">See my work ↘</a>
       <a class="pill" href="#contact">Get in touch ↗</a></div>
     </section>''')
+    stubs = "".join(
+        f'{g["go"]("", h["slug"], "stub")}<b>{e(h["n"])}</b>'
+        f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} ↗</small></span></a>'
+        for h in C["highlights"]
+    )
+    out.append(f'''<section class="wrap v2-proof" style="padding-top:16px" aria-labelledby="glance-h">
+      {sec_head('<span id="glance-h">At a glance</span>', "(05)", '<span class="mono muted">Results from the work</span>')}
+      <div class="stubs">{stubs}</div>
+    </section>''')
     a = C["about"]
     out.append(f'''<section class="sec wrap v2-about" aria-labelledby="about-h">
       {sec_head('<span id="about-h">About me</span>', "", g["ink_link"]("about/", "About", "mono") + "Full story ↗</a>")}
@@ -141,15 +150,6 @@ def home():
         <p class="v2-about-tail">From building Women of Ahmedabad at Mitti to writing and performing a play:
         the thread is the same. Find the story, bring the right people together, and make it happen.</p></div>
       </div>
-    </section>''')
-    stubs = "".join(
-        f'{g["go"]("", h["slug"], "stub")}<b>{e(h["n"])}</b>'
-        f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} ↗</small></span></a>'
-        for h in C["highlights"]
-    )
-    out.append(f'''<section class="sec wrap v2-proof" aria-labelledby="glance-h">
-      {sec_head('<span id="glance-h">At a glance</span>', "(05)", '<span class="mono muted">Results from the work</span>')}
-      <div class="stubs">{stubs}</div>
     </section>''')
     out.append('<div id="work" class="wrap v2-work">')
     loud = [BY[s] for s in MEMBERS["the-loud-table"][1:]]
