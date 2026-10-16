@@ -161,10 +161,10 @@ def home():
         f'<div class="reveal" style="--i:{i}">{go(rel, h["slug"], "stub")}<b>{e(h["n"])}</b>'
         f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} →</small></span></a></div>'
         for i, h in enumerate(C["highlights"]))
-    out.append(f"""<section class="sec wrap" aria-labelledby="glance-h">
+    highlights_section = f"""<section class="sec wrap" aria-labelledby="glance-h">
   {sec_head('<span id="glance-h">At a glance</span>', f'({pad(len(C["highlights"]))})', '<span class="mono muted">Results from the work</span>')}
   <div class="stubs">{stubs}</div>
-</section>""")
+</section>"""
 
     blocks = []
     for l in LANES:
@@ -178,6 +178,7 @@ def home():
   {sec_head('<span id="work-h">Work</span>', f"({pad(len(PROJECTS))})", '<span class="mono muted">By discipline</span>')}
   {''.join(blocks)}
 </section>""")
+    out.append(highlights_section)
     out.append(brands(rel))
     out.append(footer(rel))
     return "".join(out)

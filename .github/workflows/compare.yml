@@ -72,7 +72,8 @@ jobs:
               html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
               notfound.write_text(html, encoding="utf-8")
           assert 'id="glance-h"' in (root / "index.html").read_text()
-          assert 'id="glance-h"' not in (root / "version-2/index.html").read_text()
+          assert 'id="glance-h"' in (root / "version-2/index.html").read_text()
+          assert 'id="work"' in (root / "version-2/index.html").read_text()
           assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
           PY
       - name: Configure Pages
