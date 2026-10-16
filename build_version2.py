@@ -38,18 +38,17 @@ MEMBERS = {
 CLIENTS = [
     {"id": "swati-interiors", "name": "Swati Interiors", "credit": "Website design", "detail": "Website design and Next.js development."},
     {"id": "spaces-and-design", "name": "Spaces & Design", "credit": "Website design", "detail": "Website design and WordPress."},
+    {"id": "birc", "name": "BIRC", "credit": "Studio project", "detail": "Project details will be added after confirmation."},
     {"id": "mordevs-seeds", "name": "Mordevs Seeds", "credit": "Brand identity", "detail": "Brand identity and Next.js development."},
     {"id": "hanswild", "name": "HansWild", "credit": "Wildlife website", "detail": "Website design and Next.js development for a wildlife photographer."},
 ]
 BY = {p["slug"]: p for p in PROJECTS}
-BY["stax-living"]["logo"] = "logo-stax.svg"
-BY["indravansh"]["logo"] = "logo-indravansh.webp"
 for group_id, slugs in MEMBERS.items():
     for slug in slugs:
         BY[slug]["lane"] = group_id
 C["lanes"] = GROUPS
 g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for s in ids])
-original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
+original_head, original_project, original_module = g["head"], g["project"], g["module"]
 
 
 def head(title, desc, rel):
@@ -59,35 +58,13 @@ def head(title, desc, rel):
 
 
 def header(rel, current):
-    items = (
-        g["go"](rel, "the-loud-table") + "The Loud Table</a>" +
-        g["go"](rel, "mtrx-digital") + "MTRX</a>" +
-        f'<a href="{rel}#community">Community</a><a href="{rel}#more">More</a>'
-    )
+    links = [("the-loud-table", "The Loud Table"), ("mtrx-digital", "MTRX"),
+             ("community", "Community"), ("more", "More")]
+    items = "".join(f'<a href="{rel}#{anchor}">{label}</a>' for anchor, label in links)
     return f'''<header class="hdr">
       {g["ink_link"](rel or "./", "Ishika Thakkar", "logo")}Ishika T.<sup>©</sup></a>
       <nav class="v2-nav" aria-label="Main">{items}<a href="#contact">Contact</a></nav>
     </header><main id="main">'''
-
-
-def logo_slot(name, rel, filename=None):
-    """Real logos when supplied; honest, neutral slots for assets due later."""
-    if filename:
-        return f'<span class="logo-stage"><img src="{rel}assets/img/{filename}" alt="{e(name)} logo" loading="lazy"></span>'
-    return '<span class="logo-stage logo-pending"><span aria-hidden="true">+</span><span>Logo to be added</span></span>'
-
-
-def loud_clients(rel):
-    cards = []
-    for slug in MEMBERS["the-loud-table"][1:]:
-        p = BY[slug]
-        cards.append(
-            g["go"](rel, slug, "logo-card") +
-            logo_slot(p["name"], rel, p.get("logo")) +
-            f'<span class="logo-caption"><strong>{e(p["name"])}</strong><span aria-hidden="true">↗</span></span>'
-            f'<span class="logo-result">{e(p["result"])}</span></a>'
-        )
-    return '<div class="logo-clients">' + "".join(cards) + "</div>"
 
 
 def mtrx_clients(rel):
@@ -99,18 +76,18 @@ def mtrx_clients(rel):
             f'data-color="{color["color"]}" data-on="{color["on"]}" data-label="{e(client["name"])}"'
         )
         cards.append(f'''<a class="client-tile" href="{href}" {transition}>
-          {logo_slot(client["name"], rel, client.get("logo"))}
-          <span class="logo-caption"><strong>{e(client["name"])}</strong><span aria-hidden="true">↗</span></span>
-          <span class="logo-result">{e(client["credit"])}</span>
+          <span class="client-wordmark">{e(client["name"])}</span>
+          <span class="client-foot"><span>{e(client["credit"])}</span><span aria-hidden="true">↗</span></span>
         </a>''')
     return '<div class="mtrx-clients">' + "".join(cards) + "</div>"
 
 
 def module(rel, p):
     if p.get("module") == "clients":
+        ps = [BY[s] for s in MEMBERS["the-loud-table"][1:]]
         return f'''<section class="gallery">
           {sec_head("Work from The Loud Table", "(04)", '<span class="mono muted">Client case studies</span>')}
-          {loud_clients(rel)}
+          <div class="grid" style="padding-top:16px">{''.join(g["card"](rel, q, i % 2) for i, q in enumerate(ps))}</div>
         </section>'''
     if p.get("module") == "mtrx":
         credits = "".join(
@@ -118,7 +95,7 @@ def module(rel, p):
             for x in CLIENTS
         )
         return original_module(rel, p) + f'''<section class="gallery" id="studio-work">
-          {sec_head("Work from MTRX", "(04)", '<span class="mono muted">Studio portfolio</span>')}
+          {sec_head("Work from MTRX", "(05)", '<span class="mono muted">Studio portfolio</span>')}
           <p class="v2-credit-note">These are MTRX studio projects. My co-founder role spans client management,
           marketing and design; individual project contributions will be added separately.</p>
           {mtrx_clients(rel)}{credits}
@@ -143,42 +120,6 @@ def group_top(group_id, role, summary):
     </div>'''
 
 
-def category_heading(title, anchor=None):
-    attr = f' id="{anchor}"' if anchor else ""
-    return f'<div class="category-heading"{attr}><i aria-hidden="true"></i><h2>{e(title)}</h2></div>'
-
-
-def footer(rel):
-    # No destination is configured yet. All controls are explicitly disabled:
-    # this is a visual form, not a working submission service or fake success.
-    contact = '''<section class="wrap v2-contact" id="contact" aria-labelledby="contact-heading">
-      <div class="contact-grid">
-        <div class="contact-intro"><p class="mono">A note, an idea, an invitation</p>
-          <h2 id="contact-heading">Start a<br>conversation.</h2>
-          <p>A collaboration, a community conversation, or something we haven't thought of yet.</p>
-          <span class="contact-mark" aria-hidden="true">↗</span>
-        </div>
-        <form class="contact-form" aria-label="Contact Ishika" aria-describedby="contact-preview-note">
-          <fieldset disabled>
-            <legend class="visually-hidden">Contact details</legend>
-            <div class="form-two">
-              <label>Your name<input type="text" autocomplete="name" placeholder="What should I call you?"></label>
-              <label>Email address<input type="email" autocomplete="email" placeholder="you@example.com"></label>
-            </div>
-            <label>Your message<textarea rows="4" placeholder="What's on your mind?"></textarea></label>
-            <div class="form-bottom"><button type="button" disabled>Send message <span aria-hidden="true">↗</span></button>
-              <p id="contact-preview-note">Form preview only.<br>Sending will be enabled once contact details are added.</p>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-    </section>'''
-    tail = original_footer(rel)
-    tail = tail.replace('id="contact"', 'id="say-hello"')
-    tail = re.sub(r'<a class="pill" href="https://mtrxdigital\.com"[^>]*>MTRX Digital ↗</a>', "", tail)
-    return contact + tail
-
-
 def home():
     out = [head(SITE["title"], SITE["description"], ""), header("", "home")]
     roles = "".join(f'<li>{e(r)}</li>' for r in SITE["roles"])
@@ -199,37 +140,31 @@ def home():
       <div class="stubs">{stubs}</div>
     </section>''')
     a = C["about"]
-    role_rows = "".join(
-        f'<li>{g["go"]("", s)}<i></i><strong>{e(r)}</strong><span>{e(o)}</span><em aria-hidden="true">→</em></a></li>'
-        for r, o, s in a["roles"][:5]
-    )
-    out.append(f'''<section class="sec wrap v1-about" aria-labelledby="about-h">
-      {sec_head('<span id="about-h">About</span>', "(Ishika)", g["ink_link"]("about/", "About", "mono") + "Full story →</a>")}
-      <div class="about-grid">
-        <img class="portrait reveal" src="assets/img/ishika-portrait.webp" alt="Ishika Thakkar">
-        <div>
-          <p class="statement">{e(a["statement"])}</p>
-          <p class="lead">{e(a["short"])}</p>
-          <ul class="roles">{role_rows}</ul>
-          {g["ink_link"]("about/", "About", "pill dark more")}Read my story →</a>
-        </div>
+    out.append(f'''<section class="sec wrap v2-about" aria-labelledby="about-h">
+      {sec_head('<span id="about-h">About me</span>', "", g["ink_link"]("about/", "About", "mono") + "Full story ↗</a>")}
+      <div class="v2-about-grid">
+        <img class="portrait" src="assets/img/ishika-portrait.webp" alt="Ishika Thakkar">
+        <div><p class="statement">{e(a["statement"])}</p>
+        <p class="lead">Founder of The Loud Table. Co-founder at MTRX. I work across brand strategy,
+        design, client relationships and the live experiences that bring people together.</p>
+        <p class="v2-about-tail">From building Women of Ahmedabad at Mitti to writing and performing a play:
+        the thread is the same. Find the story, bring the right people together, and make it happen.</p></div>
       </div>
     </section>''')
     out.append('<div id="work" class="wrap v2-work">')
-    out.append(category_heading("Ventures", "ventures"))
+    loud = [BY[s] for s in MEMBERS["the-loud-table"][1:]]
+    cards = "".join(g["card"]("", p, i % 4) for i, p in enumerate(loud))
     out.append(f'''<section class="work-group studio-group" id="the-loud-table" style="{group_style("the-loud-table")}">
       {group_top("the-loud-table", "Founder & Creative Director", "Brand strategy and content, built around what a brand really stands for.")}
-      {loud_clients("")}
+      <div class="loud-clients">{cards}</div>
       <p class="group-services">Brand strategy · Personal branding · Market research · Social media · Creative direction · PR · Influencer marketing</p>
     </section>''')
     out.append(f'''<section class="work-group studio-group" id="mtrx-digital" style="{group_style("mtrx-digital")}">
       {group_top("mtrx-digital", "Co-founder", "A design and development studio. I help lead client relationships, marketing and design.")}
       {mtrx_clients("")}
-      <div class="studio-more"><p class="group-services">Client management · Marketing · Design</p>
-        <a class="pill dark" href="https://mtrxdigital.com" target="_blank" rel="noopener">Visit MTRX ↗</a></div>
+      <p class="group-services">Client management · Marketing · Design</p>
     </section>''')
-    out.append(category_heading("Communities & Units", "community"))
-    out.append('<div class="v2-pair">')
+    out.append('<div class="v2-pair" id="community">')
     for slug, role in [("women-of-ahmedabad", "Founder, curator & moderator"), ("mitti", "Events Manager")]:
         p = BY[slug]
         out.append(f'''<section class="work-group story-group" id="{slug}" style="{group_style(slug)}">
@@ -238,9 +173,7 @@ def home():
           <span>{e(p["result"])} <span aria-hidden="true">↗</span></span></a>
           <p class="group-services">{'Four editions · Newspaper coverage · Held at Mitti' if slug == 'women-of-ahmedabad' else '4-5 events a month · Instagram 11k to 19k'}</p>
         </section>''')
-    out.append("</div>")
-    out.append(category_heading("And more", "more"))
-    out.append('<div class="v2-pair">')
+    out.append('</div><div class="v2-pair" id="more">')
     for slug, desc in [
         ("stage-and-hosting", "TEDx. GUSEC. And a play I wrote, directed and performed."),
         ("leadership-and-teaching", "Four years behind a university fest, and time in the classroom."),
@@ -271,7 +204,7 @@ def grouped_page(group_id, summary):
       </article>''' + g["footer"]("../../")
 
 
-g.update(head=head, header=header, module=module, footer=footer)
+g.update(head=head, header=header, module=module)
 write("index.html", home())
 write("about/index.html", g["about"]())
 for i, p in enumerate(g["ORDER"]):
