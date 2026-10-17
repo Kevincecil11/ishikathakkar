@@ -1,80 +1,13 @@
-name: Import approved banner and original logo update
+name: Portfolio package import completed
 
 on:
-  push:
-    branches: [version-2]
-    paths: [.github/workflows/import-portfolio-package.yml]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
-
-concurrency:
-  group: portfolio-asset-import
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  import:
-    if: contains(github.event.head_commit.message, '[portfolio-import]')
+  receipt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: version-2
-          fetch-depth: 1
-      - name: Validate reviewed changes and withdrawals before writing
-        env:
-          IMPORT_URL: "https://search.clickup-au.com/workspaces/90161376302/files/DWKp16HhOfg-3wiySP91Q9msSh3lWQm9PiiYas7R5HY"
-          EXPECTED_SHA256: "f71eaec6af4e9b03e22bd4b4aae8027c9abdb231a4f73d5b72c07b1eb691bfc4"
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path, PurePosixPath
-          import hashlib, io, json, os, urllib.request, zipfile
-          data = urllib.request.urlopen(os.environ["IMPORT_URL"], timeout=120).read()
-          assert hashlib.sha256(data).hexdigest() == os.environ["EXPECTED_SHA256"], "Package checksum mismatch"
-          archive = zipfile.ZipFile(io.BytesIO(data))
-          manifest = json.loads(archive.read("_import-manifest.json"))
-          removals = json.loads(archive.read("_remove-manifest.json"))
-          assert len(manifest) == 30 and len(removals) == 3
-          assert len(archive.infolist()) == 32
-          assert {x.filename for x in archive.infolist()} == {x["path"] for x in manifest} | {"_import-manifest.json", "_remove-manifest.json"}
-          permitted_removals = {
-              "assets/documents/stax-living/stax-living-brand-book.pdf",
-              "assets/img/stax-brandbook-cover.webp",
-              "assets/img/stax-living-interior.webp",
-          }
-          assert {x["path"] for x in removals} == permitted_removals
-          for entry in manifest:
-              rel = PurePosixPath(entry["path"])
-              assert not rel.is_absolute() and ".." not in rel.parts and not str(rel).startswith(".github/"), rel
-              payload = archive.read(str(rel))
-              assert hashlib.sha256(payload).hexdigest() == entry["sha256"], rel
-              path = Path(str(rel))
-              if path.exists():
-                  assert hashlib.sha256(path.read_bytes()).hexdigest() in {entry["before_sha256"], entry["sha256"]}, f"New changes detected: {rel}"
-              else:
-                  assert entry["before_sha256"] is None, f"Expected source disappeared: {rel}"
-          for entry in removals:
-              path = Path(entry["path"])
-              if path.exists():
-                  assert hashlib.sha256(path.read_bytes()).hexdigest() == entry["before_sha256"], f"Withdrawal conflict: {path}"
-          for entry in manifest:
-              path = Path(entry["path"])
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_bytes(archive.read(entry["path"]))
-          for entry in removals:
-              Path(entry["path"]).unlink(missing_ok=True)
-          print("Imported 30 reviewed files and removed 3 expressly withdrawn Stax book assets.")
-          PY
-      - name: Commit only the reviewed changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add build_version2.py asset_library.py assets/css/version2.css src/gallery-layout.ts UPLOAD-IMAGES.md INTEGRATION.md assets/image-import-map.json assets/logo-extraction-map.json assets/img/photos/*/banner/README.md assets/img/logos/*/original-artwork.webp
-          git add -u -- assets/documents/stax-living/stax-living-brand-book.pdf assets/img/stax-brandbook-cover.webp assets/img/stax-living-interior.webp
-          git commit -m "Standardize edge-to-edge project banners, enable uploads and show original client logos"
-          git push origin HEAD:version-2
-      - name: Rebuild both live paths
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
+      - run: echo 'Approved shared banners, upload folders and original logo artwork are imported. Three withdrawn Stax book assets have been removed.'
