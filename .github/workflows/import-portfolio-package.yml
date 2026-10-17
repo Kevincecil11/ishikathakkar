@@ -1,65 +1,13 @@
-name: Import approved portfolio UX fixes
+name: Portfolio package import completed
 
 on:
-  push:
-    branches: [version-2]
-    paths: [.github/workflows/import-portfolio-package.yml]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
-
-concurrency:
-  group: portfolio-asset-import
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  import:
-    if: contains(github.event.head_commit.message, '[ux-fixes-import]')
+  receipt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: version-2
-          fetch-depth: 1
-      - name: Import the approved portfolio UX fixes
-        env:
-          IMPORT_URL: "https://search.clickup-au.com/workspaces/90161376302/files/BVl8OWPJdP_7x713fvJ-_P5yW9yLbhg497pskIYyNDg"
-          EXPECTED_SHA256: "3bda5c713466411850c84baeceedfc54093eefd6a015994626130e324dc91dd4"
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path, PurePosixPath
-          import hashlib, io, json, os, urllib.request, zipfile
-          data = urllib.request.urlopen(os.environ['IMPORT_URL'], timeout=120).read()
-          assert hashlib.sha256(data).hexdigest() == os.environ['EXPECTED_SHA256'], 'Package checksum mismatch'
-          archive = zipfile.ZipFile(io.BytesIO(data))
-          manifest = json.loads(archive.read('_import-manifest.json'))
-          assert len(manifest) == 8
-          assert {x.filename for x in archive.infolist()} == {x['path'] for x in manifest} | {'_import-manifest.json'}
-          for entry in manifest:
-              rel = PurePosixPath(entry['path'])
-              assert not rel.is_absolute() and '..' not in rel.parts and not str(rel).startswith('.github/')
-              payload = archive.read(str(rel))
-              assert hashlib.sha256(payload).hexdigest() == entry['sha256']
-              path = Path(str(rel))
-              if path.exists():
-                  assert hashlib.sha256(path.read_bytes()).hexdigest() in {entry['before_sha256'], entry['sha256']}, f'New changes detected: {rel}'
-              else:
-                  assert entry['before_sha256'] is None, f'Expected source disappeared: {rel}'
-          for entry in manifest:
-              path = Path(entry['path'])
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_bytes(archive.read(entry['path']))
-          print('Imported 8 reviewed UX source and documentation files.')
-          PY
-      - name: Commit the approved fixes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add INTEGRATION.md build_version2.py assets/js/main.js assets/css/version2.css src/portfolio-motion.tsx src/site-choreography.ts src/styles/motion.css components/ui/halftone-wordmark-footer.tsx
-          git commit -m "Polish section reveals, arrow motion, monochrome particles and uncropped banners"
-          git push origin HEAD:version-2
-      - name: Rebuild both live paths
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
+      - run: echo 'Approved portfolio UX fixes are imported. Use project asset folders for future uploads.'
