@@ -1,2 +1,4 @@
 Pillow==12.2.0
 pillow-heif==1.4.0
+fonttools==4.66.1
+Brotli==1.2.0

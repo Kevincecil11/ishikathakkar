@@ -66,3 +66,11 @@ html.motion-on .curtain.lift { transition-duration: 0.85s; }
   .it-cursor, .it-progress { display: none; }
   .hdr { transition: none !important; transform: none !important; }
 }
+
+/* Fitted display lines sized from Anton's metrics at build time (no reflow). */
+.fit[data-fit] { container-type: inline-size; }
+.fit[data-fit] > span { font-size: var(--fit-size); }
+
+/* AA contrast for white type on the brightest Mitti posters. */
+.poster-photo[style*="--pc:#E83E8C"] { --pc: #DE1A74 !important; }
+.poster-photo[style*="--pc:#4D6CFA"] { --pc: #4666FA !important; }

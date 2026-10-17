@@ -69,7 +69,7 @@ def self_host_fonts(url):
     css = get(os.environ.get("FONTS_CSS_URL") or url.replace("&amp;", "&")).decode("utf-8")
     folder = OUT / "assets/fonts"
     folder.mkdir(parents=True, exist_ok=True)
-    saved, faces, preload = {}, [], []
+    saved, faces, preload, files = {}, [], [], {}
     for subset, block in re.findall(r"/\*\s*([\w-]+)\s*\*/\s*(@font-face\s*\{[^}]+\})", css):
         if subset not in ("latin", "latin-ext"):
             continue
@@ -82,15 +82,23 @@ def self_host_fonts(url):
             assert data[:4] == b"wOF2", "Unexpected font payload"
             saved[source] = hashlib.sha1(data).hexdigest()[:12] + ".woff2"
             (folder / saved[source]).write_bytes(data)
-        faces.append(block.replace(source, "../fonts/" + saved[source]))
         family = re.search(r"font-family:\s*'([^']+)'", block)[1]
         weight = re.search(r"font-weight:\s*(\d+)", block)
+        weight = weight[1] if weight else ""
         italic = "italic" in (re.search(r"font-style:\s*(\w+)", block) or ["", ""])[1]
-        if subset == "latin" and not italic and (family, weight and weight[1]) in (("Anton", "400"), ("Outfit", "400")):
-            if saved[source] not in preload:
+        # Anton sets every display line: block (preloaded, tiny) so fitted
+        # headings never reflow. Small labels/quotes never swap mid-view.
+        display = {"Anton": "block", "Cormorant Garamond": "optional", "IBM Plex Mono": "optional"}.get(family, "swap")
+        block = re.sub(r"font-display:\s*\w+", "font-display: " + display, block)
+        faces.append(block.replace(source, "../fonts/" + saved[source]))
+        if subset == "latin":
+            files.setdefault(family, saved[source])
+            wanted = (family, italic, weight) in (("Anton", False, "400"), ("Outfit", False, "400"),
+                                                  ("IBM Plex Mono", False, "400"), ("Cormorant Garamond", True, "400"))
+            if wanted and saved[source] not in preload:
                 preload.append(saved[source])
     assert faces, "No font faces found"
-    return "\n".join(faces) + "\n", preload
+    return "\n".join(faces) + "\n", preload, files
 
 
 def minify_css(css):
@@ -101,16 +109,50 @@ def minify_css(css):
 
 sample = (OUT / "index.html").read_text(encoding="utf-8")
 google = GOOGLE_LINK.search(sample)
-font_faces, font_preload = "", []
+font_faces, font_preload, font_files = "", [], {}
 if google:
     try:
-        font_faces, font_preload = self_host_fonts(google[1])
+        font_faces, font_preload, font_files = self_host_fonts(google[1])
         print(f"Self-hosted {len(list((OUT / 'assets/fonts').glob('*.woff2')))} font files")
     except Exception as error:  # Offline builds keep Google Fonts.
         print("Font self-hosting skipped:", type(error).__name__, error)
         font_faces = ""
 order = [m[1] for m in LOCAL_CSS.finditer(sample)]
 assert order and all(name.startswith("assets/css/") for name in order), order
+# Fitted display lines: size them from Anton's real metrics in CSS, so the
+# first layout already matches the final one (main.js only trims kerning).
+FIT = re.compile(r'<(h1|p) class="fit"((?: [\w-]+="[^"]*")*)><span>([^<]+)</span>')
+fit_metrics = None
+if font_files.get("Anton"):
+    try:
+        from fontTools.ttLib import TTFont
+        anton = TTFont(OUT / "assets/fonts" / font_files["Anton"])
+        fit_metrics = (anton.getBestCmap(), anton["hmtx"].metrics, anton["head"].unitsPerEm)
+    except Exception as error:
+        print("Fitted-type metrics skipped:", type(error).__name__, error)
+
+
+def precompute_fit(text):
+    if not fit_metrics:
+        return text
+    cmap, metrics, em = fit_metrics
+    import html as html_lib
+
+    def apply(match):
+        tag, attrs, label = match[1], match[2], match[3]
+        if "data-fit" in attrs:
+            return match[0]
+        glyphs = html_lib.unescape(label).upper()
+        if not glyphs.strip() or any(ord(ch) not in cmap for ch in glyphs):
+            return match[0]
+        width = sum(metrics[cmap[ord(ch)]][0] for ch in glyphs) / em - 0.005 * len(glyphs)
+        k = 0.995 / width
+        top = re.search(r'data-max="(\d+)"', attrs)
+        size = f"min({k * 100:.4f}cqw, {top[1]}px)" if top else f"{k * 100:.4f}cqw"
+        return f'<{tag} class="fit" data-fit{attrs} style="--fit-size:{size}"><span>{label}</span>'
+    return FIT.sub(apply, text)
+
+
 bundle = font_faces + "".join(minify_css((OUT / name).read_text(encoding="utf-8")) for name in order)
 bundle_name = "site." + hashlib.sha256(bundle.encode()).hexdigest()[:12] + ".css"
 (OUT / "assets/css" / bundle_name).write_text(bundle, encoding="utf-8")
@@ -131,13 +173,14 @@ def bundle_page(page, text):
     first = LOCAL_CSS.search(text)
     text = text[:first.start()] + "\n".join(head) + "\n" + text[first.start():]
     text = LOCAL_CSS.sub(lambda m: m[0] if bundle_name in m[1] else "", text)
+    text = precompute_fit(text)
     # Generic containers need a role before they can carry an accessible name.
     text = re.sub(r'<div class="project-banner([^"]*)"(?![^>]*\brole=)', r'<div role="group" class="project-banner\1"', text)
     return text
 
 
 # ---------------------------------------------------------------- images
-VARIANT_WIDTHS = (480, 800, 1200, 1800)
+VARIANT_WIDTHS = (240, 360, 480, 800, 1200, 1800)
 VARIANT_DIR = OUT / "assets/img/_r"
 RASTER = (".webp", ".jpg", ".jpeg", ".png")
 VOID = {"img", "br", "hr", "input", "meta", "link", "source", "area", "base", "col", "embed", "param", "track", "wbr"}
@@ -158,11 +201,11 @@ def columns(style):
 
 def sizes_for(classes, banner_share):
     if "project-banner" in classes:
-        return f"{max(24, round(97 * banner_share))}vw"
+        return f"calc((100vw - 32px) * {banner_share:.3f})"
     if "ggrid" in classes or "uploaded-gallery" in classes:
-        return "(max-width: 600px) 34vw, 33vw"
+        return "(max-width: 600px) calc((100vw - 48px) / 3), 33vw"
     if "poster" in classes or "board" in classes:
-        return "(max-width: 960px) 48vw, 20vw"
+        return "(max-width: 600px) 40vw, (max-width: 960px) 48vw, 20vw"
     if "peek" in classes:
         return "200px"
     if "logo-stage" in classes or "brand" in classes:
@@ -216,7 +259,7 @@ def make_variants(job):
         for width in widths:
             target = variant_name(source, width)
             height = round(image.height * width / image.width)
-            image.resize((width, height), Image.LANCZOS).save(target, "WEBP", quality=80, method=4)
+            image.resize((width, height), Image.LANCZOS).save(target, "WEBP", quality=72, method=5)
             made.append((width, str(target)))
         return str(source), made
 
@@ -279,9 +322,8 @@ for page, text, found in plans:
             entries.append(f"{attrs['src']} {width}w")
             tag = tag[:-1].rstrip("/").rstrip() + f' srcset="{", ".join(entries)}" sizes="{sizes_for(context, share)}">'
             responsive += 1
-        if "project-banner" in context and first_banner and "loading" not in attrs:
+        if "project-banner" in context and "loading" not in attrs:
             tag = tag[:-1] + ' fetchpriority="high">'
-            first_banner = False
         elif "decoding" not in attrs:
             tag = tag[:-1] + ' decoding="async">'
         if tag != raw:
