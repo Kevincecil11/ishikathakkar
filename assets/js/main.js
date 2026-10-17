@@ -18,7 +18,21 @@
     el.classList.add("ready");
   }
   var fits = [].slice.call(document.querySelectorAll(".fit"));
-  function fitAll() { fits.forEach(fit); }
+  function fitAll() {
+    var live = fits.filter(function (el) { return el.firstElementChild; });
+    live.forEach(function (el) { el.style.fontSize = "100px"; });
+    var sizes = live.map(function (el) {
+      var w = el.clientWidth, tw = el.firstElementChild.getBoundingClientRect().width;
+      if (!tw || !w) return null;
+      var max = parseFloat(el.getAttribute("data-max")) || Infinity;
+      return Math.floor(Math.min(max, (100 * w) / tw) * 0.995 * 10) / 10;
+    });
+    live.forEach(function (el, i) {
+      if (sizes[i] == null) return;
+      el.style.fontSize = sizes[i] + "px";
+      el.classList.add("ready");
+    });
+  }
   fitAll();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
   var t;

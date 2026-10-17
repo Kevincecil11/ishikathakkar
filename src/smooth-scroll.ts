@@ -12,7 +12,7 @@ export type SmoothScroller = {
   start(): void
 }
 
-const LAMBDA = 7.2 // about 0.11 of the remaining distance per 60fps frame
+const LAMBDA = 9.5 // about 0.15 of the remaining distance per 60fps frame: smooth, never floaty
 const LINE = 16
 
 export function initSmoothScroll(): SmoothScroller | null {
