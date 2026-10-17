@@ -53,7 +53,9 @@ BY["indravansh"]["logo"] = "logo-indravansh.webp"
 BY["the-loud-table"]["result"] = ""
 BY["the-loud-table"]["org"] = "The Loud Table"
 BY["the-loud-table"]["sections"] = [
-    (heading, text.replace("The Loud Table is my own marketing firm. ", ""))
+    (heading.replace("How I work", "How we work"),
+     text.replace("The Loud Table is my own marketing firm. ", "")
+         .replace("I ask", "We ask").replace("I build", "We build").replace("I sell", "We sell"))
     for heading, text in BY["the-loud-table"]["sections"]
 ]
 PHOTOS, LOGOS = load_library(ROOT)
@@ -93,7 +95,7 @@ MITTI_POSTERS = [
     ("Workshop", "#FFBD17", "#121211", "-3deg", "painting-workshop.webp", "People painting around a workshop table"),
     ("Rave", "#E83E8C", "#FFFFFF", "2deg", "music-evening.webp", "A performer at a Mitti music evening"),
     ("Screening", "#4D6CFA", "#FFFFFF", "0deg", "audience-conversation.webp", "Audience members at a Mitti event"),
-    ("Lecture", "#B499F4", "#121211", "2deg", "ishika-at-mitti.webp", "Ishika speaking at Mitti"),
+    ("Lecture", "#B499F4", "#121211", "2deg", "colour-workshop.webp", "A conversation around the table at Mitti"),
     ("Community brunch", "#79D89C", "#121211", "-2deg", "community-table.webp", "People gathered around the community table"),
 ]
 CROP_MAP_PATH = ROOT / "assets/image-crops.json"
@@ -309,8 +311,7 @@ def women_card():
     return g["go"]("", p["slug"], "group-top woa-card") + f'''
       <div class="woa-title"><p class="mono">{e(p["role"])}</p><h2>{e(p["name"])}</h2></div>
       <div class="group-intro"><p>{e(p["summary"])}</p><span class="group-link">Full story ↗</span></div>
-      <span class="woa-arrow" aria-hidden="true">↗</span>
-      <span class="woa-band"><span>{e(p["result"])}</span><span aria-hidden="true">Open →</span></span>
+      <span class="woa-band"><span>{e(p["result"])}</span></span>
     </a>'''
 
 
@@ -386,14 +387,13 @@ def group_top(group_id, role, summary):
     x = GROUP[group_id]
     result = BY[group_id]["result"] if group_id in BY else " · ".join(BY[s]["name"] for s in MEMBERS[group_id])
     inverse = " hover-card-inverse" if group_id == "mitti" else ""
-    band = f'<span class="hover-band"><span>{e(result)}</span><span aria-hidden="true">Open →</span></span>' if result else (
-        '<span class="hover-band"><span>Full story</span><span aria-hidden="true">Open →</span></span>'
+    band = f'<span class="hover-band"><span>{e(result)}</span></span>' if result else (
+        '<span class="hover-band"><span>Full story</span></span>'
     )
     return f'''<a class="group-top hover-card{inverse}" href="work/{group_id}/"
       data-color="{x["color"]}" data-on="{x["on"]}" data-label="{e(x["name"])}" style="{group_style(group_id)}">
       <div class="hover-title"><p class="mono">{e(role)}</p><h2>{e(x["name"])}</h2></div>
       <div class="group-intro"><p>{e(summary)}</p><span class="group-link">Full story ↗</span></div>
-      <span class="hover-arrow" aria-hidden="true">↗</span>
       {band}
     </a>'''
 
@@ -541,10 +541,34 @@ def grouped_page(group_id, summary):
 
 def project_banner(p):
     """One shared frame, with edge-to-edge photos and complete-image links."""
+    if p["slug"] == "designecho":
+        def video_tile(file, poster, title):
+            return (
+                '<div class="banner-video" data-video-tile>'
+                f'<video playsinline preload="none" poster="../../assets/img/{poster}" '
+                f'aria-label="{e(title)}" controlslist="nodownload">'
+                f'<source src="../../assets/video/designecho/{file}" type="video/mp4">'
+                f'Your browser cannot play this video. <a href="../../assets/video/designecho/{file}">Open video</a>'
+                '</video>'
+                f'<button class="video-play" type="button" aria-label="Play {e(title)}">'
+                '<span class="play-symbol" aria-hidden="true">▶</span><span>Click to play</span></button>'
+                '<span class="video-error" role="status" hidden>Playback could not start. Use the video controls to try again.</span>'
+                '</div>'
+            )
+        return (
+            '<div class="project-banner media-triptych" data-project-banner="designecho" '
+            'style="--banner-columns:repeat(3,minmax(0,1fr))" aria-label="DesignEcho videos and featured image">'
+            + video_tile("brand-story.mp4", "designecho-video-left-poster.webp", "DesignEcho brand story")
+            + '<a class="banner-image" data-safe-frame href="../../assets/img/designecho-career-spotlight.webp" '
+              'data-original="../../assets/img/designecho-career-spotlight.webp" aria-label="Enlarge DesignEcho career spotlight">'
+              '<img src="../../assets/img/designecho-career-spotlight.webp" alt="Career Spotlight: Content Writing, featuring Diya Shah of DesignEcho" decoding="async"></a>'
+            + video_tile("career-conversation.mp4", "designecho-video-right-poster.webp", "DesignEcho career conversation")
+            + '</div>'
+        )
     defaults = {
         "indravansh": [
             ("photos/indravansh/blue-sari-bracelet-detail.webp", "Bracelets and ring against a blue sari", "campaign-bracelet"),
-            ("indravansh-portrait-balanced.webp", "Blue-sari campaign portrait with balanced lighting and the full head in frame", "campaign-portrait"),
+            ("indravansh-portrait-centered.webp", "Blue-sari campaign portrait, AI-recomposed with a centered subject and balanced drapery", "campaign-portrait"),
             ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
         ],
         "stax-living": [
@@ -553,7 +577,7 @@ def project_banner(p):
         ],
         "trinity-preschool": [
             ("photos/trinity-preschool/classroom-portrait.webp", "Ishika with children in the classroom", ""),
-            ("trinity-annual-function-ai-enhanced.webp", "Ishika speaking at the Trinity annual function (AI-enhanced from the supplied photograph)", ""),
+            ("trinity-center-supplied.webp", "Ishika speaking at the Trinity annual function, newly supplied photograph", ""),
             ("photos/trinity-preschool/classroom-group-photo.webp", "Ishika and the Trinity classroom group", ""),
         ],
         "designecho": [
@@ -571,7 +595,9 @@ def project_banner(p):
             (PEOPLE_CROPS["women-of-ahmedabad"], "The complete Women of Ahmedabad group, including the seated women", ""),
         ],
         "mitti": [
-            (PEOPLE_CROPS["mitti"], "A conversation at Mitti, with all three faces in frame", ""),
+            ("photos/mitti/creative-workshop-participant.webp", "A participant painting at a Mitti workshop", ""),
+            ("photos/mitti/workshop-participant.webp", "A participant creating artwork at Mitti", ""),
+            ("photos/mitti/workshop-table.webp", "People working together around a Mitti workshop table", ""),
         ],
         "on-stage": [
             ("photos/on-stage/gusec-at-the-lectern.webp", "Ishika hosting at the GUSEC lectern", ""),
@@ -580,7 +606,10 @@ def project_banner(p):
             ("tech-kaushalya-women-retouched.webp", "The front-row women at Tech Kaushalya (cropped and AI-retouched to remove background people)", ""),
         ],
         "just-a-khwab": [
-            ("khwab-team-landscape.webp", "The cast and crew of Just a Khwab, landscape crop of the supplied team photograph", ""),
+            ("khwab-team-restored.webp", "The complete cast and crew of Just a Khwab, AI-restored with an extended landscape background", ""),
+        ],
+        "the-loud-table": [
+            ("loud-table-hosting-clear.webp", "Ishika presenting at a community event, sharpened with a head-safe crop", ""),
         ],
     }
     custom = BANNERS.get(p["slug"], [])
@@ -590,7 +619,7 @@ def project_banner(p):
     originals = {entry["display"]: source for source, entry in CROPS.items()}
     originals.update({display: source for source, display in TRINITY_CLEAN.items()})
     originals.update(EDITORIAL_ORIGINALS)
-    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage", "tech-kaushalya", "trinity-preschool", "stax-living", "just-a-khwab", "indravansh"}
+    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage", "tech-kaushalya", "trinity-preschool", "stax-living", "just-a-khwab", "indravansh", "the-loud-table"}
     links = []
     for src, alt, cls in items:
         original = originals.get(src, src)
@@ -615,14 +644,32 @@ def project_with_uploads(p, index):
     display_project = dict(p)
     # No related/Connected work blocks anywhere; the next-project link stays.
     display_project.pop("related", None)
-    if p["slug"] in {"designecho", "finance-solutions", "tech-kaushalya", "trinity-preschool"}:
+    if p["slug"] in {"designecho", "finance-solutions", "tech-kaushalya"}:
         display_project.pop("gallery", None)
+    if p["slug"] == "trinity-preschool":
+        # Restore real evidence without repeating any of the three banner photos.
+        display_project["gallery"] = {
+            "title": "Project images", "note": "Tap any image to enlarge", "cols": 3,
+            "items": [
+                "photos/trinity-preschool/cover/annual-function-speaking-one.webp",
+                "photos/trinity-preschool/classroom-self-portrait.webp",
+                "trinity-classroom-added.webp",
+            ],
+        }
     if p["slug"] == "finance-solutions":
         display_project["flow"] = False
     if p["slug"] in {"mitti", "women-of-ahmedabad"} and p.get("gallery"):
-        used = {EDITORIAL_ORIGINALS[PEOPLE_CROPS[p["slug"]]]}
+        used = ({EDITORIAL_ORIGINALS[PEOPLE_CROPS[p["slug"]]]} if p["slug"] != "mitti" else {
+            "photos/mitti/creative-workshop-participant.webp", "photos/mitti/workshop-participant.webp",
+            "photos/mitti/workshop-table.webp",
+        })
         if p["slug"] == "mitti":
             used.update(f"photos/mitti/{entry[4]}" for entry in MITTI_POSTERS)
+            # Curated full rows of three: omit two near-repeated room/table
+            # views, keeping every original available in the asset library.
+            used.update({
+                "photos/mitti/creative-workshop-table.webp",
+            })
         seen = set()
         items = []
         for src in p["gallery"]["items"]:
@@ -633,8 +680,20 @@ def project_with_uploads(p, index):
             seen.add(digest)
             items.append(src)
         display_project["gallery"] = dict(p["gallery"], items=items)
+        if p["slug"] == "women-of-ahmedabad":
+            display_project["gallery"]["items"] = [
+                src for src in items if not src.endswith("event-editorial-poster.webp")
+            ] + ["woa-community-added.webp"]
         if not items:
             display_project.pop("gallery", None)
+    if p["slug"] == "indravansh" and p.get("gallery"):
+        excluded = {
+            "photos/indravansh/gold-necklace-editorial.webp",
+            "photos/indravansh/her-vision-editorial.webp",
+        }
+        display_project["gallery"] = dict(
+            p["gallery"], items=[src for src in p["gallery"]["items"] if src not in excluded],
+        )
     if p["slug"] in {"stax-living", "just-a-khwab", "tech-kaushalya"}:
         display_project["module"] = ""
     page = original_project(display_project, index)
@@ -703,16 +762,14 @@ def project_with_uploads(p, index):
         before, separator, after = page.rpartition("</article>")
         if separator:
             page = before + template + separator + after
-    if p["slug"] == "trinity-preschool" and not BANNERS.get(p["slug"]):
-        disclosure = (
-            '<p class="image-treatment-note">Center banner photo: AI-enhanced from the supplied low-resolution photograph. '
-            'The original photograph is retained in the image library.</p>'
-        )
-        # Place the disclosure immediately after the collage, not in its grid.
-        start = page.find('data-project-banner="trinity-preschool"')
+    if p["slug"] in {"indravansh", "just-a-khwab"} and not BANNERS.get(p["slug"]):
+        note = ("Center portrait: AI-recomposed for a balanced layout; the original photograph is retained."
+                if p["slug"] == "indravansh" else
+                "Team photo: AI-restored and extended to landscape from the supplied image; the original is retained.")
+        start = page.find(f'data-project-banner="{p["slug"]}"')
         end = page.find("</div>", start)
         if end != -1:
-            page = page[:end + 6] + disclosure + page[end + 6:]
+            page = page[:end + 6] + f'<p class="image-treatment-note">{note}</p>' + page[end + 6:]
     # Reserve each photo's natural dimensions before loading and supply ratios
     # to the justified-row layout. No image is cropped, repeated or omitted.
     from PIL import Image

@@ -2,6 +2,39 @@
  * Cropping is a preview treatment only. Sources and their order are preserved.
  */
 export function initGalleryLayout() {
+  // Explicitly user-started media. No autoplay, even when the tile enters
+  // the viewport. Only one portfolio video can play at once.
+  const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("[data-video-tile] video"))
+  videos.forEach(video => {
+    const tile = video.closest<HTMLElement>("[data-video-tile]")!
+    const play = tile.querySelector<HTMLButtonElement>(".video-play")!
+    const error = tile.querySelector<HTMLElement>(".video-error")!
+    video.autoplay = false
+    play.addEventListener("click", async () => {
+      error.hidden = true
+      videos.forEach(other => { if (other !== video) other.pause() })
+      video.controls = true
+      try {
+        await video.play()
+        play.hidden = true
+        video.focus({ preventScroll: true })
+      } catch {
+        error.hidden = false
+        play.hidden = false
+      }
+    })
+    video.addEventListener("play", () => {
+      videos.forEach(other => { if (other !== video) other.pause() })
+      play.hidden = true
+      tile.classList.add("is-playing")
+    })
+    const paused = () => { tile.classList.remove("is-playing"); play.hidden = false }
+    video.addEventListener("pause", paused)
+    video.addEventListener("ended", paused)
+  })
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) videos.forEach(video => video.pause())
+  })
   // Measure the original Indravansh layout at this exact width, with the live
   // fonts. Other results panels inherit its size; Indravansh itself is unchanged.
   const panel = document.querySelector<HTMLElement>("[data-outcome-panel]")
@@ -39,10 +72,11 @@ export function initGalleryLayout() {
       const width = gallery.clientWidth
       if (width < 1) return
       const gap = 8
-      const columns = Math.min(figures.length,
+      const triples = !!gallery.closest('article:has([data-project-banner="mitti"]),article:has([data-project-banner="indravansh"])')
+      const columns = triples ? 3 : Math.min(figures.length,
         width >= 1200 ? 6 : width >= 900 ? 5 : width >= 650 ? 4 : width >= 420 ? 3 : 2)
       const cellWidth = (width - gap * (columns - 1)) / columns
-      const rowHeight = Math.min(300, Math.max(140, cellWidth * 1.15))
+      const rowHeight = triples ? Math.min(480, Math.max(140, cellWidth * 1.15)) : Math.min(300, Math.max(140, cellWidth * 1.15))
       gallery.style.setProperty("--proof-columns", String(columns))
       gallery.style.setProperty("--proof-row-height", `${rowHeight}px`)
       gallery.style.setProperty("--proof-gap", `${gap}px`)
@@ -62,7 +96,7 @@ export function initGalleryLayout() {
     })
     layout()
   })
-  allLinks.push(...document.querySelectorAll<HTMLAnchorElement>(".project-banner a"))
+  allLinks.push(...document.querySelectorAll<HTMLAnchorElement>(".project-banner a.banner-image"))
   allLinks.push(...document.querySelectorAll<HTMLAnchorElement>(".poster-photo a"))
   if (!allLinks.length) return
   const dialog = document.createElement("dialog")
