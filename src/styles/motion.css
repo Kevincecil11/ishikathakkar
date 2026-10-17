@@ -1,0 +1,50 @@
+/* Tailwind utility support, scoped to this new integration. No global reset. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 60 8% 90%;
+  --foreground: 60 3% 7%;
+  --primary: 225 60% 16%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 60 8% 95%;
+  --secondary-foreground: 60 3% 7%;
+  --muted: 60 8% 95%;
+  --muted-foreground: 60 3% 33%;
+  --accent: 22 85% 52%;
+  --accent-foreground: 60 3% 7%;
+  --popover: 60 8% 95%;
+  --popover-foreground: 60 3% 7%;
+  --card: 60 8% 95%;
+  --card-foreground: 60 3% 7%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 60 3% 78%;
+  --input: 60 3% 65%;
+  --ring: 225 60% 16%;
+  --radius: 0.5rem;
+}
+[data-halftone-footer] { margin-top:clamp(60px,6vw,90px); }
+.it-roll { display:inline-flex; align-items:center; justify-content:center; gap:12px; }
+.it-roll-window { display:block; height:1.4em; overflow:hidden; perspective:400px; }
+.it-roll-track { display:flex; flex-direction:column; transform:translateY(-50%); transition:transform .48s cubic-bezier(.22,.7,.15,1); }
+.it-roll-face { display:block; flex:none; height:1.4em; line-height:1.4; white-space:nowrap; }
+.it-roll-face:first-child { transform:rotateX(35deg); transform-origin:50% 100%; transition:transform .48s cubic-bezier(.22,.7,.15,1); }
+.it-roll-face:last-child { transform:rotateX(0); transform-origin:50% 0%; transition:transform .48s cubic-bezier(.22,.7,.15,1); }
+.it-roll-icon { position:relative; display:block; width:18px; height:18px; overflow:hidden; flex:none; }
+.it-roll-icon svg { display:block; width:18px; height:18px; transition:transform .48s cubic-bezier(.22,.7,.15,1); }
+.it-roll-icon svg:last-child { position:absolute; top:-18px; left:0; }
+@media(hover:hover) {
+  .it-roll:hover .it-roll-track { transform:translateY(0); }
+  .it-roll:hover .it-roll-face:first-child { transform:rotateX(0); }
+  .it-roll:hover .it-roll-face:last-child { transform:rotateX(-35deg); }
+  .it-roll:hover .it-roll-icon svg { transform:translateY(18px); }
+}
+.it-roll:focus-visible .it-roll-track { transform:translateY(0); }
+.it-roll:focus-visible .it-roll-face:first-child { transform:rotateX(0); }
+.it-roll:focus-visible .it-roll-face:last-child { transform:rotateX(-35deg); }
+.it-roll:focus-visible .it-roll-icon svg { transform:translateY(18px); }
+@media(prefers-reduced-motion:reduce) {
+  .it-roll .it-roll-track,.it-roll .it-roll-face,.it-roll .it-roll-icon svg { transition:none !important; transform:none !important; }
+}

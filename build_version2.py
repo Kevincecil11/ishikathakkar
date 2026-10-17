@@ -54,12 +54,16 @@ g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for 
 original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
 STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexdigest()[:12]
 HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
+MOTION_JS = ROOT / "assets/js/portfolio-motion.js"
+MOTION_READY = MOTION_JS.exists() and (ROOT / "assets/css/motion.css").exists()
+MOTION_REV = hashlib.sha256(MOTION_JS.read_bytes()).hexdigest()[:12] if MOTION_READY else ""
 
 
 def head(title, desc, rel):
+    motion_css = f'<link rel="stylesheet" href="{rel}assets/css/motion.css?v={MOTION_REV}">\n' if MOTION_READY else ""
     return original_head(title, desc, rel).replace(
         "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n'
-        f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n</head>'
+        f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n{motion_css}</head>'
     )
 
 
@@ -248,6 +252,17 @@ def footer(rel):
     tail = original_footer(rel)
     tail = tail.replace('id="contact"', 'id="say-hello"')
     tail = re.sub(r'<a class="pill" href="https://mtrxdigital\.com"[^>]*>MTRX Digital ↗</a>', "", tail)
+    if MOTION_READY:
+        fallback = re.search(r"<footer\b.*?</footer>", tail, re.S).group(0)
+        fallback = fallback.replace(' id="say-hello"', "")
+        fallback = re.sub(r'<p class="footer-note">.*?</p>', "", fallback, flags=re.S)
+        enhanced = (
+            f'<div id="say-hello" data-halftone-footer data-relative="{e(rel)}">'
+            + fallback + "</div>"
+            + f'<p class="footer-note wrap">{e(SITE["note"])}</p>'
+        )
+        tail = re.sub(r"<footer\b.*?</footer>", lambda _: enhanced, tail, count=1, flags=re.S)
+        tail = tail.replace("</body>", f'<script src="{rel}assets/js/portfolio-motion.js?v={MOTION_REV}" defer></script>\n</body>')
     return contact + tail
 
 

@@ -1,0 +1,25 @@
+{
+  "name": "ishika-portfolio-motion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build:motion": "esbuild src/portfolio-motion.tsx --bundle --minify --format=iife --target=es2020 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=assets/js/portfolio-motion.js && tailwindcss -c tailwind.config.ts -i src/styles/motion.css -o assets/css/motion.css --minify",
+    "build": "npm run typecheck && npm run build:motion && python3 build_version2.py"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "lucide-react": "0.577.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "tailwind-merge": "2.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "esbuild": "0.27.2",
+    "tailwindcss": "3.4.18",
+    "typescript": "5.6.3"
+  }
+}
