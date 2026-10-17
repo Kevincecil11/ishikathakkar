@@ -53,11 +53,13 @@ C["lanes"] = GROUPS
 g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for s in ids])
 original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
 STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexdigest()[:12]
+HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
 
 
 def head(title, desc, rel):
     return original_head(title, desc, rel).replace(
-        "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n</head>'
+        "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n'
+        f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n</head>'
     )
 
 
@@ -120,7 +122,11 @@ def client_ribbon():
         <label class="reel-control" for="pause-client-reel"><span class="when-playing">Pause</span><span class="when-paused">Play</span><span class="visually-hidden"> logo animation</span></label>
       </div>
       <div class="orbit-window">
-        <div class="orbit-center" aria-hidden="true">Across<br>my work</div>
+        <div class="orbit-center studio-hub" role="img" aria-label="The Loud Table plus MTRX Digital">
+          <img class="hub-loud" src="assets/img/logo-loud-table.webp" alt="">
+          <span class="hub-plus" aria-hidden="true">+</span>
+          <img class="hub-mtrx" src="assets/img/logo-mtrx.svg" alt="">
+        </div>
         <ul class="orbit-track" aria-label="Clients and collaborators">{"".join(tiles)}</ul>
       </div>
     </section>
@@ -155,7 +161,8 @@ def women_card():
 def mtrx_clients(rel):
     color = GROUP["mtrx-digital"]
     cards = []
-    for client in CLIENTS:
+    visible_clients = [x for x in CLIENTS if rel or x["id"] != "mordevs-seeds"]
+    for client in visible_clients:
         href = f'#{client["id"]}' if rel == "../../" else f'{rel}work/mtrx-digital/#{client["id"]}'
         transition = "" if rel == "../../" else (
             f'data-color="{color["color"]}" data-on="{color["on"]}" data-label="{e(client["name"])}"'
