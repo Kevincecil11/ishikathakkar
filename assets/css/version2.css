@@ -375,6 +375,15 @@ main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
 }
 
 /* One connected project is a complete editorial feature, not half a grid. */
+.trinity-quality-hero { display:grid; grid-template-columns:1fr 1.5fr 1fr; gap:12px; align-items:center; background:var(--paper); padding:16px; border-radius:8px; }
+.trinity-quality-hero figure { margin:0; min-width:0; }
+.trinity-quality-hero img { display:block; width:100%; height:clamp(200px,24vw,350px); object-fit:contain; transform:none !important; }
+.trinity-quality-hero .trinity-event-photo img { max-width:560px; height:auto; margin:auto; }
+@media(max-width:600px) {
+  .trinity-quality-hero { grid-template-columns:1fr 1fr; gap:8px; padding:10px; }
+  .trinity-quality-hero .trinity-event-photo { grid-column:1/-1; grid-row:1; }
+  .trinity-quality-hero img { height:160px; }
+}
 .related-single { padding-top:16px; }
 .connected-feature { display:grid; grid-template-columns:minmax(220px, min(30%, 330px)) minmax(0,1fr); overflow:hidden; border-radius:8px; background:var(--c); color:var(--on); }
 .connected-photo { display:block; align-self:stretch; }

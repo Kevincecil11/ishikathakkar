@@ -76,6 +76,14 @@ for slug, logo in LOGOS.items():
     for client in CLIENTS:
         if client["id"] == slug:
             client["logo"] = logo
+TRINITY_CLEAN = {
+    "photos/trinity-preschool/cover/annual-function-speaking-one.webp": "trinity-annual-function-speaking-one.webp",
+    "photos/trinity-preschool/annual-function-speaking-two.webp": "trinity-annual-function-speaking-two.webp",
+}
+if "gallery" in BY["trinity-preschool"]:
+    BY["trinity-preschool"]["gallery"]["items"] = [
+        TRINITY_CLEAN.get(src, src) for src in BY["trinity-preschool"]["gallery"]["items"]
+    ]
 for brand in C["brands"]:
     if brand.get("slug") in LOGOS:
         brand["logo"] = LOGOS[brand["slug"]]
@@ -508,12 +516,22 @@ def project_with_uploads(p, index):
             lambda _: banner,
             page, count=1, flags=re.S,
         )
+    elif p["slug"] == "trinity-preschool":
+        # The event originals are only 560px wide. Show them at honest size,
+        # alongside the supplied higher-resolution classroom images.
+        visual = '''<div class="trinity-quality-hero" aria-label="Trinity Preschool teaching and annual function">
+          <figure><img src="../../assets/img/photos/trinity-preschool/classroom-portrait.webp" alt="Ishika with children in the classroom"></figure>
+          <figure class="trinity-event-photo"><img src="../../assets/img/trinity-annual-function-speaking-one.webp" alt="Ishika speaking at the Trinity annual function"></figure>
+          <figure><img src="../../assets/img/photos/trinity-preschool/classroom-group-photo.webp" alt="Ishika and the Trinity classroom group"></figure>
+        </div>'''
+        page = re.sub(r'<figure class="hero-img">.*?</figure>', lambda _: visual, page, count=1, flags=re.S)
     elif p["slug"] == "women-of-ahmedabad":
         page = page.replace('<figure class="hero-img">', '<figure class="hero-img hero-img-natural">', 1)
     if p["slug"] in PHOTOS:
         def link_images(match):
             gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery proof-board"', 1)
             originals = {entry["display"]: source for source, entry in CROPS.items()}
+            originals.update({display: source for source, display in TRINITY_CLEAN.items()})
             def image_link(image):
                 src = image[3]
                 relative = src.split("assets/img/", 1)[1]
