@@ -1,4 +1,4 @@
-name: Reconcile V2 promotion preparation
+name: Inspect promotion merge
 
 on:
   push:
@@ -6,26 +6,29 @@ on:
     paths: [.github/workflows/build.yml]
 
 permissions:
-  contents: write
+  contents: read
+  checks: write
 
 jobs:
-  reconcile:
-    if: contains(github.event.head_commit.message, '[reconcile-promotion]')
+  inspect:
+    if: contains(github.event.head_commit.message, '[inspect-promotion]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: promote/v2-to-main
-          fetch-depth: 1
-      - name: Restore only the two shared legacy files from preserved main
+          fetch-depth: 0
+      - name: Inspect without changing any branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git fetch origin main version-1 --depth=1
-          test "$(git rev-parse origin/main)" = "a47bff389e059c65ab646d6ccf9c05b9a75cbe77"
-          test "$(git rev-parse origin/version-1)" = "a47bff389e059c65ab646d6ccf9c05b9a75cbe77"
-          git show origin/main:build.py > build.py
-          git show origin/main:index.html > index.html
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add build.py index.html
-          git diff --cached --quiet || git commit -m "Reconcile shared V1 base files; V2 generator and assets unchanged"
-          git push origin HEAD:promote/v2-to-main
+          git merge --no-commit --no-ff origin/main > /tmp/merge-result.txt 2>&1 || true
+          git diff --name-only --diff-filter=U > /tmp/conflicts.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, os
+          summary = Path('/tmp/merge-result.txt').read_text() + '\nConflicting files:\n' + Path('/tmp/conflicts.txt').read_text()
+          Path('/tmp/check.json').write_text(json.dumps({'name':'Promotion merge diagnosis','head_sha':os.environ['GITHUB_SHA'],'status':'completed','conclusion':'neutral','output':{'title':'Read-only merge diagnosis','summary':summary}}))
+          PY
+          gh api --method POST "repos/$GITHUB_REPOSITORY/check-runs" --input /tmp/check.json
