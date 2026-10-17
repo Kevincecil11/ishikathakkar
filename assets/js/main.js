@@ -26,10 +26,16 @@
 
   /* Deep links land after font fitting and image dimensions have settled.
      Hash destinations use native navigation, never a delayed curtain redirect. */
+  [].forEach.call(document.querySelectorAll(".all-work-link"), function (link) {
+    var url = new URL(link.href, location.href);
+    url.searchParams.set("view", "work");
+    link.href = url.href;
+  });
   function settleHash() {
-    if (!location.hash) return;
+    var workView = new URLSearchParams(location.search).get("view") === "work";
+    if (!location.hash && !workView) return;
     var id;
-    try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+    try { id = workView ? "work" : decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
     var target = document.getElementById(id);
     if (!target) return;
     requestAnimationFrame(function () { target.scrollIntoView({ block: "start", behavior: "instant" }); });
