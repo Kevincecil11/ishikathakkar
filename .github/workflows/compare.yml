@@ -1,19 +1,96 @@
-name: Refresh portfolio comparison
+name: Publish portfolio and preserved alternate
 
 on:
   push:
-    branches: [version-2]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  actions: write
   contents: read
 
+concurrency:
+  group: portfolio-pages
+  cancel-in-progress: false
+
 jobs:
-  refresh:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Publish both versions using the main-branch workflow
+      - name: Check out promoted V2
+        uses: actions/checkout@v4
+        with:
+          path: current
+          persist-credentials: false
+      - name: Check out preserved V1
+        uses: actions/checkout@v4
+        with:
+          ref: version-1
+          path: alternate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the current portfolio
+        working-directory: current
+        run: |
+          npm install --no-audit --no-fund
+          python3 -m pip install -r requirements-images.txt
+          npm run build
+          python3 scripts/export_site.py
+      - name: Assemble current and alternate sites
+        run: |
+          python3 alternate/build.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, shutil
+          root = Path("_site")
+          shutil.copytree("current/dist", root)
+          shutil.copytree("current/dist", root / "version-2")
+          old = root / "version-1"
+          old.mkdir()
+          for directory in ("assets", "about", "work"):
+              shutil.copytree(Path("alternate") / directory, old / directory)
+          for name in ("index.html", "404.html", ".nojekyll"):
+              shutil.copy2(Path("alternate") / name, old / name)
+          base = "/" + "${{ github.event.repository.name }}" + "/"
+          for folder, suffix in ((root, ""), (root / "version-2", "version-2/"), (old, "version-1/")):
+              path = folder / "404.html"
+              html = path.read_text(encoding="utf-8")
+              html = re.sub(r"<script>.*?</script>", '<base href="' + base + suffix + '">', html, count=1, flags=re.S)
+              path.write_text(html, encoding="utf-8")
+          assert "v2-nav" in (root / "index.html").read_text()
+          assert "v2-nav" in (root / "version-2/index.html").read_text()
+          assert "v2-nav" not in (old / "index.html").read_text()
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for any legacy publisher
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
+        run: |
+          for attempt in $(seq 1 40); do
+            active=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?per_page=30" --jq '[.workflow_runs[] | select(.name == "pages-build-deployment" and .status != "completed")] | length')
+            if [ "$active" = "0" ]; then break; fi
+            sleep 10
+          done
+          test "$active" = "0"
+      - name: Publish portfolio
+        id: deployment
+        uses: actions/deploy-pages@v4
