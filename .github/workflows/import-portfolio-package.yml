@@ -1,18 +1,75 @@
-name: Approved quiet motion import complete
+name: Import approved navigation, banners and counter update
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [version-2]
+    paths: [.github/workflows/import-portfolio-package.yml]
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
+
+concurrency:
+  group: portfolio-asset-import
+  cancel-in-progress: false
 
 jobs:
-  receipt:
+  import:
+    if: contains(github.event.head_commit.message, '[portfolio-import]')
     runs-on: ubuntu-latest
     steps:
-      - name: Completed import receipt
+      - uses: actions/checkout@v4
+        with:
+          ref: version-2
+          fetch-depth: 1
+      - name: Validate all reviewed files before writing
+        env:
+          IMPORT_URL: "https://search.clickup-au.com/workspaces/90161376302/files/Nia1J5VKlIBu-3Pu0j024XHO9PmljvC8vVOLAa7bRZo"
+          EXPECTED_SHA256: "353750c7a0af38d4bb7471f4fd961c68b8cc783cedbdbc5f19641795e457efcf"
         run: |
-          echo 'Approved quiet motion and image package imported on 2026-10-17.'
-          echo 'Package SHA256: d31833bfb649e420b6a238dd071cb14c9feb4bf7c716e5bd992bab3576518198'
-          echo 'Six reviewed source and image files imported. Original photographs retained. V1 unchanged.'
-          echo 'This receipt performs no imports or repository writes.'
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib, io, json, os, urllib.request, zipfile
+          payload = urllib.request.urlopen(os.environ["IMPORT_URL"], timeout=120).read()
+          assert hashlib.sha256(payload).hexdigest() == os.environ["EXPECTED_SHA256"], "Package checksum mismatch"
+          archive = zipfile.ZipFile(io.BytesIO(payload))
+          manifest = json.loads(archive.read("_import-manifest.json"))
+          allowed = {
+              "build_version2.py",
+              "assets/css/version2.css",
+              "src/premium-motion.ts",
+              "assets/img/stax-sierra-supplied.webp",
+              "assets/img/stax-aximo-supplied.webp",
+              "assets/img/khwab-team-landscape.webp",
+              "assets/img/indravansh-portrait-balanced.webp",
+          }
+          assert len(manifest) == 7 and len(archive.infolist()) == 8
+          assert {entry["path"] for entry in manifest} == allowed
+          assert {entry.filename for entry in archive.infolist()} == allowed | {"_import-manifest.json"}
+          for entry in manifest:
+              relative = PurePosixPath(entry["path"])
+              assert not relative.is_absolute() and ".." not in relative.parts and not str(relative).startswith(".github/")
+              data = archive.read(str(relative))
+              assert hashlib.sha256(data).hexdigest() == entry["sha256"], relative
+              path = Path(str(relative))
+              if path.exists():
+                  assert hashlib.sha256(path.read_bytes()).hexdigest() in {entry["before_sha256"], entry["sha256"]}, f"Source changed: {relative}"
+              else:
+                  assert entry["before_sha256"] is None, f"Expected source disappeared: {relative}"
+          for entry in manifest:
+              path = Path(entry["path"])
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(archive.read(entry["path"]))
+          print("Imported seven reviewed files. No source images or other files were deleted.")
+          PY
+      - name: Commit the reviewed source changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build_version2.py assets/css/version2.css src/premium-motion.ts assets/img/stax-sierra-supplied.webp assets/img/stax-aximo-supplied.webp assets/img/khwab-team-landscape.webp assets/img/indravansh-portrait-balanced.webp
+          git diff --cached --quiet || git commit -m "Refine hero CTA and About navigation, replace Stax and Khwab photos, fix portrait crop and refresh-driven counters"
+          git push origin HEAD:version-2
+      - name: Rebuild both live paths without changing V1 sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
