@@ -48,3 +48,57 @@
 @media(prefers-reduced-motion:reduce) {
   .it-roll .it-roll-track,.it-roll .it-roll-face,.it-roll .it-roll-icon svg { transition:none !important; transform:none !important; }
 }
+
+/* Kinetic type enhances the exact original statement, not replacement copy. */
+.kinetic-word { display:inline-block; }
+.kinetic-story,.kinetic-strategy { padding:.03em .12em .08em; font-family:var(--sans); font-style:normal; font-weight:500; line-height:1; }
+.kinetic-story { background:#F4A623; color:#121211; }
+.kinetic-strategy { background:#101D40; color:#FFFFFF; }
+
+/* Enhanced orbit. Original CSS orbit remains a no-JS fallback. */
+.gsap-orbit .reel-toggle { display:none; }
+.gsap-orbit .orbit-window { inset:64px 4px 76px !important; overflow:hidden !important; cursor:grab; touch-action:pan-y; user-select:none; }
+.gsap-orbit.is-dragging .orbit-window { cursor:grabbing; }
+.gsap-orbit .orbit-track { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; display:block !important; aspect-ratio:auto !important; translate:none !important; animation:none !important; margin:0 !important; }
+.gsap-orbit .orbit-track::before { display:block !important; inset:17% 13%; border-radius:50%; }
+.gsap-orbit .orbit-slot { position:absolute !important; top:0 !important; left:0 !important; width:clamp(48px,12cqw,84px) !important; max-width:none !important; margin:0 !important; translate:none; animation:none !important; }
+.gsap-orbit .orbit-upright { animation:none !important; }
+.gsap-orbit .studio-hub { display:flex !important; position:absolute !important; left:50% !important; top:50% !important; transform:translate(-50%,-50%) !important; margin:0 !important; width:auto !important; }
+.gsap-orbit .hub-loud { width:42px; height:42px; }
+.gsap-orbit .hub-mtrx { width:60px; height:30px; }
+.gsap-orbit .hub-plus { font-size:18px; }
+.orbit-controls { position:absolute; left:18px; right:18px; bottom:12px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; z-index:3; }
+.orbit-hint { color:var(--muted); font-size:14px; }
+.orbit-navigation { display:flex; align-items:center; gap:6px; }
+.orbit-controls button { min-width:40px; min-height:40px; padding:6px 12px; font:400 14px/1 var(--sans); color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:999px; cursor:pointer; }
+.orbit-controls button:hover { background:var(--ink); color:var(--paper); }
+.orbit-speed { display:flex; align-items:center; gap:8px; font-size:14px; }
+.orbit-speed input { width:85px; min-height:26px; accent-color:#ED691D; cursor:ew-resize; }
+.orbit-window:focus-visible { outline:2px solid #101D40; outline-offset:-3px; border-radius:8px; }
+@container (max-width:450px) {
+  .gsap-orbit .orbit-window { inset:56px 4px 68px !important; }
+  .gsap-orbit .orbit-slot { width:48px !important; }
+  .gsap-orbit .studio-hub { gap:2px; }
+  .gsap-orbit .hub-loud { width:22px; height:22px; }
+  .gsap-orbit .hub-mtrx { width:32px; height:14px; }
+  .gsap-orbit .hub-plus { font-size:12px; }
+  .orbit-controls { left:12px; right:12px; bottom:8px; gap:2px 8px; }
+  .orbit-hint { width:100%; }
+  .orbit-controls button { min-width:36px; min-height:36px; padding:6px 10px; }
+  .orbit-speed input { width:64px; }
+  .gsap-orbit .reel-wordmark { font-size:14px; letter-spacing:-.05em; }
+}
+@container (max-width:300px) {
+  .gsap-orbit .orbit-window { inset:48px 4px 56px !important; }
+  .gsap-orbit .orbit-slot { width:44px !important; }
+  .gsap-orbit .studio-hub { flex-direction:row; gap:2px; }
+  .gsap-orbit .hub-loud { width:12px; height:12px; }
+  .gsap-orbit .hub-mtrx { width:22px; height:10px; }
+  .gsap-orbit .hub-plus { font-size:8px; }
+  .orbit-controls { bottom:4px; }
+  .orbit-hint { font-size:14px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto !important; }
+  .kinetic-word { transform:none !important; opacity:1 !important; }
+}

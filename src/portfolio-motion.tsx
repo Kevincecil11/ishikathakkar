@@ -2,6 +2,7 @@ import * as React from "react"
 import { createRoot } from "react-dom/client"
 import { ArrowUpRight } from "lucide-react"
 import HalftoneWordmarkFooter from "@/components/ui/halftone-wordmark-footer"
+import { startSiteChoreography } from "./site-choreography"
 
 const mount = document.querySelector<HTMLElement>("[data-halftone-footer]")
 if (mount) {
@@ -72,3 +73,4 @@ function enhanceButtons() {
   })
 }
 enhanceButtons()
+startSiteChoreography()
