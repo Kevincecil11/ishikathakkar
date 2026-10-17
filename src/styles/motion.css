@@ -102,3 +102,16 @@
   html { scroll-behavior:auto !important; }
   .kinetic-word { transform:none !important; opacity:1 !important; }
 }
+
+/* MTRX-style pill CTA: rolling label and a contrasting circular arrow. */
+a.pill.it-roll:has(.it-roll-icon) { padding:5px 6px 5px 20px; min-height:42px; }
+a.pill.it-roll .it-roll-icon { width:30px; height:30px; border-radius:50%; background:var(--ink); color:var(--paper); }
+a.pill.it-roll.dark .it-roll-icon { background:var(--paper); color:var(--ink); }
+a.pill.it-roll .it-roll-icon svg { position:absolute; top:6px; left:6px; }
+a.pill.it-roll .it-roll-icon svg:last-child { top:-24px; left:6px; }
+@media(hover:hover) {
+  a.pill.it-roll:hover .it-roll-icon { background:var(--paper); color:var(--ink); }
+  a.pill.it-roll.dark:hover .it-roll-icon { background:var(--ink); color:var(--paper); }
+  a.pill.it-roll:hover .it-roll-icon svg { transform:translateY(30px); }
+}
+a.pill.it-roll:focus-visible .it-roll-icon svg { transform:translateY(30px); }
