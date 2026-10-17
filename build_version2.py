@@ -95,7 +95,7 @@ MITTI_POSTERS = [
     ("Workshop", "#FFBD17", "#121211", "-3deg", "painting-workshop.webp", "People painting around a workshop table"),
     ("Rave", "#E83E8C", "#FFFFFF", "2deg", "music-evening.webp", "A performer at a Mitti music evening"),
     ("Screening", "#4D6CFA", "#FFFFFF", "0deg", "audience-conversation.webp", "Audience members at a Mitti event"),
-    ("Lecture", "#B499F4", "#121211", "2deg", "colour-workshop.webp", "A conversation around the table at Mitti"),
+    ("Lecture", "#B499F4", "#121211", "2deg", "cafe-audience.webp", "Audience members listening at a Mitti lecture"),
     ("Community brunch", "#79D89C", "#121211", "-2deg", "community-table.webp", "People gathered around the community table"),
 ]
 CROP_MAP_PATH = ROOT / "assets/image-crops.json"
@@ -135,6 +135,10 @@ SITE["note"] = (
 for group_id, slugs in MEMBERS.items():
     for slug in slugs:
         BY[slug]["lane"] = group_id
+# Canonical covers also feed group cards and next-project previews.
+BY["stax-living"].update(image="stax-ronin-bench.webp", pos="50% 50%")
+BY["just-a-khwab"].update(image="khwab-original-preserved-wide.webp", pos="50% 50%")
+BY["trinity-preschool"].update(image="trinity-classroom-added.webp", pos="50% 50%")
 C["lanes"] = GROUPS
 g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for s in ids])
 original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
@@ -212,7 +216,7 @@ def loud_clients(rel):
     # Finance: the same advisory photograph used on its official supplied site:
     # https://financesolutions2.vercel.app/ (Insurance, Unsplash 1450101499163).
     covers = {
-        "stax-living": ("stax-post-aximo-detail.webp", "50% 50%"),
+        "stax-living": ("stax-ronin-bench.webp", "50% 50%"),
         "designecho": ("designecho-editorial-stationery.webp", "50% 45%"),
         "finance-solutions": ("finance-solutions-advisory.webp", "50% 50%"),
     }
@@ -405,8 +409,7 @@ def category_heading(title, anchor=None):
 
 
 def footer(rel):
-    # No destination is configured yet. All controls are explicitly disabled:
-    # this is a visual form, not a working submission service or fake success.
+    # User-supplied Web3Forms access key. The provider handles submission.
     contact = '''<section class="wrap v2-contact" id="contact" aria-labelledby="contact-heading">
       <div class="contact-grid contact-sheet">
         <div class="contact-intro">
@@ -415,16 +418,19 @@ def footer(rel):
           <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
           <span class="contact-signature">Let's find the story.</span>
         </div>
-        <form class="contact-form" aria-label="Contact Ishika" aria-describedby="contact-preview-note">
-          <fieldset disabled>
+        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST" aria-label="Contact Ishika">
+          <input type="hidden" name="access_key" value="6756b89f-e818-4c12-8f40-cdc5628ee0f7">
+          <input type="hidden" name="subject" value="New enquiry from Ishika's portfolio">
+          <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true">
+          <fieldset>
             <legend class="visually-hidden">Contact details</legend>
             <div class="form-two">
-              <label>Your name<input type="text" autocomplete="name" placeholder="The name behind the idea"></label>
-              <label>Email address<input type="email" autocomplete="email" placeholder="you@example.com"></label>
+              <label>Your name<input type="text" name="name" required autocomplete="name" placeholder="The name behind the idea"></label>
+              <label>Email address<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
             </div>
-            <label>What's on your mind?<textarea rows="4" placeholder="A little about what you have in mind..."></textarea></label>
-            <div class="form-bottom"><button type="button" disabled>Send message <span aria-hidden="true">↗</span></button>
-              <p id="contact-preview-note">Preview only. Sending isn't connected yet.</p>
+            <label>What's on your mind?<textarea name="message" required rows="4" placeholder="A little about what you have in mind..."></textarea></label>
+            <div class="form-bottom"><button type="submit">Send message <span aria-hidden="true">↗</span></button>
+              <p>Sent securely through Web3Forms.</p>
             </div>
           </fieldset>
         </form>
@@ -597,7 +603,7 @@ def project_banner(p):
         ],
         "mitti": [
             ("photos/mitti/creative-workshop-participant.webp", "A participant painting at a Mitti workshop", ""),
-            ("photos/mitti/workshop-participant.webp", "A participant creating artwork at Mitti", ""),
+            ("photos/mitti/colour-workshop.webp", "A conversation around the table at Mitti", ""),
             ("photos/mitti/workshop-table.webp", "People working together around a Mitti workshop table", ""),
         ],
         "on-stage": [
@@ -607,7 +613,7 @@ def project_banner(p):
             ("tech-kaushalya-women-retouched.webp", "The front-row women at Tech Kaushalya (cropped and AI-retouched to remove background people)", ""),
         ],
         "just-a-khwab": [
-            ("khwab-team-restored.webp", "The complete cast and crew of Just a Khwab, AI-restored with an extended landscape background", ""),
+            ("khwab-original-preserved-wide.webp", "The complete original Just a Khwab cast and crew in the courtyard", ""),
         ],
         "the-loud-table": [
             ("loud-table-hosting-clear.webp", "Ishika presenting at a community event, sharpened with a head-safe crop", ""),
@@ -652,8 +658,6 @@ def project_with_uploads(p, index):
         display_project["gallery"] = {
             "title": "Project images", "note": "Tap any image to enlarge", "cols": 3,
             "items": [
-                "photos/trinity-preschool/cover/annual-function-speaking-one.webp",
-                "photos/trinity-preschool/classroom-self-portrait.webp",
                 "trinity-classroom-added.webp",
             ],
         }
@@ -661,7 +665,7 @@ def project_with_uploads(p, index):
         display_project["flow"] = False
     if p["slug"] in {"mitti", "women-of-ahmedabad"} and p.get("gallery"):
         used = ({EDITORIAL_ORIGINALS[PEOPLE_CROPS[p["slug"]]]} if p["slug"] != "mitti" else {
-            "photos/mitti/creative-workshop-participant.webp", "photos/mitti/workshop-participant.webp",
+            "photos/mitti/creative-workshop-participant.webp", "photos/mitti/colour-workshop.webp",
             "photos/mitti/workshop-table.webp",
         })
         if p["slug"] == "mitti":
@@ -801,10 +805,8 @@ def project_with_uploads(p, index):
         before, separator, after = page.rpartition("</article>")
         if separator:
             page = before + template + separator + after
-    if p["slug"] in {"indravansh", "just-a-khwab"} and not BANNERS.get(p["slug"]):
-        note = ("Center portrait: AI-recomposed for a balanced layout; the original photograph is retained."
-                if p["slug"] == "indravansh" else
-                "Team photo: AI-restored and extended to landscape from the supplied image; the original is retained.")
+    if p["slug"] == "indravansh" and not BANNERS.get(p["slug"]):
+        note = "Center portrait: AI-recomposed for a balanced layout; the original photograph is retained."
         start = page.find(f'data-project-banner="{p["slug"]}"')
         end = page.find("</div>", start)
         if end != -1:

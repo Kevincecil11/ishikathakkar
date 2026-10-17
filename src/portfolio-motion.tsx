@@ -5,6 +5,10 @@ import HalftoneWordmarkFooter from "@/components/ui/halftone-wordmark-footer"
 import { startSiteChoreography } from "./site-choreography"
 import { initGalleryLayout } from "./gallery-layout"
 
+// The combined Pages publisher adds this legacy comparison link after build.
+// V2 no longer presents it; the alternate site remains independently hosted.
+document.querySelectorAll(".version-switch").forEach(link => link.remove())
+
 const mount = document.querySelector<HTMLElement>("[data-halftone-footer]")
 if (mount) {
   const rel = mount.dataset.relative || ""
@@ -33,7 +37,7 @@ if (mount) {
         radius={220}
         crop={0}
         grain={0}
-        interactive={false}
+        interactive={true}
       />
     )
   }

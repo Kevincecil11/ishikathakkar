@@ -526,6 +526,13 @@ article:has([data-project-banner="women-of-ahmedabad"]) .ggrid.uploaded-gallery.
 }
 .ggrid.uploaded-gallery.proof-board figure.proof-video { grid-column:1/-1; background:#121211; }
 .proof-video .banner-video { width:100%; height:100%; }
+.hdr .version-switch { display:none !important; }
+article:has([data-project-banner]) .ggrid.uploaded-gallery.proof-board {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:var(--proof-row-height,260px);
+}
+.project-banner[data-project-banner="just-a-khwab"] { height:auto; aspect-ratio:2708/1356; }
+.project-banner[data-project-banner="just-a-khwab"] img { object-fit:cover; width:100%; height:100%; }
 .proof-board a:focus-visible { outline:3px solid var(--ink); outline-offset:-4px; }
 .portfolio-image-viewer { width:min(1100px,calc(100vw - 32px)); max-width:none; max-height:calc(100svh - 32px); padding:20px; border:0; border-radius:10px; background:#E8E8E4; color:#121211; }
 .portfolio-image-viewer::backdrop { background:rgb(18 18 17 / .86); }

@@ -112,6 +112,7 @@ export default function HalftoneWordmarkFooter({
     let reduced = preference.matches, w = 0, h = 0, dpr = 1
     let px = -1e5, py = -1e5, smoothX = -1e5, smoothY = -1e5, raf = 0, visible = true, awake = true, alive = true
     let lastTime = 0, frames = 0
+    let touchRelease: ReturnType<typeof setTimeout> | undefined
     let dots = new Float32Array(0), count = 0
 
     const layout = () => {
@@ -214,17 +215,36 @@ export default function HalftoneWordmarkFooter({
       return [e.clientX - b.left, e.clientY - b.top]
     }
     const onMove = (e: PointerEvent) => {
-      if (!opts.current.interactive || reduced || e.pointerType === "touch") return
+      if (!opts.current.interactive || reduced) return
       const entering = px < -1e4
       ;[px, py] = toLocal(e); wake()
       if (entering) { smoothX = px; smoothY = py }
     }
-    const onLeave = () => { px = -1e5; py = -1e5; wake() }
+    const onLeave = (e?: PointerEvent) => {
+      // Touch browsers synthesize pointerleave immediately after pointerup.
+      // Keep the tap alive for its short pulse rather than cancelling it.
+      if (e?.pointerType === "touch" && touchRelease) return
+      px = -1e5; py = -1e5; wake()
+    }
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return
+      if (touchRelease) clearTimeout(touchRelease)
+      onMove(e)
+    }
+    const onUp = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return
+      // Let a tap scatter the lettering, then spring back without hijacking
+      // normal vertical scrolling or blocking any footer links.
+      touchRelease = setTimeout(() => { touchRelease = undefined; onLeave() }, 650)
+    }
     const onPreference = () => { reduced = preference.matches; onLeave(); layout(); wake() }
     const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0 } else wake() }
     layout(); draw(performance.now()); wake()
     root.addEventListener("pointermove", onMove)
     root.addEventListener("pointerleave", onLeave)
+    root.addEventListener("pointerdown", onDown, { passive: true })
+    root.addEventListener("pointerup", onUp, { passive: true })
+    root.addEventListener("pointercancel", onLeave)
     const ro = new ResizeObserver(() => { layout(); wake() })
     ro.observe(root)
     const io = new IntersectionObserver(entries => {
@@ -237,8 +257,12 @@ export default function HalftoneWordmarkFooter({
     document.fonts?.ready.then(() => { if (alive) { layout(); wake() } })
     return () => {
       alive = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect()
+      if (touchRelease) clearTimeout(touchRelease)
       root.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointerleave", onLeave)
+      root.removeEventListener("pointerdown", onDown)
+      root.removeEventListener("pointerup", onUp)
+      root.removeEventListener("pointercancel", onLeave)
       preference.removeEventListener("change", onPreference)
       document.removeEventListener("visibilitychange", onVisibility)
     }
