@@ -2,6 +2,8 @@
 
 ## Current asset and interaction update
 
+Latest UX polish: all five section headers are full clickable cards with hover/focus result reveals, matching Women of Ahmedabad. Small directional arrows use a two-face roll. All work uses native hash navigation after font fitting, with a cache-versioned navigation script. Indravansh uses the original landscape campaign sheet; Women of Ahmedabad shows the full original group photo. Both fit the viewport without cropping or parallax. Uploaded galleries no longer zoom/crop on hover. The footer now uses monochrome pointer-only particles, batched into one canvas fill, with time-based damped springs and no warmth, grain or click-wave effects.
+
 The current upload workflow is [UPLOAD-IMAGES.md](UPLOAD-IMAGES.md). Its project folders and automatic scanning supersede the older filename examples below. `asset_library.py` accepts original filenames and converts HEIC/HEIF at publish time using `requirements-images.txt`.
 
 `src/logo-physics.ts` provides continuous upright circular motion with individual two-axis dragging, release velocity, spring forces, impulse collisions and hub/edge constraints. Grabbing interrupts the moving spring targets; release blends the bodies back into the loop. GSAP 3.13.0 provides the ticker and transform setters. There are no visible slider, arrow or playback controls. Keyboard focus and Reduced Motion pause the orbit; offscreen/hidden-tab detection sleeps the ticker.

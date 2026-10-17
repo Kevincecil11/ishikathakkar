@@ -115,3 +115,20 @@ a.pill.it-roll .it-roll-icon svg:last-child { top:-24px; left:6px; }
   a.pill.it-roll:hover .it-roll-icon svg { transform:translateY(30px); }
 }
 a.pill.it-roll:focus-visible .it-roll-icon svg { transform:translateY(30px); }
+
+/* Small arrows use the same outgoing/incoming roll as the pill CTAs. */
+.it-arrow { --ax:0; --ay:-125%; position:relative; display:inline-block; flex:none; width:1.1em; height:1.15em; overflow:hidden; line-height:1; vertical-align:-.18em; }
+.it-arrow-ne { --ax:125%; --ay:-125%; }
+.it-arrow-se { --ax:125%; --ay:125%; }
+.it-arrow-e { --ax:125%; --ay:0%; }
+.it-arrow-w { --ax:-125%; --ay:0%; }
+.it-arrow-face { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; transition:transform .48s cubic-bezier(.22,.7,.15,1); }
+.it-arrow-face:last-child { transform:translate(calc(-1 * var(--ax)),calc(-1 * var(--ay))); }
+.it-arrow-link:hover .it-arrow-face:first-child,.it-arrow-link:focus-visible .it-arrow-face:first-child { transform:translate(var(--ax),var(--ay)); }
+.it-arrow-link:hover .it-arrow-face:last-child,.it-arrow-link:focus-visible .it-arrow-face:last-child { transform:translate(0,0); }
+.stub small .it-arrow { font-size:16px; margin-left:3px; }
+@media(prefers-reduced-motion:reduce) {
+  .it-arrow-face { transition:none; }
+  .it-arrow-face:first-child { transform:none !important; }
+  .it-arrow-face:last-child { display:none; }
+}

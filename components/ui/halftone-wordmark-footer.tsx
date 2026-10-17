@@ -1,9 +1,8 @@
 "use client"
 
 // Supplied halftone footer, adapted for Ishika's existing static portfolio.
-// The coverage mask, spring physics, pointer warmth and click ring are retained.
-// Fixes: clean pasted Markdown URLs, 14px metadata, safe missing links,
-// reduced-motion updates, sleeping/offscreen canvas, and font-load cleanup.
+// Monochrome pointer-only particles: batched drawing, bounded displacement,
+// time-based springs, no colour changes, click rings or grain overlay.
 import * as React from "react"
 
 export interface HalftonePalette { background: string; ink: string; warm: string }
@@ -53,15 +52,16 @@ export function hwfHex(hex: string): number[] | null {
 export function hwfRadius(coverage: number, gap: number) {
   return Math.sqrt(Math.max(0, Math.min(1, coverage))) * gap * 0.56
 }
-export function hwfStep(x: number, y: number, vx: number, vy: number, hx: number, hy: number, px: number, py: number, r: number) {
-  const dx = x - px, dy = y - py, d2 = dx * dx + dy * dy
+export function hwfStep(x: number, y: number, vx: number, vy: number, hx: number, hy: number, px: number, py: number, r: number, dt = 1 / 60) {
+  const dx = hx - px, dy = hy - py, d2 = dx * dx + dy * dy
+  let tx = hx, ty = hy
   if (r > 0 && d2 < r * r) {
-    const d = Math.sqrt(d2) + 0.001, f = (1 - d / r) * 2.6
-    vx += (dx / d) * f; vy += (dy / d) * f
+    const d = Math.sqrt(d2) + 0.001, f = Math.pow(1 - d / r, 2) * 30
+    tx += dx / d * f; ty += dy / d * f
   }
-  vx = (vx + (hx - x) * 0.05) * 0.84
-  vy = (vy + (hy - y) * 0.05) * 0.84
-  return [x + vx, y + vy, vx, vy]
+  vx += ((tx - x) * 220 - vx * 27) * dt
+  vy += ((ty - y) * 220 - vy * 27) * dt
+  return [x + vx * dt, y + vy * dt, vx, vy]
 }
 export function hwfWarmth(x: number, y: number, hx: number, hy: number, span: number) {
   return span > 0 ? Math.min(1, Math.hypot(x - hx, y - hy) / span) : 0
@@ -111,16 +111,13 @@ export default function HalftoneWordmarkFooter({
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
     let reduced = preference.matches, w = 0, h = 0, dpr = 1
     let px = -1e5, py = -1e5, raf = 0, visible = true, awake = true, alive = true
-    let ring = { x: 0, y: 0, t: -1 }
+    let lastTime = 0, frames = 0
     let dots = new Float32Array(0), count = 0
-    let grainTile: HTMLCanvasElement | null = null
-    const ink = hwfHex(opts.current.colors.ink) || [233, 228, 218]
-    const warm = hwfHex(opts.current.colors.warm) || [233, 118, 43]
 
     const layout = () => {
       const o = opts.current, rect = root.getBoundingClientRect()
       w = Math.max(1, Math.round(rect.width)); h = Math.max(1, Math.round(rect.height))
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr)
       const mask = document.createElement("canvas")
       mask.width = w; mask.height = h
@@ -150,58 +147,47 @@ export default function HalftoneWordmarkFooter({
         }
       }
       dots = new Float32Array(tmp); count = tmp.length / 7
-      grainTile = document.createElement("canvas")
-      grainTile.width = 256; grainTile.height = 256
-      const g = grainTile.getContext("2d")
-      if (g) {
-        const id = g.createImageData(256, 256)
-        for (let i = 0; i < id.data.length; i += 4) {
-          const v = Math.random() * 255
-          id.data[i] = id.data[i + 1] = id.data[i + 2] = v
-          id.data[i + 3] = Math.random() < 0.5 ? 0 : 255
-        }
-        g.putImageData(id, 0, 0)
-      }
       root.dataset.hwfDots = String(count)
-      awake = true
+      root.dataset.hwfEffect = "monochrome-pointer"
+      awake = true; lastTime = 0
     }
     const draw = (now: number) => {
       const o = opts.current
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.fillStyle = o.colors.background; ctx.fillRect(0, 0, w, h)
       const r = o.interactive && !reduced ? Math.max(0, o.radius) : 0
-      const ringAge = ring.t < 0 ? 1e9 : now - ring.t, ringR = ringAge * 0.9
+      const elapsed = lastTime ? Math.min((now - lastTime) / 1000, 0.04) : 1 / 60
+      lastTime = now
+      const steps = Math.max(1, Math.ceil(elapsed / (1 / 120))), dt = elapsed / steps
       let moving = false
+      // A single fill for the entire wordmark avoids per-dot colour and draw calls.
+      ctx.fillStyle = o.colors.ink; ctx.beginPath()
       for (let i = 0; i < count; i++) {
         const j = i * 7, hx = dots[j + 4], hy = dots[j + 5]
         let x = dots[j], y = dots[j + 1], vx = dots[j + 2], vy = dots[j + 3]
         if (!reduced) {
-          if (o.interactive && ringAge < 900) {
-            const dx = hx - ring.x, dy = hy - ring.y, d = Math.hypot(dx, dy) + 0.001
-            const band = 1 - Math.min(1, Math.abs(d - ringR) / 26)
-            if (band > 0) {
-              const f = band * 3.2 * (1 - ringAge / 900)
-              vx += (dx / d) * f; vy += (dy / d) * f
-            }
+          const dx = hx - px, dy = hy - py, distance2 = dx * dx + dy * dy
+          let tx = hx, ty = hy
+          if (r > 0 && distance2 < r * r) {
+            const distance = Math.sqrt(distance2) + 0.001, force = Math.pow(1 - distance / r, 2) * 30
+            tx += dx / distance * force; ty += dy / distance * force
           }
-          ;[x, y, vx, vy] = hwfStep(x, y, vx, vy, hx, hy, px, py, r)
-          if (Math.abs(vx) + Math.abs(vy) > 0.02 || Math.abs(x - hx) + Math.abs(y - hy) > 0.05) moving = true
-          else { x = hx; y = hy; vx = 0; vy = 0 }
+          for (let step = 0; step < steps; step++) {
+            vx += ((tx - x) * 220 - vx * 27) * dt
+            vy += ((ty - y) * 220 - vy * 27) * dt
+            x += vx * dt; y += vy * dt
+          }
+          if (Math.abs(vx) + Math.abs(vy) > 0.06) moving = true
+          else { vx = 0; vy = 0 }
           dots[j] = x; dots[j + 1] = y; dots[j + 2] = vx; dots[j + 3] = vy
         }
-        const k = hwfWarmth(x, y, hx, hy, 28)
-        ctx.fillStyle = k > 0.02
-          ? `rgb(${Math.round(ink[0] + (warm[0] - ink[0]) * k)},${Math.round(ink[1] + (warm[1] - ink[1]) * k)},${Math.round(ink[2] + (warm[2] - ink[2]) * k)})`
-          : o.colors.ink
-        ctx.beginPath(); ctx.arc(x, y, dots[j + 6], 0, Math.PI * 2); ctx.fill()
+        ctx.moveTo(x + dots[j + 6], y)
+        ctx.arc(x, y, dots[j + 6], 0, Math.PI * 2)
       }
-      if (grainTile && o.grain > 0) {
-        ctx.globalAlpha = Math.min(1, o.grain) * 0.09; ctx.globalCompositeOperation = "overlay"
-        const pattern = ctx.createPattern(grainTile, "repeat")
-        if (pattern) { ctx.fillStyle = pattern; ctx.fillRect(0, 0, w, h) }
-        ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"
-      }
-      awake = !reduced && (moving || ringAge < 900 || (o.interactive && px > -1e4))
+      ctx.fill()
+      awake = !reduced && moving
+      root.dataset.hwfFrames = String(++frames)
+      root.dataset.hwfAwake = String(awake)
     }
     const loop = (now: number) => {
       raf = 0
@@ -211,7 +197,7 @@ export default function HalftoneWordmarkFooter({
     }
     const wake = () => {
       awake = true
-      if (alive && !raf && visible && !document.hidden) raf = requestAnimationFrame(loop)
+      if (alive && !raf && visible && !document.hidden) { lastTime = 0; raf = requestAnimationFrame(loop) }
     }
     const toLocal = (e: PointerEvent) => {
       const b = canvas.getBoundingClientRect()
@@ -222,17 +208,11 @@ export default function HalftoneWordmarkFooter({
       ;[px, py] = toLocal(e); wake()
     }
     const onLeave = () => { px = -1e5; py = -1e5; wake() }
-    const onDown = (e: PointerEvent) => {
-      if (!opts.current.interactive || reduced || (e.target as HTMLElement).closest("a,button")) return
-      const [x, y] = toLocal(e)
-      ring = { x, y, t: performance.now() }; wake()
-    }
-    const onPreference = () => { reduced = preference.matches; onLeave(); ring.t = -1; layout(); wake() }
+    const onPreference = () => { reduced = preference.matches; onLeave(); layout(); wake() }
     const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0 } else wake() }
     layout(); draw(performance.now()); wake()
     root.addEventListener("pointermove", onMove)
     root.addEventListener("pointerleave", onLeave)
-    root.addEventListener("pointerdown", onDown)
     const ro = new ResizeObserver(() => { layout(); wake() })
     ro.observe(root)
     const io = new IntersectionObserver(entries => {
@@ -247,7 +227,6 @@ export default function HalftoneWordmarkFooter({
       alive = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect()
       root.removeEventListener("pointermove", onMove)
       root.removeEventListener("pointerleave", onLeave)
-      root.removeEventListener("pointerdown", onDown)
       preference.removeEventListener("change", onPreference)
       document.removeEventListener("visibilitychange", onVisibility)
     }

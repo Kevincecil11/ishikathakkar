@@ -18,7 +18,7 @@ if (mount) {
         label="Ishika Thakkar"
         meta="©2026 Ishika Thakkar"
         preset="paper"
-        palette={{ background: "#E8E8E4", ink: "#121211", warm: "#ED691D" }}
+        palette={{ background: "#E8E8E4", ink: "#121211", warm: "#121211" }}
         columns={[
           { title: "Work", links: [{ label: "The Loud Table", href: rel + "work/the-loud-table/" }, { label: "MTRX", href: rel + "work/mtrx-digital/" }] },
           { title: "About", links: [{ label: "Ishika Thakkar", href: rel + "about/" }] },
@@ -28,10 +28,10 @@ if (mount) {
         fontWeight={400}
         monoFamily={'"IBM Plex Mono", ui-monospace, monospace'}
         height="clamp(360px, 39vw, 560px)"
-        dotGap={5}
-        radius={85}
+        dotGap={6}
+        radius={100}
         crop={0.12}
-        grain={0.3}
+        grain={0}
       />
     )
   }
@@ -39,7 +39,7 @@ if (mount) {
 
 function enhanceButtons() {
   document.querySelectorAll<HTMLAnchorElement | HTMLButtonElement>(
-    "a.pill, button:not(.hwf-up), a.group-link, .woa-card .group-link, a.mini-work"
+    "a.pill, button:not(.hwf-up), a.group-link, .group-top .group-link, a.mini-work"
   ).forEach(button => {
     // Don't alter forms, project cards, the canvas controls or disabled actions.
     if (button.closest(".contact-form,.client-ribbon") || button.matches(":disabled,.it-roll") || button.children.length && !button.matches("a.pill")) return
@@ -73,4 +73,32 @@ function enhanceButtons() {
   })
 }
 enhanceButtons()
+function enhanceInlineArrows() {
+  document.querySelectorAll<HTMLAnchorElement>("a:not(.it-roll)").forEach(link => {
+    if (link.closest(".client-ribbon,.contact-form,.hwf-root")) return
+    const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT)
+    const nodes: Text[] = []
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text
+      if (!node.parentElement?.closest(".it-roll,svg,.it-arrow") && /[↗↘→↑←]/.test(node.textContent || "")) nodes.push(node)
+    }
+    for (const node of nodes) {
+      const fragment = document.createDocumentFragment()
+      for (const part of (node.textContent || "").split(/([↗↘→↑←])/)) {
+        if (!/^[↗↘→↑←]$/.test(part)) { fragment.append(document.createTextNode(part)); continue }
+        const arrow = document.createElement("span")
+        arrow.className = "it-arrow it-arrow-" + ({ "↗": "ne", "↘": "se", "→": "e", "↑": "n", "←": "w" }[part])
+        arrow.setAttribute("aria-hidden", "true")
+        for (let i = 0; i < 2; i++) {
+          const face = document.createElement("span")
+          face.className = "it-arrow-face"; face.textContent = part; arrow.append(face)
+        }
+        fragment.append(arrow)
+      }
+      node.replaceWith(fragment)
+      link.classList.add("it-arrow-link")
+    }
+  })
+}
+enhanceInlineArrows()
 startSiteChoreography()

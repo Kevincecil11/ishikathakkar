@@ -65,6 +65,33 @@ body { --radius: 8px; }
 .mini-work:hover strong { text-decoration:underline; text-underline-offset:4px; }
 .hdr { z-index:50; }
 
+/* Full section cards share WOA's rising result reveal, not nested links. */
+a.group-top { text-decoration:none; color:var(--on); }
+.hover-card { position:relative; overflow:hidden; isolation:isolate; padding-bottom:76px; }
+.hover-title { transition:transform .5s var(--ease); }
+.hover-title h2 { padding-right:20px; }
+.hover-arrow { position:absolute; top:24px; right:24px; font-size:28px; }
+.hover-band { position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 24px; color:#FFFFFF; background:#121211; font-size:16px; visibility:hidden; transform:translateY(101%); transition:transform .5s var(--ease),visibility .5s; }
+.hover-band > span:last-child { white-space:nowrap; }
+.hover-card-inverse .hover-band { background:#F3F3EF; color:#121211; }
+.hover-card:hover .hover-band,.hover-card:focus-visible .hover-band { transform:none; visibility:visible; }
+.hover-card:hover .hover-title,.hover-card:focus-visible .hover-title { transform:translateY(-8px); }
+.hover-card:focus-visible { outline:2px solid var(--ink); outline-offset:4px; }
+.all-work-link { display:inline-flex; align-items:center; min-height:40px; gap:7px; position:relative; z-index:2; }
+#work { scroll-margin-top:90px; }
+.hero-img-natural { aspect-ratio:auto; overflow:hidden; background:var(--paper); }
+.hero-img-natural img { display:block; width:100%; height:auto; max-height:calc(100svh - 120px); object-fit:contain; border-radius:var(--radius); transform:none !important; }
+.uploaded-gallery img,.uploaded-gallery figure:hover img { transform:none !important; }
+@media(max-width:600px) {
+  .group-top.hover-card { padding-bottom:80px; }
+  .hover-band { padding:16px 20px; }
+  .hover-arrow { right:20px; }
+  #work { scroll-margin-top:120px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .hover-title,.hover-band { transition:none; }
+}
+
 /* V1's About uses its original shared layout, sizes, spacing and copy. */
 .v1-about { --radius: 10px; }
 .category-heading { display:flex; align-items:center; gap:18px; padding-bottom:26px; scroll-margin-top:110px; }

@@ -76,6 +76,7 @@ original_head, original_project, original_module, original_footer = g["head"], g
 STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexdigest()[:12]
 HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
 PHYSICS_REV = hashlib.sha256((ROOT / "assets/css/logo-physics.css").read_bytes()).hexdigest()[:12]
+MAIN_REV = hashlib.sha256((ROOT / "assets/js/main.js").read_bytes()).hexdigest()[:12]
 MOTION_JS = ROOT / "assets/js/portfolio-motion.js"
 MOTION_READY = MOTION_JS.exists() and (ROOT / "assets/css/motion.css").exists()
 MOTION_REV = hashlib.sha256(MOTION_JS.read_bytes()).hexdigest()[:12] if MOTION_READY else ""
@@ -244,13 +245,15 @@ def group_style(group_id):
 
 def group_top(group_id, role, summary):
     x = GROUP[group_id]
-    link = g["go"]("", group_id, "group-link") + "Full story ↗</a>" if group_id in BY else (
-        f'<a class="group-link" href="work/{group_id}/">Full story ↗</a>'
-    )
-    return f'''<div class="group-top" style="{group_style(group_id)}">
-      <div><p class="mono">{e(role)}</p><h2>{e(x["name"])}</h2></div>
-      <div class="group-intro"><p>{e(summary)}</p>{link}</div>
-    </div>'''
+    result = BY[group_id]["result"] if group_id in BY else " · ".join(BY[s]["name"] for s in MEMBERS[group_id])
+    inverse = " hover-card-inverse" if group_id == "mitti" else ""
+    return f'''<a class="group-top hover-card{inverse}" href="work/{group_id}/"
+      data-color="{x["color"]}" data-on="{x["on"]}" data-label="{e(x["name"])}" style="{group_style(group_id)}">
+      <div class="hover-title"><p class="mono">{e(role)}</p><h2>{e(x["name"])}</h2></div>
+      <div class="group-intro"><p>{e(summary)}</p><span class="group-link">Full story ↗</span></div>
+      <span class="hover-arrow" aria-hidden="true">↗</span>
+      <span class="hover-band"><span>{e(result)}</span><span aria-hidden="true">Open →</span></span>
+    </a>'''
 
 
 def category_heading(title, anchor=None):
@@ -286,6 +289,7 @@ def footer(rel):
       </div>
     </section>'''
     tail = original_footer(rel)
+    tail = tail.replace(f'{rel}assets/js/main.js"', f'{rel}assets/js/main.js?v={MAIN_REV}"')
     tail = tail.replace('id="contact"', 'id="say-hello"')
     tail = re.sub(r'<a class="pill" href="https://mtrxdigital\.com"[^>]*>MTRX Digital ↗</a>', "", tail)
     if MOTION_READY:
@@ -401,6 +405,24 @@ def grouped_page(group_id, summary):
 
 def project_with_uploads(p, index):
     page = original_project(p, index)
+    # Returning to the work index must not depend on the transition JavaScript.
+    page = re.sub(
+        r'<a class="mono" href="([^"]*#work)"[^>]*>← All work</a>',
+        r'<a class="mono all-work-link" href="\1">← All work</a>',
+        page,
+    )
+    if p["slug"] == "indravansh":
+        # The supplied landscape contact sheet shows the complete blue-sari
+        # campaign, unlike a portrait forced into a shallow widescreen crop.
+        banner = "photos/indravansh/blue-sari-shoot-contact-sheet.webp"
+        page = re.sub(
+            r'<figure class="hero-img">.*?</figure>',
+            f'<figure class="hero-img hero-img-natural"><img src="../../assets/img/{banner}" '
+            'alt="Blue-sari campaign photographs for Indravansh" decoding="async"></figure>',
+            page, count=1, flags=re.S,
+        )
+    elif p["slug"] == "women-of-ahmedabad":
+        page = page.replace('<figure class="hero-img">', '<figure class="hero-img hero-img-natural">', 1)
     if p["slug"] in PHOTOS:
         def link_images(match):
             gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery"', 1)

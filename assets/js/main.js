@@ -24,6 +24,21 @@
   var t;
   window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(fitAll, 80); });
 
+  /* Deep links land after font fitting and image dimensions have settled.
+     Hash destinations use native navigation, never a delayed curtain redirect. */
+  function settleHash() {
+    if (!location.hash) return;
+    var id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+    var target = document.getElementById(id);
+    if (!target) return;
+    requestAnimationFrame(function () { target.scrollIntoView({ block: "start", behavior: "instant" }); });
+  }
+  window.addEventListener("load", function () {
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(settleHash);
+    else settleHash();
+  });
+
   /* 2. Reveal on scroll. */
   var io = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
@@ -55,6 +70,8 @@
       var a = ev.target.closest && ev.target.closest("a[data-color]");
       if (!a || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button !== 0) return;
       if (a.target === "_blank") return;
+      var destination = new URL(a.href, location.href);
+      if (destination.hash || destination.origin !== location.origin) return;
       ev.preventDefault();
       var data = { c: a.getAttribute("data-color"), on: a.getAttribute("data-on") || "#121211", label: a.getAttribute("data-label") || "" };
       curtain.style.setProperty("--cc", data.c);

@@ -53,7 +53,7 @@ export function startSiteChoreography() {
     }
     // Slow, small image shifts on pointer-capable desktops only.
     if (window.matchMedia("(min-width: 900px) and (pointer: fine)").matches) {
-      gsap.utils.toArray<HTMLElement>(".story-image img,.project-hero img,.ggrid img").forEach(img => {
+      gsap.utils.toArray<HTMLElement>(".story-image img,.project-hero:not(.hero-img-natural) img,.ggrid:not(.uploaded-gallery) img").forEach(img => {
         gsap.fromTo(img, { yPercent: -2, scale: 1.04 }, {
           yPercent: 2, scale: 1.04, ease: "none",
           scrollTrigger: { trigger: img.parentElement, start: "top bottom", end: "bottom top", scrub: 0.6 },
