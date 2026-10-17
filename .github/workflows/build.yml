@@ -1,17 +1,25 @@
-name: Build site
+name: Validate V2 production build
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          persist-credentials: false
-      - name: Validate portfolio build without republishing or changing source
-        run: python3 build.py
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm install --no-audit --no-fund
+      - run: python3 -m pip install -r requirements-images.txt
+      - run: npm run build
+      - run: python3 scripts/export_site.py

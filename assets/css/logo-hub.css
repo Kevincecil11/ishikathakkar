@@ -1,0 +1,26 @@
+/* Parent studios stay still; their clients orbit around them. */
+.orbit-center.studio-hub { display:flex; align-items:center; justify-content:center; gap:8px; width:42%; max-width:240px; pointer-events:none; z-index:1; }
+.studio-hub .hub-loud { width:60px; height:60px; object-fit:contain; mix-blend-mode:multiply; flex:none; }
+.studio-hub .hub-mtrx { width:72px; height:36px; object-fit:contain; flex:none; }
+.studio-hub .hub-plus { color:var(--ink); font:400 22px/1 var(--sans); flex:none; }
+@container (max-width:450px) {
+  .orbit-center.studio-hub { width:auto; gap:3px; flex-direction:column; }
+  .studio-hub .hub-loud { width:28px; height:28px; }
+  .studio-hub .hub-mtrx { width:40px; height:16px; }
+  .studio-hub .hub-plus { font-size:14px; }
+  .client-ribbon .orbit-slot { width:52px; }
+  .client-ribbon .reel-brand { padding:4px; }
+  .client-ribbon .orbit-position-0 { top:14%; }
+  .client-ribbon .orbit-position-1 { left:86%; }
+  .client-ribbon .orbit-position-2 { top:86%; }
+  .client-ribbon .orbit-position-3 { left:14%; }
+}
+@container (max-width:300px) {
+  .orbit-center.studio-hub { gap:2px; }
+  .studio-hub .hub-loud { width:20px; height:20px; }
+  .studio-hub .hub-mtrx { width:32px; height:14px; }
+  .studio-hub .hub-plus { font-size:10px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .client-ribbon:not(.motion-enabled) .orbit-center.studio-hub { position:static; transform:none; width:100%; max-width:none; margin:0 auto 16px; flex-direction:row; }
+}

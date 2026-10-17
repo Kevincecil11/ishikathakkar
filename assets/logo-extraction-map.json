@@ -1,0 +1,162 @@
+[
+  {
+    "brand": "birc",
+    "file": "assets/img/logos/birc/original-artwork.webp",
+    "source": "Kevin's MTRX selected-work board",
+    "crop": [
+      92,
+      405,
+      335,
+      480
+    ],
+    "size": [
+      226,
+      54
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "swati-interiors",
+    "file": "assets/img/logos/swati-interiors/original-artwork.webp",
+    "source": "Kevin's MTRX selected-work board",
+    "crop": [
+      806,
+      390,
+      935,
+      514
+    ],
+    "size": [
+      117,
+      115
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "spaces-and-design",
+    "file": "assets/img/logos/spaces-and-design/original-artwork.webp",
+    "source": "Kevin's MTRX selected-work board",
+    "crop": [
+      154,
+      567,
+      275,
+      686
+    ],
+    "size": [
+      102,
+      102
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "finance-solutions",
+    "file": "assets/img/logos/finance-solutions/original-artwork.webp",
+    "source": "Kevin's MTRX selected-work board",
+    "crop": [
+      108,
+      774,
+      326,
+      845
+    ],
+    "size": [
+      192,
+      54
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "hanswild",
+    "file": "assets/img/logos/hanswild/original-artwork.webp",
+    "source": "Kevin's MTRX selected-work board",
+    "crop": [
+      774,
+      967,
+      962,
+      1034
+    ],
+    "size": [
+      167,
+      45
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "stax-living",
+    "file": "assets/img/logos/stax-living/original-artwork.webp",
+    "source": "Existing supplied stax-living-round.png",
+    "crop": [
+      487,
+      739,
+      1454,
+      1139
+    ],
+    "size": [
+      951,
+      384
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "mitti",
+    "file": "assets/img/logos/mitti/original-artwork.webp",
+    "source": "Existing supplied Mitti_round_enhanced.png",
+    "crop": [
+      338,
+      632,
+      1290,
+      996
+    ],
+    "size": [
+      947,
+      362
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "trinity-preschool",
+    "file": "assets/img/logos/trinity-preschool/original-artwork.webp",
+    "source": "Existing supplied trinity-preschool-enhanced.png",
+    "crop": [
+      371,
+      265,
+      1229,
+      1336
+    ],
+    "size": [
+      842,
+      1055
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "indravansh",
+    "file": "assets/img/logos/indravansh/original-artwork.webp",
+    "source": "Existing supplied Indravansh.jpg",
+    "crop": [
+      28,
+      38,
+      122,
+      112
+    ],
+    "size": [
+      88,
+      66
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  },
+  {
+    "brand": "designecho",
+    "file": "assets/img/logos/designecho/original-artwork.webp",
+    "source": "Supplied DesignEcho style guide, page 4",
+    "crop": [
+      180,
+      248,
+      1020,
+      426
+    ],
+    "size": [
+      836,
+      172
+    ],
+    "treatment": "Source artwork cropped and its flat/background field made transparent. No logo redrawing."
+  }
+]

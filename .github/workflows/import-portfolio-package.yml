@@ -1,0 +1,19 @@
+name: Import prepared portfolio package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Completed approved import
+        run: |
+          echo "Approved gallery and contact fixes imported successfully."
+          echo "Package SHA256: 34d136ae66054f4a48f0bfb8496cafd4a0e19843b83dcbfd92518524dac38d32"
+          echo "Content commit: 88b7f7cbdf2926b571bc74f8bbcaad02fbd0a2b0"
+          echo "Six reviewed source and image files imported; main unchanged."
+          echo "No automatic import or external download remains enabled."

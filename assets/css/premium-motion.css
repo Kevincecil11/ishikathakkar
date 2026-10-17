@@ -1,0 +1,57 @@
+/* Premium motion layer for V2.
+   html.motion-on is set before first paint only when Reduced Motion is off.
+   Everything here degrades to the static site if the motion bundle is absent. */
+
+html.it-smooth { scroll-behavior: auto !important; }
+
+/* Hide only the first screen until its entrance is staged: no flash. */
+html.motion-on:not(.motion-ready):not(.motion-fallback) :is(
+  .hero h1, .hero-row, .hero-actions, .it-marquee,
+  main > article > .crumbs, main > article > h1, main > article > .summary,
+  main > article > .meta, main > article > .project-banner, .about-hero
+) { visibility: hidden; }
+
+/* GSAP owns entrances when motion is on; the CSS fallbacks stand down. */
+html.motion-on .reveal { opacity: 1; transform: none; transition: none; }
+html.motion-on .fit.ready > span { animation: none; }
+
+/* Masks clip the rising edge only, leaving room for Anton caps and italics. */
+.itline-mask { overflow: visible !important; clip-path: inset(-0.3em -0.25em -0.14em -0.25em); }
+.itchar { will-change: transform; }
+
+/* Image settle uses independent CSS scale/translate, never transform. */
+html.motion-on :is(.tile, .proof-board figure, .connected-photo, .project-banner .banner-image) img {
+  scale: var(--it-scale, 1);
+  translate: 0 var(--it-y, 0%);
+}
+
+/* Header tucks away on the way down and returns on the way up. */
+html.motion-on .hdr { transition: transform 0.75s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.4s ease; }
+html.motion-on .hdr.is-hidden { transform: translateY(calc(-100% - 2px)); }
+html.motion-on .hdr.is-hidden:focus-within { transform: none; }
+.hdr.is-scrolled { box-shadow: 0 1px 0 var(--rule); }
+.it-progress { position: fixed; z-index: 70; top: 0; left: 0; width: 100%; height: 2px; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); pointer-events: none; }
+
+/* Organisation band: every name carries its own colour dot. */
+.it-marquee { overflow: hidden; margin-top: clamp(20px, 2.6vw, 36px); padding: clamp(14px, 1.8vw, 24px) 0; border-block: 1px solid var(--rule); }
+.it-marquee-track { display: flex; width: max-content; }
+.it-marquee.is-live .it-marquee-track { will-change: transform; }
+.it-marquee-item { display: inline-flex; align-items: center; gap: clamp(14px, 1.4vw, 24px); padding-right: clamp(28px, 3vw, 52px); font: 400 clamp(34px, 4.4vw, 72px)/1 var(--display); text-transform: uppercase; white-space: nowrap; }
+.it-marquee-item i { flex: none; width: 0.3em; height: 0.3em; border-radius: 50%; background: var(--dot); }
+
+/* View / Open / Next badge that trails the pointer over visual links. */
+.it-cursor { position: fixed; z-index: 90; top: 0; left: 0; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; background: #E8E8E4; color: #121211; font: 500 15px/1 var(--sans); letter-spacing: 0.02em; pointer-events: none; box-shadow: 0 0 0 1px rgb(18 18 17 / 0.12), 0 14px 34px rgb(18 18 17 / 0.22); visibility: hidden; }
+
+/* Page curtain: the destination name lands with the colour. */
+@keyframes it-curtain-label { from { transform: translateY(55%); opacity: 0; } to { transform: none; opacity: 1; } }
+html.motion-on .curtain.cover b { animation: it-curtain-label 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
+html.motion-on .curtain.cover { transition-duration: 0.55s; }
+html.motion-on .curtain.lift { transition-duration: 0.85s; }
+
+@media (max-width: 600px) {
+  .it-marquee-item { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .it-cursor, .it-progress { display: none; }
+  .hdr { transition: none !important; transform: none !important; }
+}

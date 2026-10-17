@@ -1,13 +1,9 @@
-name: Publish both portfolio versions
+name: Publish portfolio and preserved alternate
 
 on:
   push:
-    branches: [main, version-2]
-  workflow_dispatch:
-  workflow_run:
-    workflows: [pages-build-deployment]
-    types: [completed]
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,123 +13,64 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  refresh-main:
-    if: github.ref == 'refs/heads/version-2'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: read
-    steps:
-      - name: Rebuild the combined site from main
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
-
   build:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: read
     steps:
-      - name: Check out version 1
+      - name: Check out promoted V2
         uses: actions/checkout@v4
         with:
-          ref: main
-          path: source-v1
+          path: current
           persist-credentials: false
-      - name: Check out version 2
+      - name: Check out preserved V1
         uses: actions/checkout@v4
         with:
-          ref: version-2
-          path: source-v2
+          ref: version-1
+          path: alternate
           persist-credentials: false
-      - name: Set up Node for V2's React island
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Build V2 React and Tailwind assets when present
-        working-directory: source-v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the current portfolio
+        working-directory: current
         run: |
-          if [ -f package.json ]; then
-            npm install --no-audit --no-fund
-            npm run typecheck
-            npm run build:motion
-          fi
-      - name: Set up image conversion for original-filename uploads
+          npm install --no-audit --no-fund
+          python3 -m pip install -r requirements-images.txt
+          npm run build
+          python3 scripts/export_site.py
+      - name: Assemble current and alternate sites
         run: |
-          if [ -f source-v2/requirements-images.txt ]; then
-            python3 -m pip install -r source-v2/requirements-images.txt
-          fi
-      - name: Build both versions
-        run: |
-          python3 source-v1/build.py
-          python3 source-v2/build_version2.py
-      - name: Assemble one Pages site with two independent paths
-        run: |
+          python3 alternate/build.py
           python3 - <<'PY'
           from pathlib import Path
-          import re
-          import shutil
-
+          import re, shutil
           root = Path("_site")
+          shutil.copytree("current/dist", root)
+          shutil.copytree("current/dist", root / "version-2")
+          old = root / "version-1"
+          old.mkdir()
+          for directory in ("assets", "about", "work"):
+              shutil.copytree(Path("alternate") / directory, old / directory)
+          for name in ("index.html", "404.html", ".nojekyll"):
+              shutil.copy2(Path("alternate") / name, old / name)
           base = "/" + "${{ github.event.repository.name }}" + "/"
-          for source, target, prefix in [
-              (Path("source-v1"), root, base),
-              (Path("source-v2"), root / "version-2", base + "version-2/"),
-          ]:
-              target.mkdir(parents=True, exist_ok=True)
-              for directory in ["assets", "about", "work"]:
-                  shutil.copytree(source / directory, target / directory)
-              for name in ["index.html", "404.html", ".nojekyll"]:
-                  shutil.copy2(source / name, target / name)
-              notfound = target / "404.html"
-              html = notfound.read_text(encoding="utf-8")
-              html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
-              notfound.write_text(html, encoding="utf-8")
-              other_version = "2" if source.name == "source-v1" else "1"
-              other_url = base + "version-2/" if other_version == "2" else base
-              button = (
-                  '<a class="pill dark version-switch" href="' + other_url + '" '
-                  'aria-label="Switch to version ' + other_version + '" '
-                  'style="padding:0 14px;flex-shrink:0;text-decoration:none">'
-                  'V' + other_version + '</a>'
-              )
-              mobile_style = (
-                  '<style>@media(max-width:600px){.hdr .version-switch{'
-                  'position:absolute;right:var(--pad);top:12px}}</style>'
-              )
-              for page in target.rglob("*.html"):
-                  text = page.read_text(encoding="utf-8")
-                  text, count = re.subn(
-                      r'(<nav\b[^>]*aria-label="Main"[^>]*>)(.*?)(</nav>)',
-                      lambda match: match.group(1) + match.group(2) + button + match.group(3),
-                      text, count=1, flags=re.S,
-                  )
-                  assert count == 1, f"Main navigation missing: {page}"
-                  text = text.replace("</head>", mobile_style + "</head>", 1)
-                  page.write_text(text, encoding="utf-8")
-          assert 'id="glance-h"' in (root / "index.html").read_text()
-          assert 'id="glance-h"' in (root / "version-2/index.html").read_text()
-          assert 'id="work"' in (root / "version-2/index.html").read_text()
-          assert 'aria-label="Switch to version 2"' in (root / "index.html").read_text()
-          assert 'aria-label="Switch to version 1"' in (root / "version-2/index.html").read_text()
-          assert (root / "version-2/assets/css/version2.css").is_file()
-          assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
-          if (Path("source-v2") / "package.json").is_file():
-              assert (root / "version-2/assets/js/portfolio-motion.js").is_file()
-              assert (root / "version-2/assets/css/motion.css").is_file()
-              assert 'data-halftone-footer' in (root / "version-2/index.html").read_text()
+          for folder, suffix in ((root, ""), (root / "version-2", "version-2/"), (old, "version-1/")):
+              path = folder / "404.html"
+              html = path.read_text(encoding="utf-8")
+              html = re.sub(r"<script>.*?</script>", '<base href="' + base + suffix + '">', html, count=1, flags=re.S)
+              path.write_text(html, encoding="utf-8")
+          assert "v2-nav" in (root / "index.html").read_text()
+          assert "v2-nav" in (root / "version-2/index.html").read_text()
+          assert "v2-nav" not in (old / "index.html").read_text()
           PY
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload both versions
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
-    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -144,7 +81,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Let the legacy branch publisher finish before publishing both versions
+      - name: Wait for any legacy publisher
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -153,10 +90,7 @@ jobs:
             if [ "$active" = "0" ]; then break; fi
             sleep 10
           done
-          if [ "$active" != "0" ]; then
-            echo "Legacy publisher still running; refusing a conflicting deployment"
-            exit 1
-          fi
-      - name: Publish version 1 and version 2 together
+          test "$active" = "0"
+      - name: Publish portfolio
         id: deployment
         uses: actions/deploy-pages@v4
