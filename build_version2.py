@@ -6,6 +6,7 @@ MTRX client credits are studio-level, not individual authorship claims.
 """
 from pathlib import Path
 import hashlib
+import json
 import re
 import runpy
 from urllib.parse import unquote
@@ -41,8 +42,7 @@ MEMBERS = {
 CLIENTS = [
     {"id": "swati-interiors", "name": "Swati Interiors", "credit": "Website design", "detail": "Website design and Next.js development."},
     {"id": "spaces-and-design", "name": "Spaces & Design", "credit": "Website design", "detail": "Website design and WordPress."},
-    {"id": "birc", "name": "BIRC", "credit": "", "detail": ""},
-    {"id": "mordevs-seeds", "name": "Mordevs Seeds", "credit": "Brand identity", "detail": "Brand identity and Next.js development."},
+    {"id": "birc", "name": "BIRC", "credit": "Website design", "detail": "Website design."},
     {"id": "hanswild", "name": "HansWild", "credit": "Wildlife website", "detail": "Website design and Next.js development for a wildlife photographer."},
 ]
 BY = {p["slug"]: p for p in PROJECTS}
@@ -57,12 +57,19 @@ BY["the-loud-table"]["sections"] = [
     for heading, text in BY["the-loud-table"]["sections"]
 ]
 PHOTOS, LOGOS = load_library(ROOT)
+CROP_MAP_PATH = ROOT / "assets/image-crops.json"
+CROPS = json.loads(CROP_MAP_PATH.read_text()) if CROP_MAP_PATH.exists() else {}
 for slug, files in PHOTOS.items():
     if slug not in BY:
         continue
     p = BY[slug]
     p.update(image=files[0], placeholder=False, pos="50% 40%")
-    p["gallery"] = {"title": "Project images", "note": "Photos and work supplied for this portfolio", "cols": 3, "items": files}
+    p["gallery"] = {
+        "title": "Project images",
+        "note": "Tap any image to enlarge",
+        "cols": 3,
+        "items": [CROPS.get(src, {}).get("display", src) for src in files],
+    }
 for slug, logo in LOGOS.items():
     if slug in BY:
         BY[slug]["logo"] = logo
@@ -116,7 +123,7 @@ def logo_slot(name, rel, filename=None):
     """Real logos when supplied; honest, neutral slots for assets due later."""
     if filename:
         return f'<span class="logo-stage"><img src="{rel}assets/img/{filename}" alt="{e(name)} logo" loading="lazy"></span>'
-    return '<span class="logo-stage logo-pending"><span aria-hidden="true">+</span><span>Logo to be added</span></span>'
+    return f'<span class="logo-stage logo-pending"><strong>{e(name)}</strong><span>Logo pending</span></span>'
 
 
 def loud_clients(rel):
@@ -180,6 +187,39 @@ def client_ribbon():
       <p class="logo-physics-hint">Grab a logo. Give it a flick.</p>
       <p class="visually-hidden" id="logo-keyboard-help">Press Space to grab a logo. Use arrow keys to move it, Space to release, or Escape to return it. Touch anywhere outside a badge to scroll the page.</p>
       <span class="logo-status visually-hidden" role="status" aria-live="polite"></span>
+    </section>'''
+
+
+def brand_grid():
+    """All supplied identities together, with honest names for missing marks."""
+    entries = [
+        ("The Loud Table", "the-loud-table", LOGOS.get("the-loud-table", "logo-loud-table.webp")),
+        ("MTRX Digital", "mtrx-digital", LOGOS.get("mtrx-digital", "logo-mtrx.svg")),
+        ("Stax Living", "stax-living", LOGOS.get("stax-living", "logo-stax.svg")),
+        ("Indravansh", "indravansh", LOGOS.get("indravansh", "logo-indravansh.webp")),
+        ("DesignEcho", "designecho", LOGOS.get("designecho")),
+        ("Finance Solutions", "finance-solutions", LOGOS.get("finance-solutions", "logo-finance.webp")),
+        *[(x["name"], "mtrx-digital#" + x["id"], x.get("logo")) for x in CLIENTS],
+        ("Mitti", "mitti", LOGOS.get("mitti", "logo-mitti.webp")),
+        ("Trinity Preschool", "trinity-preschool", LOGOS.get("trinity-preschool", "logo-trinity.webp")),
+        ("TEDx", "on-stage", LOGOS.get("tedx")),
+        ("GUSEC", "on-stage", LOGOS.get("gusec")),
+        ("HerStart", "on-stage", LOGOS.get("herstart")),
+        ("Tech Kaushalya", "tech-kaushalya", LOGOS.get("tech-kaushalya")),
+    ]
+    tiles = []
+    for name, destination, logo in entries:
+        slug, _, anchor = destination.partition("#")
+        href = f'work/{slug}/' + (f"#{anchor}" if anchor else "")
+        mark = (f'<img src="assets/img/{e(logo)}" alt="{e(name)}" loading="lazy">'
+                if logo else f'<strong>{e(name)}</strong>')
+        contrast = " identity-dark" if name in {"TEDx", "Tech Kaushalya"} else ""
+        tiles.append(f'<a class="brand identity-tile{contrast}" href="{href}" aria-label="{e(name)}" '
+                     f'data-logo-state="{"supplied" if logo else "name-only"}">{mark}</a>')
+    return f'''<section class="brand-index" aria-labelledby="brands-h">
+      {sec_head('<span id="brands-h">Brands &amp; stages</span>', f'({len(entries):02d})', '<span class="mono muted">Across my work</span>')}
+      <div class="brands identity-grid">{"".join(tiles)}</div>
+      <p class="brand-source-note">Supplied logos are shown as received. Four MTRX client names appear while their logo files are pending.</p>
     </section>'''
 
 
@@ -371,18 +411,13 @@ def home():
     out.append('<div class="v2-pair">')
     for slug, role in [("women-of-ahmedabad", "Founder, curator & moderator"), ("mitti", "Events Manager")]:
         p = BY[slug]
-        visual = client_ribbon() if slug == "women-of-ahmedabad" else (
-            g["go"]("", slug, "story-image") +
-            f'<img loading="lazy" src="assets/img/{p["image"]}" alt="">'
-            f'<span>{e(p["result"])} <span aria-hidden="true">↗</span></span></a>'
-        )
         top = women_card() if slug == "women-of-ahmedabad" else group_top(slug, role, p["summary"])
         out.append(f'''<section class="work-group story-group" id="{slug}" style="{group_style(slug)}">
           {top}
-          {visual}
           <p class="group-services">{'Four editions · Newspaper coverage · Held at Mitti' if slug == 'women-of-ahmedabad' else '4-5 events a month · Instagram 11k to 19k'}</p>
         </section>''')
     out.append("</div>")
+    out.append(brand_grid())
     out.append(category_heading("And more", "more"))
     out.append('<div class="v2-pair">')
     for slug, desc in [
@@ -416,7 +451,44 @@ def grouped_page(group_id, summary):
 
 
 def project_with_uploads(p, index):
-    page = original_project(p, index)
+    display_project = dict(p)
+    if p["slug"] == "stax-living":
+        # The old day/night visual used illustrative stand-ins. Authentic
+        # post details and the supplied PDF now take its place.
+        display_project["module"] = ""
+    page = original_project(display_project, index)
+    if p["slug"] == "stax-living":
+        visual = '''<section class="stax-evidence" aria-label="Stax Living brand book and social posts">
+          <a class="brandbook-cover-link" href="../../assets/documents/stax-living/stax-living-brand-book.pdf" target="_blank" rel="noopener" aria-label="Open Stax Living brand book PDF">
+            <img src="../../assets/img/stax-brandbook-cover.webp" alt="Cover of the supplied Stax Living Brand Book">
+            <span>Open brand book (PDF) <span aria-hidden="true">↗</span></span>
+          </a>
+          <div class="stax-posts">
+            <div class="stax-posts-heading"><h2>Brand in use</h2><p>Social post details</p></div>
+            <div class="stax-post-pair">
+              <figure><a href="../../assets/img/stax-post-aximo-detail.webp" target="_blank" rel="noopener" aria-label="Open Stax Aximo side-table post detail"><img src="../../assets/img/stax-post-aximo-detail.webp" alt="Aximo side table in a Stax Living social post"><span aria-hidden="true">↗</span></a><figcaption>Aximo · Side table</figcaption></figure>
+              <figure><a href="../../assets/img/stax-post-kulture-detail.webp" target="_blank" rel="noopener" aria-label="Open Stax Kulture daybed post detail"><img src="../../assets/img/stax-post-kulture-detail.webp" alt="Kulture daybed in a Stax Living social post"><span aria-hidden="true">↗</span></a><figcaption>Kulture · Daybed</figcaption></figure>
+            </div>
+            <p class="stax-source-note">Extracted from the supplied Stax Instagram grid. <a href="../../assets/img/photos/stax-living/social-content-grid-three.webp" target="_blank" rel="noopener">View source grid ↗</a></p>
+          </div>
+        </section>'''
+        page = re.sub(r'<figure class="hero-img">.*?</figure>', lambda _: visual, page, count=1, flags=re.S)
+    if len(p.get("related", [])) == 1:
+        related = BY[p["related"][0]]
+        feature = f'''<div class="related-single">
+          {g["go"]("../../", related["slug"], "connected-feature")}
+            <span class="connected-photo"><img src="../../assets/img/{e(related["image"])}" alt="" loading="lazy"></span>
+            <span class="connected-copy">
+              <span class="mono">{e(related["role"])}</span>
+              <strong>{e(related["name"])}</strong>
+              <span class="connected-summary">{e(related["summary"])}</span>
+              <span class="connected-result">{e(related["result"])}</span>
+              <span class="connected-cta">Full story <span aria-hidden="true">↗</span></span>
+            </span>
+          </a>
+        </div>'''
+        original_related = '<div class="related">' + g["card"]("../../", related, 0) + '</div>'
+        page = page.replace(original_related, feature)
     # Returning to the work index must not depend on the transition JavaScript.
     page = re.sub(
         r'<a class="mono" href="([^"]*#work)"[^>]*>← All work</a>',
@@ -424,28 +496,36 @@ def project_with_uploads(p, index):
         page,
     )
     if p["slug"] == "indravansh":
-        # The supplied landscape contact sheet shows the complete blue-sari
-        # campaign, unlike a portrait forced into a shallow widescreen crop.
-        banner = "photos/indravansh/blue-sari-shoot-contact-sheet.webp"
+        # Campaign contact sheet plus two genuine portraits fills the side
+        # columns without stretching the contact sheet or inventing imagery.
+        banner = '''<div class="campaign-collage" aria-label="Indravansh blue-sari campaign">
+          <a href="../../assets/img/crops/indravansh-blue-sari-story-preview.webp" data-original="../../assets/img/photos/indravansh/blue-sari-story-preview.webp" aria-label="Enlarge Indravansh campaign portrait"><img src="../../assets/img/crops/indravansh-blue-sari-story-preview.webp" alt="Blue-sari campaign portrait"></a>
+          <a class="campaign-contact" href="../../assets/img/photos/indravansh/blue-sari-shoot-contact-sheet.webp" aria-label="Enlarge full Indravansh campaign contact sheet"><img src="../../assets/img/photos/indravansh/blue-sari-shoot-contact-sheet.webp" alt="Eight photographs from the blue-sari campaign"></a>
+          <a href="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" aria-label="Enlarge Indravansh full-length campaign portrait"><img src="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" alt="Full-length blue-sari campaign portrait"></a>
+        </div>'''
         page = re.sub(
             r'<figure class="hero-img">.*?</figure>',
-            f'<figure class="hero-img hero-img-natural"><img src="../../assets/img/{banner}" '
-            'alt="Blue-sari campaign photographs for Indravansh" decoding="async"></figure>',
+            lambda _: banner,
             page, count=1, flags=re.S,
         )
     elif p["slug"] == "women-of-ahmedabad":
         page = page.replace('<figure class="hero-img">', '<figure class="hero-img hero-img-natural">', 1)
     if p["slug"] in PHOTOS:
         def link_images(match):
-            gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery"', 1)
+            gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery proof-board"', 1)
+            originals = {entry["display"]: source for source, entry in CROPS.items()}
+            def image_link(image):
+                src = image[3]
+                relative = src.split("assets/img/", 1)[1]
+                original = originals.get(relative, relative)
+                return (image[1] + f'<a href="{src}" data-original="../../assets/img/{e(original)}" '
+                        'aria-label="Enlarge project image">' + image[2] + '</a>' + image[4])
             return re.sub(
                 r'(<figure\b[^>]*>)(<img\b[^>]*src="([^"]+)"[^>]*>)(</figure>)',
-                lambda image: image[1] + f'<a href="{image[3]}" target="_blank" rel="noopener" aria-label="Open full image">' + image[2] + "</a>" + image[4],
+                image_link,
                 gallery,
             )
         page = re.sub(r'<div class="ggrid"[^>]*>.*?</div>', link_images, page, flags=re.S)
-        if p["slug"] == "stax-living":
-            page = page.replace('<div class="daynight">', '<p class="mono muted">Concept illustrations</p><div class="daynight">', 1)
     # A single result needs a purposeful two-part composition, not a full-width
     # empty statistics grid. Preserve the exact result and labels.
     if len(p.get("stats", [])) == 1:

@@ -1,0 +1,112 @@
+{
+  "photos/indravansh/blue-sari-story-preview.webp": {
+    "display": "crops/indravansh-blue-sari-story-preview.webp",
+    "box": [
+      0,
+      196,
+      591,
+      1091
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/indravansh/social-content-grid.webp": {
+    "display": "crops/indravansh-social-content-grid.webp",
+    "box": [
+      0,
+      442,
+      1179,
+      1999
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/indravansh/social-profile-overview.webp": {
+    "display": "crops/indravansh-social-profile-overview.webp",
+    "box": [
+      0,
+      468,
+      1179,
+      2038
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/stax-living/cover/social-profile-overview.webp": {
+    "display": "crops/stax-living-social-profile-overview.webp",
+    "box": [
+      0,
+      320,
+      1179,
+      1155
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/stax-living/social-content-grid-one.webp": {
+    "display": "crops/stax-living-social-content-grid-one.webp",
+    "box": [
+      0,
+      424,
+      1179,
+      1996
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/stax-living/social-content-grid-four.webp": {
+    "display": "crops/stax-living-social-content-grid-four.webp",
+    "box": [
+      0,
+      570,
+      1179,
+      2140
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/stax-living/social-content-grid-three.webp": {
+    "display": "crops/stax-living-social-content-grid-three.webp",
+    "box": [
+      0,
+      183,
+      1179,
+      2277
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/stax-living/social-content-grid-two.webp": {
+    "display": "crops/stax-living-social-content-grid-two.webp",
+    "box": [
+      0,
+      216,
+      1179,
+      1787
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/designecho/cover/social-profile-overview.webp": {
+    "display": "crops/designecho-social-profile-overview.webp",
+    "box": [
+      0,
+      1278,
+      1179,
+      2323
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/designecho/social-content-grid.webp": {
+    "display": "crops/designecho-social-content-grid.webp",
+    "box": [
+      0,
+      442,
+      1179,
+      2011
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  },
+  "photos/tech-kaushalya/team-social-story.webp": {
+    "display": "crops/tech-kaushalya-team-social-story.webp",
+    "box": [
+      0,
+      310,
+      1179,
+      2140
+    ],
+    "note": "Display crop removes phone or app chrome. Original remains available in image viewer."
+  }
+}
