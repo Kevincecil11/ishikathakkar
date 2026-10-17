@@ -1,5 +1,5 @@
-/** Compact proof sheets: overview fits one viewport; detail is opt-in.
- * Sources stay ordered and whole, except reviewed screenshot-chrome crops.
+/** Larger edge-to-edge thumbnails; the viewer always opens the complete image.
+ * Cropping is a preview treatment only. Sources and their order are preserved.
  */
 export function initGalleryLayout() {
   const allLinks: HTMLAnchorElement[] = []
@@ -12,30 +12,15 @@ export function initGalleryLayout() {
       frame = 0
       const width = gallery.clientWidth
       if (width < 1) return
-      const gap = width < 600 ? 8 : 12
-      const budget = Math.max(160, Math.min(600, window.innerHeight - 220))
-      let best = { columns: 1, rows: figures.length, score: -Infinity }
-      for (let columns = 1; columns <= Math.min(figures.length, width < 600 ? 4 : 8); columns++) {
-        const rows = Math.ceil(figures.length / columns)
-        const cellW = (width - gap * (columns - 1)) / columns
-        const cellH = (budget - gap * (rows - 1)) / rows
-        if (cellW < 54 || cellH < 32) continue
-        let area = 0
-        for (const figure of figures) {
-          const image = figure.querySelector<HTMLImageElement>("img")!
-          const ratio = Number(image.getAttribute("width")) / Number(image.getAttribute("height")) ||
-            image.naturalWidth / image.naturalHeight || 1
-          area += Math.min(cellW, cellH * ratio) * Math.min(cellH, cellW / ratio)
-        }
-        const filled = figures.length / (rows * columns)
-        const score = area * (0.8 + filled * 0.2)
-        if (score > best.score) best = { columns, rows, score }
-      }
-      const rowHeight = Math.min(280, (budget - gap * (best.rows - 1)) / best.rows)
-      gallery.style.setProperty("--proof-columns", String(best.columns))
+      const gap = 8
+      const columns = Math.min(figures.length,
+        width >= 1200 ? 6 : width >= 900 ? 5 : width >= 650 ? 4 : width >= 420 ? 3 : 2)
+      const cellWidth = (width - gap * (columns - 1)) / columns
+      const rowHeight = Math.min(300, Math.max(140, cellWidth * 1.15))
+      gallery.style.setProperty("--proof-columns", String(columns))
       gallery.style.setProperty("--proof-row-height", `${rowHeight}px`)
       gallery.style.setProperty("--proof-gap", `${gap}px`)
-      gallery.dataset.galleryLayout = "compact-viewport"
+      gallery.dataset.galleryLayout = "edge-to-edge-thumbnails"
       gallery.dataset.galleryItems = String(figures.length)
       window.dispatchEvent(new Event("portfolio:layout"))
     }
@@ -51,7 +36,7 @@ export function initGalleryLayout() {
     })
     layout()
   })
-  allLinks.push(...document.querySelectorAll<HTMLAnchorElement>(".campaign-collage a"))
+  allLinks.push(...document.querySelectorAll<HTMLAnchorElement>(".project-banner a"))
   if (!allLinks.length) return
   const dialog = document.createElement("dialog")
   dialog.className = "portfolio-image-viewer"
@@ -71,18 +56,14 @@ export function initGalleryLayout() {
   const previous = document.createElement("button"), next = document.createElement("button")
   previous.type = next.type = "button"
   previous.textContent = "Previous"; next.textContent = "Next"
-  const original = document.createElement("a")
-  original.textContent = "Open original file"
-  original.target = "_blank"; original.rel = "noopener"
-  controls.append(previous, original, next)
+  controls.append(previous, next)
   dialog.append(header, image, controls); document.body.append(dialog)
   let active = 0, opener: HTMLAnchorElement | null = null, oldOverflow = ""
   const show = (index: number) => {
     active = (index + allLinks.length) % allLinks.length
     const link = allLinks[active]
-    image.src = link.href
+    image.src = link.dataset.original || link.href
     image.alt = link.querySelector("img")?.alt || "Supplied project image"
-    original.href = link.dataset.original || link.href
     status.textContent = `Image ${active + 1} of ${allLinks.length}`
   }
   allLinks.forEach((link, index) => link.addEventListener("click", event => {

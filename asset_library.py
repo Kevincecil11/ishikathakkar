@@ -62,7 +62,11 @@ def load_library(root):
     photos, logos = {}, {}
     for slug in PHOTO_SECTIONS:
         folder = base / "photos" / slug
-        files = sorted((p for p in folder.rglob("*") if p.is_file() and p.suffix.lower() in IMAGE_TYPES), key=_sort) if folder.exists() else []
+        files = sorted((
+            p for p in folder.rglob("*")
+            if p.is_file() and p.suffix.lower() in IMAGE_TYPES
+            and "banner" not in p.relative_to(folder).parts[:-1]
+        ), key=_sort) if folder.exists() else []
         # An optional cover/ folder wins, so changing a cover never needs renaming.
         covers = [p for p in files if "cover" in p.relative_to(folder).parts[:-1]]
         ordered = covers + [p for p in files if p not in covers]
@@ -76,3 +80,18 @@ def load_library(root):
         elif slug in LEGACY_LOGOS and (base / "logos" / LEGACY_LOGOS[slug]).is_file():
             logos[slug] = _image(root, base / "logos" / LEGACY_LOGOS[slug], True)
     return photos, logos
+
+
+def load_banners(root):
+    """A project's banner/ folder overrides its default collage, any filenames."""
+    root = Path(root)
+    banners = {}
+    for slug in PHOTO_SECTIONS:
+        folder = root / "assets/img/photos" / slug / "banner"
+        files = sorted((
+            p for p in folder.rglob("*")
+            if p.is_file() and p.suffix.lower() in IMAGE_TYPES
+        ), key=_sort) if folder.exists() else []
+        if files:
+            banners[slug] = [_image(root, p) for p in files]
+    return banners

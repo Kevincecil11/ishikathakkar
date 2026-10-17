@@ -377,7 +377,8 @@
   },
   {
     "source": "stax living/BrandBook_StaxLiving.pdf",
-    "file": "assets/documents/stax-living/stax-living-brand-book.pdf",
+    "excluded_destination": "assets/documents/stax-living/stax-living-brand-book.pdf",
+    "excluded_reason": "Withdrawn: Kevin confirmed this brand book is not Ishika's work.",
     "bytes": 3479937
   },
   {

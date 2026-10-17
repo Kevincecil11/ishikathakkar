@@ -10,7 +10,7 @@ import json
 import re
 import runpy
 from urllib.parse import unquote
-from asset_library import load_library
+from asset_library import load_library, load_banners
 
 ROOT = Path(__file__).resolve().parent
 api = runpy.run_path(str(ROOT / "build.py"), run_name="__main__")
@@ -57,6 +57,7 @@ BY["the-loud-table"]["sections"] = [
     for heading, text in BY["the-loud-table"]["sections"]
 ]
 PHOTOS, LOGOS = load_library(ROOT)
+BANNERS = load_banners(ROOT)
 CROP_MAP_PATH = ROOT / "assets/image-crops.json"
 CROPS = json.loads(CROP_MAP_PATH.read_text()) if CROP_MAP_PATH.exists() else {}
 for slug, files in PHOTOS.items():
@@ -136,12 +137,12 @@ def logo_slot(name, rel, filename=None):
 
 def loud_clients(rel):
     # Curated covers stay separate from uploaded evidence and gallery ordering.
-    # Stax: interior rendering from the supplied Brand Book, page 2.
+    # Stax: genuine product-post detail from the supplied historical grid.
     # DesignEcho: stationery mockup from the supplied Style Guide, page 22.
     # Finance: the same advisory photograph used on its official supplied site:
     # https://financesolutions2.vercel.app/ (Insurance, Unsplash 1450101499163).
     covers = {
-        "stax-living": ("stax-living-interior.webp", "50% 55%"),
+        "stax-living": ("stax-post-aximo-detail.webp", "50% 50%"),
         "designecho": ("designecho-editorial-stationery.webp", "50% 45%"),
         "finance-solutions": ("finance-solutions-advisory.webp", "50% 50%"),
     }
@@ -221,13 +222,13 @@ def brand_grid():
         href = f'work/{slug}/' + (f"#{anchor}" if anchor else "")
         mark = (f'<img src="assets/img/{e(logo)}" alt="{e(name)}" loading="lazy">'
                 if logo else f'<strong>{e(name)}</strong>')
-        contrast = " identity-dark" if name in {"TEDx", "Tech Kaushalya"} else ""
+        contrast = " identity-dark" if name in {"TEDx", "Tech Kaushalya"} else " identity-green" if name == "DesignEcho" else ""
         tiles.append(f'<a class="brand identity-tile{contrast}" href="{href}" aria-label="{e(name)}" '
                      f'data-logo-state="{"supplied" if logo else "name-only"}">{mark}</a>')
     return f'''<section class="brand-index" aria-labelledby="brands-h">
       {sec_head('<span id="brands-h">Brands &amp; stages</span>', f'({len(entries):02d})', '<span class="mono muted">Across my work</span>')}
       <div class="brands identity-grid">{"".join(tiles)}</div>
-      <p class="brand-source-note">Supplied logos are shown as received. Four MTRX client names appear while their logo files are pending.</p>
+      <p class="brand-source-note">Original logo artwork, extracted from supplied files and the MTRX selected-work board.</p>
     </section>'''
 
 
@@ -287,7 +288,6 @@ def module(rel, p):
         </section>'''
     content = original_module(rel, p)
     document = {
-        "stax-living": ("stax-living/stax-living-brand-book.pdf", "Brand book (PDF)"),
         "designecho": ("designecho/designecho-brand-style-guide.pdf", "Brand style guide (PDF)"),
     }.get(p["slug"])
     if document and (ROOT / "assets/documents" / document[0]).is_file():
@@ -458,29 +458,62 @@ def grouped_page(group_id, summary):
       </article>''' + g["footer"]("../../")
 
 
+def project_banner(p):
+    """One shared frame, with edge-to-edge photos and complete-image links."""
+    defaults = {
+        "indravansh": [
+            ("photos/indravansh/blue-sari-bracelet-detail.webp", "Bracelets and ring against a blue sari", "campaign-bracelet"),
+            ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
+            ("photos/indravansh/cover/blue-sari-brand-portrait.webp", "Full-length blue-sari campaign portrait", "campaign-portrait"),
+        ],
+        "stax-living": [
+            ("stax-post-aximo-detail.webp", "Aximo side-table post detail from the supplied Stax grid", ""),
+            ("stax-post-kulture-detail.webp", "Kulture daybed post detail from the supplied Stax grid", ""),
+        ],
+        "trinity-preschool": [
+            ("photos/trinity-preschool/classroom-portrait.webp", "Ishika with children in the classroom", ""),
+            ("trinity-annual-function-speaking-one.webp", "Ishika speaking at the Trinity annual function", ""),
+            ("photos/trinity-preschool/classroom-group-photo.webp", "Ishika and the Trinity classroom group", ""),
+        ],
+        "designecho": [
+            ("crops/designecho-social-profile-overview.webp", "DesignEcho supplied social artwork", ""),
+            ("crops/designecho-social-content-grid.webp", "DesignEcho supplied content grid", ""),
+        ],
+    }
+    custom = BANNERS.get(p["slug"], [])
+    items = [(src, f'{p["name"]} supplied banner image {i + 1}', "") for i, src in enumerate(custom)]
+    if not items:
+        items = defaults.get(p["slug"], [(p["image"], f'{p["name"]} project photograph', "")])
+    originals = {entry["display"]: source for source, entry in CROPS.items()}
+    originals.update({display: source for source, display in TRINITY_CLEAN.items()})
+    links = []
+    for src, alt, cls in items:
+        original = originals.get(src, src)
+        links.append(
+            f'<a class="banner-image {cls}" href="../../assets/img/{e(original)}" '
+            f'data-original="../../assets/img/{e(original)}" aria-label="Open full image: {e(alt)}">'
+            f'<img src="../../assets/img/{e(src)}" alt="{e(alt)}" decoding="async"></a>'
+        )
+    is_indra = p["slug"] == "indravansh" and not custom
+    classes = "project-banner" + (" campaign-collage" if is_indra else "")
+    columns = "1fr 1fr 1.2fr" if is_indra else f"repeat({len(items)},minmax(0,1fr))"
+    return (
+        f'<div class="{classes}" data-project-banner="{e(p["slug"])}" '
+        f'data-banner-source="{"upload-folder" if custom else "default"}" '
+        f'style="--banner-columns:{columns}" aria-label="{e(p["name"])} project images">'
+        + "".join(links) + "</div>"
+    )
+
+
 def project_with_uploads(p, index):
     display_project = dict(p)
     if p["slug"] == "stax-living":
-        # The old day/night visual used illustrative stand-ins. Authentic
-        # post details and the supplied PDF now take its place.
         display_project["module"] = ""
     page = original_project(display_project, index)
-    if p["slug"] == "stax-living":
-        visual = '''<section class="stax-evidence" aria-label="Stax Living brand book and social posts">
-          <a class="brandbook-cover-link" href="../../assets/documents/stax-living/stax-living-brand-book.pdf" target="_blank" rel="noopener" aria-label="Open Stax Living brand book PDF">
-            <img src="../../assets/img/stax-brandbook-cover.webp" alt="Cover of the supplied Stax Living Brand Book">
-            <span>Open brand book (PDF) <span aria-hidden="true">↗</span></span>
-          </a>
-          <div class="stax-posts">
-            <div class="stax-posts-heading"><h2>Brand in use</h2><p>Social post details</p></div>
-            <div class="stax-post-pair">
-              <figure><a href="../../assets/img/stax-post-aximo-detail.webp" target="_blank" rel="noopener" aria-label="Open Stax Aximo side-table post detail"><img src="../../assets/img/stax-post-aximo-detail.webp" alt="Aximo side table in a Stax Living social post"><span aria-hidden="true">↗</span></a><figcaption>Aximo · Side table</figcaption></figure>
-              <figure><a href="../../assets/img/stax-post-kulture-detail.webp" target="_blank" rel="noopener" aria-label="Open Stax Kulture daybed post detail"><img src="../../assets/img/stax-post-kulture-detail.webp" alt="Kulture daybed in a Stax Living social post"><span aria-hidden="true">↗</span></a><figcaption>Kulture · Daybed</figcaption></figure>
-            </div>
-            <p class="stax-source-note">Extracted from the supplied Stax Instagram grid. <a href="../../assets/img/photos/stax-living/social-content-grid-three.webp" target="_blank" rel="noopener">View source grid ↗</a></p>
-          </div>
-        </section>'''
-        page = re.sub(r'<figure class="hero-img">.*?</figure>', lambda _: visual, page, count=1, flags=re.S)
+    page = re.sub(
+        r'<figure class="hero-img">.*?</figure>',
+        lambda _: project_banner(p), page, count=1, flags=re.S,
+    )
     if len(p.get("related", [])) == 1:
         related = BY[p["related"][0]]
         feature = f'''<div class="related-single">
@@ -503,29 +536,6 @@ def project_with_uploads(p, index):
         r'<a class="mono all-work-link" href="\1">← All work</a>',
         page,
     )
-    if p["slug"] == "indravansh":
-        # Kevin's selected order: bracelet, earring, larger full-length portrait.
-        banner = '''<div class="campaign-collage" aria-label="Indravansh blue-sari campaign">
-          <a class="campaign-bracelet" href="../../assets/img/photos/indravansh/blue-sari-bracelet-detail.webp" aria-label="Enlarge Indravansh bracelet detail"><img src="../../assets/img/photos/indravansh/blue-sari-bracelet-detail.webp" alt="Bracelets and ring against a blue sari"></a>
-          <a class="campaign-earring" href="../../assets/img/photos/indravansh/silver-earring-detail.webp" aria-label="Enlarge Indravansh earring close-up"><img src="../../assets/img/photos/indravansh/silver-earring-detail.webp" alt="Silver earring close-up"></a>
-          <a class="campaign-portrait" href="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" aria-label="Enlarge Indravansh full-length campaign portrait"><img src="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" alt="Full-length blue-sari campaign portrait"></a>
-        </div>'''
-        page = re.sub(
-            r'<figure class="hero-img">.*?</figure>',
-            lambda _: banner,
-            page, count=1, flags=re.S,
-        )
-    elif p["slug"] == "trinity-preschool":
-        # The event originals are only 560px wide. Show them at honest size,
-        # alongside the supplied higher-resolution classroom images.
-        visual = '''<div class="trinity-quality-hero" aria-label="Trinity Preschool teaching and annual function">
-          <figure><img src="../../assets/img/photos/trinity-preschool/classroom-portrait.webp" alt="Ishika with children in the classroom"></figure>
-          <figure class="trinity-event-photo"><img src="../../assets/img/trinity-annual-function-speaking-one.webp" alt="Ishika speaking at the Trinity annual function"></figure>
-          <figure><img src="../../assets/img/photos/trinity-preschool/classroom-group-photo.webp" alt="Ishika and the Trinity classroom group"></figure>
-        </div>'''
-        page = re.sub(r'<figure class="hero-img">.*?</figure>', lambda _: visual, page, count=1, flags=re.S)
-    elif p["slug"] == "women-of-ahmedabad":
-        page = page.replace('<figure class="hero-img">', '<figure class="hero-img hero-img-natural">', 1)
     if p["slug"] in PHOTOS:
         def link_images(match):
             gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery proof-board"', 1)
@@ -535,7 +545,7 @@ def project_with_uploads(p, index):
                 src = image[3]
                 relative = src.split("assets/img/", 1)[1]
                 original = originals.get(relative, relative)
-                return (image[1] + f'<a href="{src}" data-original="../../assets/img/{e(original)}" '
+                return (image[1] + f'<a href="../../assets/img/{e(original)}" data-original="../../assets/img/{e(original)}" '
                         'aria-label="Enlarge project image">' + image[2] + '</a>' + image[4])
             return re.sub(
                 r'(<figure\b[^>]*>)(<img\b[^>]*src="([^"]+)"[^>]*>)(</figure>)',
