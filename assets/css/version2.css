@@ -395,10 +395,40 @@ main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
 /* People and full website artwork must never be zoomed out of the frame.
    Crops remove ceiling, not faces. The shared Indravansh frame is untouched. */
 .project-banner[data-project-banner="women-of-ahmedabad"] img,
-.project-banner[data-project-banner="mitti"] img,
+.project-banner[data-project-banner="mitti"] img { object-fit:contain; }
 .project-banner[data-project-banner="finance-solutions"] img,
-.project-banner[data-project-banner="mtrx-digital"] img { object-fit:contain; }
+.project-banner[data-project-banner="mtrx-digital"] img { object-fit:cover; }
+.project-banner[data-project-banner="finance-solutions"] .banner-image:first-child img { object-position:51% 50%; }
+.project-banner[data-project-banner="finance-solutions"] .banner-image:last-child img { object-position:50% 64%; }
+.project-banner[data-project-banner="tech-kaushalya"] img { object-fit:contain; }
+.project-banner[data-project-banner="trinity-preschool"] .banner-image:nth-child(2) img { object-position:50% 47%; }
 .project-banner[data-project-banner="on-stage"] img { object-position:50% 44%; }
+.image-treatment-note { font:400 14px/1.5 var(--sans); color:var(--muted); margin:10px 0 0; }
+/* No scroll-triggered visibility effects, even before JS or with it blocked. */
+.reveal,.reveal.in,.words span,.panel.in .words span { opacity:1; transform:none; transition:none; }
+.shift s::after,.panel.in .shift s::after { transform:scaleX(1); transition:none; }
+.daynight .home img { filter:none; transition:none; }
+.it-cursor,.it-marquee { display:none !important; }
+.project-banner .banner-image,.ggrid.uploaded-gallery.proof-board a,.poster-photo > a { cursor:pointer; }
+/* Restore generously sized gallery previews on both community project pages.
+   Keep all remaining images, edge-to-edge, with the full-image viewer intact. */
+article:has([data-project-banner="mitti"]) .ggrid.uploaded-gallery.proof-board,
+article:has([data-project-banner="women-of-ahmedabad"]) .ggrid.uploaded-gallery.proof-board {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:clamp(300px,34vw,480px);
+}
+@media(max-width:960px) {
+  article:has([data-project-banner="mitti"]) .ggrid.uploaded-gallery.proof-board,
+  article:has([data-project-banner="women-of-ahmedabad"]) .ggrid.uploaded-gallery.proof-board {
+    grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:360px;
+  }
+}
+@media(max-width:600px) {
+  article:has([data-project-banner="mitti"]) .ggrid.uploaded-gallery.proof-board,
+  article:has([data-project-banner="women-of-ahmedabad"]) .ggrid.uploaded-gallery.proof-board {
+    grid-template-columns:1fr; grid-auto-rows:360px;
+  }
+}
 /* The reference is the real, responsive Indravansh panel, not a fixed guess. */
 .outcome-panel { height:var(--outcome-height,auto); }
 .outcome-panel:not([data-outcome-panel="indravansh"]) { display:flex; flex-direction:column; }

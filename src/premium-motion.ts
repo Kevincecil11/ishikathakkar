@@ -208,6 +208,21 @@ function pageIn(arriving: boolean) {
 
 /* ------------------------------------------------------------ scroll story */
 function scrollReveals() {
+  // Scroll never gates visibility now. Keep count-ups and subtle hero/banner
+  // depth, but not masked type, image wipes, staggered cards or quote fills.
+  take(all(".stub b,.outcome-single .stat b,.stats .stat b")).forEach(el => countUp(el))
+  const quote = document.querySelector<HTMLElement>(".v1-about .statement")
+  if (quote) {
+    const split = SplitText.create(quote, { type: "words", wordsClass: "kinetic-word" })
+    split.words.forEach(word => {
+      if (/^stories/i.test(word.textContent || "")) word.classList.add("kinetic-story")
+      if (/^strategy/i.test(word.textContent || "")) word.classList.add("kinetic-strategy")
+    })
+  }
+}
+
+// Kept here as the old choreography reference, not called by the site.
+function retiredScrollReveals() {
   // Section rules draw across, then their labels decode.
   take(all(".sec-head")).forEach(head => {
     gsap.fromTo(head, { clipPath: "inset(0% 100% 0% 0%)" }, {
@@ -378,9 +393,6 @@ export function initPremiumMotion(scroller: SmoothScroller | null) {
     if (!fallback) pageIn(arriving)
     scrollReveals()
     root.classList.add("motion-ready")
-    marquee()
-    magnetic()
-    cursorBadge()
     chrome()
     ScrollTrigger.refresh()
   })

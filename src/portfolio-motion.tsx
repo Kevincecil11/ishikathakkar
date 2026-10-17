@@ -33,6 +33,7 @@ if (mount) {
         radius={220}
         crop={0}
         grain={0}
+        interactive={false}
       />
     )
   }

@@ -84,6 +84,10 @@ PEOPLE_CROPS = {
         "photos/mitti/cover/event-conversation.webp",
         (0, 180, 1950, 1160), "mitti-conversation-faces",
     ),
+    "tech-kaushalya": editorial_crop(
+        "photos/tech-kaushalya/cover/university-festival-team.webp",
+        (120, 1620, 1680, 2400), "tech-front-row-women",
+    ),
 }
 MITTI_POSTERS = [
     ("Workshop", "#FFBD17", "#121211", "-3deg", "painting-workshop.webp", "People painting around a workshop table"),
@@ -452,7 +456,6 @@ def home():
       <div class="pills hero-actions"><a class="pill dark" href="#work">See my work ↘</a>
       <a class="pill" href="#contact">Get in touch ↗</a></div>
     </section>''')
-    out.append(marquee())
     stubs = "".join(
         f'{g["go"]("", h["slug"], "stub")}<b>{e(h["n"])}</b>'
         f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} ↗</small></span></a>'
@@ -540,8 +543,8 @@ def project_banner(p):
     defaults = {
         "indravansh": [
             ("photos/indravansh/blue-sari-bracelet-detail.webp", "Bracelets and ring against a blue sari", "campaign-bracelet"),
-            ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
             ("photos/indravansh/cover/blue-sari-brand-portrait.webp", "Full-length blue-sari campaign portrait", "campaign-portrait"),
+            ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
         ],
         "stax-living": [
             ("stax-post-aximo-detail.webp", "Aximo side-table post detail from the supplied Stax grid", ""),
@@ -549,7 +552,7 @@ def project_banner(p):
         ],
         "trinity-preschool": [
             ("photos/trinity-preschool/classroom-portrait.webp", "Ishika with children in the classroom", ""),
-            ("trinity-annual-function-speaking-one.webp", "Ishika speaking at the Trinity annual function", ""),
+            ("trinity-annual-function-ai-enhanced.webp", "Ishika speaking at the Trinity annual function (AI-enhanced from the supplied photograph)", ""),
             ("photos/trinity-preschool/classroom-group-photo.webp", "Ishika and the Trinity classroom group", ""),
         ],
         "designecho": [
@@ -572,6 +575,9 @@ def project_banner(p):
         "on-stage": [
             ("photos/on-stage/gusec-at-the-lectern.webp", "Ishika hosting at the GUSEC lectern", ""),
         ],
+        "tech-kaushalya": [
+            ("tech-kaushalya-women-retouched.webp", "The front-row women at Tech Kaushalya (cropped and AI-retouched to remove background people)", ""),
+        ],
     }
     custom = BANNERS.get(p["slug"], [])
     items = [(src, f'{p["name"]} supplied banner image {i + 1}', "") for i, src in enumerate(custom)]
@@ -580,7 +586,7 @@ def project_banner(p):
     originals = {entry["display"]: source for source, entry in CROPS.items()}
     originals.update({display: source for source, display in TRINITY_CLEAN.items()})
     originals.update(EDITORIAL_ORIGINALS)
-    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage"}
+    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage", "tech-kaushalya", "trinity-preschool"}
     links = []
     for src, alt, cls in items:
         original = originals.get(src, src)
@@ -591,7 +597,7 @@ def project_banner(p):
         )
     is_indra = p["slug"] == "indravansh" and not custom
     classes = "project-banner" + (" campaign-collage" if is_indra else "")
-    columns = ("1fr 1fr 1.2fr" if is_indra else "2.67fr 1fr" if p["slug"] == "finance-solutions" and not custom
+    columns = ("1fr 1.2fr 1fr" if is_indra else "1fr 1fr" if p["slug"] == "finance-solutions" and not custom
                else f"repeat({len(items)},minmax(0,1fr))")
     return (
         f'<div class="{classes}" data-project-banner="{e(p["slug"])}" '
@@ -603,7 +609,9 @@ def project_banner(p):
 
 def project_with_uploads(p, index):
     display_project = dict(p)
-    if p["slug"] in {"designecho", "finance-solutions"}:
+    # No related/Connected work blocks anywhere; the next-project link stays.
+    display_project.pop("related", None)
+    if p["slug"] in {"designecho", "finance-solutions", "tech-kaushalya", "trinity-preschool"}:
         display_project.pop("gallery", None)
     if p["slug"] == "finance-solutions":
         display_project["flow"] = False
@@ -630,7 +638,7 @@ def project_with_uploads(p, index):
         r'<figure class="hero-img">.*?</figure>',
         lambda _: project_banner(p), page, count=1, flags=re.S,
     )
-    if len(p.get("related", [])) == 1:
+    if len(display_project.get("related", [])) == 1:
         related = BY[p["related"][0]]
         feature = f'''<div class="related-single">
           {g["go"]("../../", related["slug"], "connected-feature")}
@@ -687,7 +695,29 @@ def project_with_uploads(p, index):
             '<div class="panel-label"><span class="mono">What came of it</span><span class="mono">Indravansh</span></div>'
             f'<div class="stats" style="--n:4">{reference_stats}</div></div></template>'
         )
-        page = page.replace("</article>", template + "</article>", 1)
+        # Mitti contains nested photo-card <article>s, so use the OUTER close.
+        before, separator, after = page.rpartition("</article>")
+        if separator:
+            page = before + template + separator + after
+    if p["slug"] == "trinity-preschool" and not BANNERS.get(p["slug"]):
+        disclosure = (
+            '<p class="image-treatment-note">Center banner photo: AI-enhanced from the supplied low-resolution photograph. '
+            'The original photograph is retained in the image library.</p>'
+        )
+        # Place the disclosure immediately after the collage, not in its grid.
+        start = page.find('data-project-banner="trinity-preschool"')
+        end = page.find("</div>", start)
+        if end != -1:
+            page = page[:end + 6] + disclosure + page[end + 6:]
+    if p["slug"] == "tech-kaushalya" and not BANNERS.get(p["slug"]):
+        disclosure = (
+            '<p class="image-treatment-note">Banner photo: cropped and AI-retouched to remove background people. '
+            'The original team photograph is retained in the image library.</p>'
+        )
+        start = page.find('data-project-banner="tech-kaushalya"')
+        end = page.find("</div>", start)
+        if end != -1:
+            page = page[:end + 6] + disclosure + page[end + 6:]
     # Reserve each photo's natural dimensions before loading and supply ratios
     # to the justified-row layout. No image is cropped, repeated or omitted.
     from PIL import Image
