@@ -504,12 +504,11 @@ def project_with_uploads(p, index):
         page,
     )
     if p["slug"] == "indravansh":
-        # Campaign contact sheet plus two genuine portraits fills the side
-        # columns without stretching the contact sheet or inventing imagery.
+        # Kevin's selected order: bracelet, earring, larger full-length portrait.
         banner = '''<div class="campaign-collage" aria-label="Indravansh blue-sari campaign">
-          <a href="../../assets/img/crops/indravansh-blue-sari-story-preview.webp" data-original="../../assets/img/photos/indravansh/blue-sari-story-preview.webp" aria-label="Enlarge Indravansh campaign portrait"><img src="../../assets/img/crops/indravansh-blue-sari-story-preview.webp" alt="Blue-sari campaign portrait"></a>
-          <a class="campaign-contact" href="../../assets/img/photos/indravansh/blue-sari-shoot-contact-sheet.webp" aria-label="Enlarge full Indravansh campaign contact sheet"><img src="../../assets/img/photos/indravansh/blue-sari-shoot-contact-sheet.webp" alt="Eight photographs from the blue-sari campaign"></a>
-          <a href="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" aria-label="Enlarge Indravansh full-length campaign portrait"><img src="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" alt="Full-length blue-sari campaign portrait"></a>
+          <a class="campaign-bracelet" href="../../assets/img/photos/indravansh/blue-sari-bracelet-detail.webp" aria-label="Enlarge Indravansh bracelet detail"><img src="../../assets/img/photos/indravansh/blue-sari-bracelet-detail.webp" alt="Bracelets and ring against a blue sari"></a>
+          <a class="campaign-earring" href="../../assets/img/photos/indravansh/silver-earring-detail.webp" aria-label="Enlarge Indravansh earring close-up"><img src="../../assets/img/photos/indravansh/silver-earring-detail.webp" alt="Silver earring close-up"></a>
+          <a class="campaign-portrait" href="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" aria-label="Enlarge Indravansh full-length campaign portrait"><img src="../../assets/img/photos/indravansh/cover/blue-sari-brand-portrait.webp" alt="Full-length blue-sari campaign portrait"></a>
         </div>'''
         page = re.sub(
             r'<figure class="hero-img">.*?</figure>',
