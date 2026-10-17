@@ -1,34 +1,17 @@
-name: Inspect promotion merge
+name: Build site
 
 on:
-  push:
-    branches: [promote/v2-to-main]
-    paths: [.github/workflows/build.yml]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  checks: write
 
 jobs:
-  inspect:
-    if: contains(github.event.head_commit.message, '[inspect-promotion]')
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Inspect without changing any branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git merge --no-commit --no-ff origin/main > /tmp/merge-result.txt 2>&1 || true
-          git diff --name-only --diff-filter=U > /tmp/conflicts.txt
-          python3 - <<'PY'
-          from pathlib import Path
-          import json, os
-          summary = Path('/tmp/merge-result.txt').read_text() + '\nConflicting files:\n' + Path('/tmp/conflicts.txt').read_text()
-          Path('/tmp/check.json').write_text(json.dumps({'name':'Promotion merge diagnosis','head_sha':os.environ['GITHUB_SHA'],'status':'completed','conclusion':'neutral','output':{'title':'Read-only merge diagnosis','summary':summary}}))
-          PY
-          gh api --method POST "repos/$GITHUB_REPOSITORY/check-runs" --input /tmp/check.json
+          persist-credentials: false
+      - name: Validate portfolio build without republishing or changing source
+        run: python3 build.py
