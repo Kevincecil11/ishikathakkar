@@ -210,7 +210,7 @@ function pageIn(arriving: boolean) {
 function scrollReveals() {
   // Scroll never gates visibility now. Keep count-ups and subtle hero/banner
   // depth, but not masked type, image wipes, staggered cards or quote fills.
-  take(all(".stub b,.outcome-single .stat b,.stats .stat b")).forEach(el => countUp(el))
+  take(all(".stub b,.outcome-single .stat b,.stats .stat b")).forEach(el => countUp(el, { scroll: false }))
   const quote = document.querySelector<HTMLElement>(".v1-about .statement")
   if (quote) {
     const split = SplitText.create(quote, { type: "words", wordsClass: "kinetic-word" })

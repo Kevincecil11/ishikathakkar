@@ -400,9 +400,21 @@ main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
 .project-banner[data-project-banner="mtrx-digital"] img { object-fit:cover; }
 .project-banner[data-project-banner="finance-solutions"] .banner-image:first-child img { object-position:51% 50%; }
 .project-banner[data-project-banner="finance-solutions"] .banner-image:last-child img { object-position:50% 64%; }
-.project-banner[data-project-banner="tech-kaushalya"] img { object-fit:contain; }
+.project-banner[data-project-banner="tech-kaushalya"] img { object-fit:cover; object-position:50% 50%; }
 .project-banner[data-project-banner="trinity-preschool"] .banner-image:nth-child(2) img { object-position:50% 47%; }
 .project-banner[data-project-banner="on-stage"] img { object-position:50% 44%; }
+.hero-actions .hero-work { background:#FFFFFF; color:var(--ink); }
+.hero-actions .hero-work:hover,.hero-actions .hero-work:active,.hero-actions .hero-work:focus-visible { background:var(--ink); color:#FFFFFF; }
+.hero-actions .hero-work.it-roll .it-roll-icon { background:var(--ink); color:#FFFFFF; }
+.hero-actions .hero-work.it-roll:hover .it-roll-icon,
+.hero-actions .hero-work.it-roll:active .it-roll-icon,
+.hero-actions .hero-work.it-roll:focus-visible .it-roll-icon { background:#FFFFFF; color:var(--ink); }
+.project-banner[data-project-banner="stax-living"] img { object-fit:cover; object-position:50% 50%; }
+.project-banner[data-project-banner="indravansh"] .campaign-portrait img { object-position:50% 0%; }
+.project-banner[data-project-banner="just-a-khwab"] img { object-fit:cover; object-position:50% 45%; }
+@media(max-width:960px) {
+  .project-banner[data-project-banner="just-a-khwab"] img { object-fit:contain; }
+}
 .image-treatment-note { font:400 14px/1.5 var(--sans); color:var(--muted); margin:10px 0 0; }
 /* No scroll-triggered visibility effects, even before JS or with it blocked. */
 .reveal,.reveal.in,.words span,.panel.in .words span { opacity:1; transform:none; transition:none; }

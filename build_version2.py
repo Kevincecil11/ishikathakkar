@@ -183,10 +183,12 @@ def marquee():
 
 
 def header(rel, current):
+    about_current = ' aria-current="page"' if current == "about" else ""
     items = (
         g["go"](rel, "the-loud-table") + "The Loud Table</a>" +
         g["go"](rel, "mtrx-digital") + "MTRX</a>" +
-        f'<a href="{rel}#community">Community</a><a href="{rel}#more">More</a>'
+        f'<a href="{rel}about/"{about_current}>About</a>' +
+        f'<a href="{rel}#community">Community</a>'
     )
     return f'''<header class="hdr">
       {g["ink_link"](rel or "./", "Ishika Thakkar", "logo")}Ishika T.<sup>©</sup></a>
@@ -453,8 +455,7 @@ def home():
       <h1 class="fit" id="name"><span>{e(SITE["name"])}</span></h1>
       <div class="hero-row"><p class="positioning">{e(SITE["positioning"])}</p>
       <ul class="hero-roles">{roles}</ul></div>
-      <div class="pills hero-actions"><a class="pill dark" href="#work">See my work ↘</a>
-      <a class="pill" href="#contact">Get in touch ↗</a></div>
+      <div class="pills hero-actions"><a class="pill hero-work" href="#work">See my work ↘</a></div>
     </section>''')
     stubs = "".join(
         f'{g["go"]("", h["slug"], "stub")}<b>{e(h["n"])}</b>'
@@ -543,12 +544,12 @@ def project_banner(p):
     defaults = {
         "indravansh": [
             ("photos/indravansh/blue-sari-bracelet-detail.webp", "Bracelets and ring against a blue sari", "campaign-bracelet"),
-            ("photos/indravansh/cover/blue-sari-brand-portrait.webp", "Full-length blue-sari campaign portrait", "campaign-portrait"),
+            ("indravansh-portrait-balanced.webp", "Blue-sari campaign portrait with balanced lighting and the full head in frame", "campaign-portrait"),
             ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
         ],
         "stax-living": [
-            ("stax-post-aximo-detail.webp", "Aximo side-table post detail from the supplied Stax grid", ""),
-            ("stax-post-kulture-detail.webp", "Kulture daybed post detail from the supplied Stax grid", ""),
+            ("stax-sierra-supplied.webp", "Stax Living Sierra poster bed, supplied product image", ""),
+            ("stax-aximo-supplied.webp", "Stax Living Aximo side table, supplied product image", ""),
         ],
         "trinity-preschool": [
             ("photos/trinity-preschool/classroom-portrait.webp", "Ishika with children in the classroom", ""),
@@ -578,6 +579,9 @@ def project_banner(p):
         "tech-kaushalya": [
             ("tech-kaushalya-women-retouched.webp", "The front-row women at Tech Kaushalya (cropped and AI-retouched to remove background people)", ""),
         ],
+        "just-a-khwab": [
+            ("khwab-team-landscape.webp", "The cast and crew of Just a Khwab, landscape crop of the supplied team photograph", ""),
+        ],
     }
     custom = BANNERS.get(p["slug"], [])
     items = [(src, f'{p["name"]} supplied banner image {i + 1}', "") for i, src in enumerate(custom)]
@@ -586,7 +590,7 @@ def project_banner(p):
     originals = {entry["display"]: source for source, entry in CROPS.items()}
     originals.update({display: source for source, display in TRINITY_CLEAN.items()})
     originals.update(EDITORIAL_ORIGINALS)
-    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage", "tech-kaushalya", "trinity-preschool"}
+    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage", "tech-kaushalya", "trinity-preschool", "stax-living", "just-a-khwab", "indravansh"}
     links = []
     for src, alt, cls in items:
         original = originals.get(src, src)
@@ -631,7 +635,7 @@ def project_with_uploads(p, index):
         display_project["gallery"] = dict(p["gallery"], items=items)
         if not items:
             display_project.pop("gallery", None)
-    if p["slug"] == "stax-living":
+    if p["slug"] in {"stax-living", "just-a-khwab", "tech-kaushalya"}:
         display_project["module"] = ""
     page = original_project(display_project, index)
     page = re.sub(
@@ -706,15 +710,6 @@ def project_with_uploads(p, index):
         )
         # Place the disclosure immediately after the collage, not in its grid.
         start = page.find('data-project-banner="trinity-preschool"')
-        end = page.find("</div>", start)
-        if end != -1:
-            page = page[:end + 6] + disclosure + page[end + 6:]
-    if p["slug"] == "tech-kaushalya" and not BANNERS.get(p["slug"]):
-        disclosure = (
-            '<p class="image-treatment-note">Banner photo: cropped and AI-retouched to remove background people. '
-            'The original team photograph is retained in the image library.</p>'
-        )
-        start = page.find('data-project-banner="tech-kaushalya"')
         end = page.find("</div>", start)
         if end != -1:
             page = page[:end + 6] + disclosure + page[end + 6:]
