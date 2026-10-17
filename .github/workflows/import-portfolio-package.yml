@@ -1,13 +1,73 @@
-name: Portfolio package import completed
+name: Import reviewed compact portfolio update
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [version-2]
+    paths: [.github/workflows/import-portfolio-package.yml]
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
+
+concurrency:
+  group: portfolio-asset-import
+  cancel-in-progress: false
 
 jobs:
-  receipt:
+  import:
+    if: contains(github.event.head_commit.message, '[portfolio-import]')
     runs-on: ubuntu-latest
     steps:
-      - run: echo 'Approved geometry, gallery and footer refinements are imported. Use project asset folders for future uploads.'
+      - uses: actions/checkout@v4
+        with:
+          ref: version-2
+          fetch-depth: 1
+      - name: Import only the reviewed source and display crops
+        env:
+          IMPORT_URL: "https://search.clickup-au.com/workspaces/90161376302/files/PuhUqugkCDMlfsKwvNCHPXd6aHcJ5elxvWislJXIsqk"
+          EXPECTED_SHA256: "9a8234ec3d9278876848e502eb64c582e6d4afebc86d29bd0db3e33589d68c36"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import hashlib, io, json, os, urllib.request, zipfile
+          data = urllib.request.urlopen(os.environ["IMPORT_URL"], timeout=120).read()
+          assert hashlib.sha256(data).hexdigest() == os.environ["EXPECTED_SHA256"], "Package checksum mismatch"
+          archive = zipfile.ZipFile(io.BytesIO(data))
+          manifest = json.loads(archive.read("_import-manifest.json"))
+          assert len(manifest) == 19, "Unexpected import size"
+          assert len(archive.infolist()) == 20, "Unexpected archive entries"
+          assert {x.filename for x in archive.infolist()} == {x["path"] for x in manifest} | {"_import-manifest.json"}
+          for entry in manifest:
+              rel = PurePosixPath(entry["path"])
+              assert not rel.is_absolute() and ".." not in rel.parts and not str(rel).startswith(".github/"), rel
+              payload = archive.read(str(rel))
+              assert hashlib.sha256(payload).hexdigest() == entry["sha256"], rel
+              path = Path(str(rel))
+              if path.exists():
+                  actual = hashlib.sha256(path.read_bytes()).hexdigest()
+                  assert actual in {entry["before_sha256"], entry["sha256"]}, f"New changes detected: {rel}"
+              else:
+                  assert entry["before_sha256"] is None, f"Expected source disappeared: {rel}"
+          for entry in manifest:
+              path = Path(entry["path"])
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(archive.read(entry["path"]))
+          Path(".github/workflows/import-portfolio-package.yml").write_text(
+              "name: Portfolio package import completed\n\n"
+              "on:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\n"
+              "jobs:\n  receipt:\n    runs-on: ubuntu-latest\n    steps:\n"
+              "      - run: echo 'Reviewed compact galleries, screenshot crops and Stax evidence are imported. Original uploads remain unchanged.'\n"
+          )
+          print(f"Imported {len(manifest)} reviewed repository files.")
+          PY
+      - name: Commit the reviewed update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build_version2.py assets/css/version2.css src/gallery-layout.ts INTEGRATION.md assets/image-crops.json assets/img/crops assets/img/stax-brandbook-cover.webp assets/img/stax-post-aximo-detail.webp assets/img/stax-post-kulture-detail.webp .github/workflows/import-portfolio-package.yml
+          git commit -m "Refine compact portfolio galleries, complete brand grid and authentic Stax evidence"
+          git push origin HEAD:version-2
+      - name: Rebuild both live paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
