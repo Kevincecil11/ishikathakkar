@@ -1,5 +1,6 @@
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
+import { initLogoPhysics } from "./logo-physics"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -62,7 +63,7 @@ export function startSiteChoreography() {
     return () => { /* gsap.matchMedia reverts its animations and triggers. */ }
   })
   document.fonts?.ready.then(() => ScrollTrigger.refresh())
-  initOrbit(preference)
+  initLogoPhysics(preference)
 }
 
 /** GSAP ticker + quickSetter: smooth drag, damped release, and speed control.

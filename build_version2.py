@@ -8,6 +8,7 @@ from pathlib import Path
 import hashlib
 import re
 import runpy
+from asset_library import load_library
 
 ROOT = Path(__file__).resolve().parent
 api = runpy.run_path(str(ROOT / "build.py"), run_name="__main__")
@@ -46,6 +47,26 @@ CLIENTS = [
 BY = {p["slug"]: p for p in PROJECTS}
 BY["stax-living"]["logo"] = "logo-stax.svg"
 BY["indravansh"]["logo"] = "logo-indravansh.webp"
+PHOTOS, LOGOS = load_library(ROOT)
+for slug, files in PHOTOS.items():
+    if slug not in BY:
+        continue
+    p = BY[slug]
+    p.update(image=files[0], placeholder=False, pos="50% 40%")
+    p["gallery"] = {"title": "Project images", "note": "Photos and work supplied for this portfolio", "cols": 3, "items": files}
+for slug, logo in LOGOS.items():
+    if slug in BY:
+        BY[slug]["logo"] = logo
+    for client in CLIENTS:
+        if client["id"] == slug:
+            client["logo"] = logo
+for brand in C["brands"]:
+    if brand.get("slug") in LOGOS:
+        brand["logo"] = LOGOS[brand["slug"]]
+SITE["note"] = (
+    "Uploaded photographs, screenshots and supplied logos are real. Some remaining project "
+    "illustrations are stand-ins. MTRX client credits describe studio work, not individual authorship."
+)
 for group_id, slugs in MEMBERS.items():
     for slug in slugs:
         BY[slug]["lane"] = group_id
@@ -54,6 +75,7 @@ g.update(LANES=GROUPS, LANE=GROUP, ORDER=[BY[s] for ids in MEMBERS.values() for 
 original_head, original_project, original_module, original_footer = g["head"], g["project"], g["module"], g["footer"]
 STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexdigest()[:12]
 HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
+PHYSICS_REV = hashlib.sha256((ROOT / "assets/css/logo-physics.css").read_bytes()).hexdigest()[:12]
 MOTION_JS = ROOT / "assets/js/portfolio-motion.js"
 MOTION_READY = MOTION_JS.exists() and (ROOT / "assets/css/motion.css").exists()
 MOTION_REV = hashlib.sha256(MOTION_JS.read_bytes()).hexdigest()[:12] if MOTION_READY else ""
@@ -63,7 +85,8 @@ def head(title, desc, rel):
     motion_css = f'<link rel="stylesheet" href="{rel}assets/css/motion.css?v={MOTION_REV}">\n' if MOTION_READY else ""
     return original_head(title, desc, rel).replace(
         "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n'
-        f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n{motion_css}</head>'
+        f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n'
+        f'<link rel="stylesheet" href="{rel}assets/css/logo-physics.css?v={PHYSICS_REV}">\n{motion_css}</head>'
     )
 
 
@@ -93,63 +116,47 @@ def loud_clients(rel):
 
 
 def client_ribbon():
-    """A pausable circular reel with four visible badges at a time.
-
-    Missing logo files use their real names, never invented logo artwork.
-    This is cross-portfolio work, not a claim that these are WOA clients.
-    """
+    """All clients are present together, as tangible, individually grabbable badges."""
     brands = [
-        ("Stax Living", "logo-stax.svg"),
-        ("Indravansh", "logo-indravansh.webp"),
-        ("DesignEcho", None),
-        ("Finance Solutions", "logo-finance.webp"),
+        ("Stax Living", LOGOS.get("stax-living", "logo-stax.svg")),
+        ("Indravansh", LOGOS.get("indravansh", "logo-indravansh.webp")),
+        ("DesignEcho", LOGOS.get("designecho")),
+        ("Finance Solutions", LOGOS.get("finance-solutions", "logo-finance.webp")),
         *[(x["name"], x.get("logo")) for x in CLIENTS],
-        ("Mitti", "logo-mitti.webp"),
-        ("Trinity Preschool", "logo-trinity.webp"),
-        ("TEDx", None),
-        ("GUSEC", None),
+        ("Mitti", LOGOS.get("mitti", "logo-mitti.webp")),
+        ("Trinity Preschool", LOGOS.get("trinity-preschool", "logo-trinity.webp")),
+        ("TEDx", LOGOS.get("tedx")),
+        ("GUSEC", LOGOS.get("gusec")),
     ]
-    batch_count = (len(brands) + 3) // 4
-    padded = brands + brands[:batch_count * 4 - len(brands)]
     tiles = []
-    for i, (name, logo) in enumerate(padded):
-        mark = (f'<img src="assets/img/{logo}" alt="{e(name)}" loading="lazy">' if logo else
-                '<span class="reel-wordmark">' + re.sub(r'(?<=[a-z])(?=[A-Z])', '<wbr>', e(name)) + '</span>')
-        duplicate = ' aria-hidden="true"' if i >= len(brands) else ""
+    for name, logo in brands:
+        label = {
+            "Swati Interiors": ["Swati", "Interiors"],
+            "Spaces & Design": ["Spaces", "&", "Design"],
+            "Mordevs Seeds": ["Mordevs", "Seeds"],
+            "HansWild": ["Hans", "Wild"],
+        }.get(name, [name])
+        mark = (f'<img src="assets/img/{e(logo)}" alt="" loading="lazy" draggable="false">' if logo else
+                '<span class="logo-text">' + "".join(f'<span class="logo-word">{e(word)}</span>' for word in label) + '</span>')
         tiles.append(
-            f'<li class="orbit-slot orbit-position-{i % 4}" style="--batch:{i // 4}"{duplicate}>'
-            f'<span class="orbit-upright"><span class="reel-brand">{mark}</span></span></li>'
+            f'<li class="logo-body"><button class="logo-grab" type="button" disabled '
+            f'aria-label="Move {e(name)} logo" aria-pressed="false" aria-describedby="logo-keyboard-help" '
+            f'data-name="{e(name)}" title="{e(name)}">{mark}</button></li>'
         )
-    return f'''<section class="client-ribbon" style="--batch-cycle:{batch_count * 12}s" aria-label="Clients and collaborators across my work">
-      <input class="reel-toggle" id="pause-client-reel" type="checkbox">
-      <div class="reel-head"><p>Clients &amp; collaborators <span>Across my work</span></p>
-        <label class="reel-control" for="pause-client-reel"><span class="when-playing">Pause</span><span class="when-paused">Play</span><span class="visually-hidden"> logo animation</span></label>
-      </div>
-      <div class="orbit-window">
+    return f'''<section class="client-ribbon logo-playground" aria-label="Clients and collaborators across my work">
+      <div class="reel-head"><p>Clients &amp; collaborators <span>Across my work</span></p></div>
+      <div class="logo-stage-area">
         <div class="orbit-center studio-hub" role="img" aria-label="The Loud Table plus MTRX Digital">
-          <img class="hub-loud" src="assets/img/logo-loud-table.webp" alt="">
+          <img class="hub-loud" src="assets/img/{LOGOS.get("the-loud-table", "logo-loud-table.webp")}" alt="">
           <span class="hub-plus" aria-hidden="true">+</span>
-          <img class="hub-mtrx" src="assets/img/logo-mtrx.svg" alt="">
+          <img class="hub-mtrx" src="assets/img/{LOGOS.get("mtrx-digital", "logo-mtrx.svg")}" alt="">
         </div>
-        <ul class="orbit-track" aria-label="Clients and collaborators">{"".join(tiles)}</ul>
+        <ul class="logo-bodies" aria-label="Clients and collaborators">{"".join(tiles)}</ul>
       </div>
-    </section>
-    <script>
-    (function(){{
-      var panel = document.currentScript.previousElementSibling;
-      var toggle = panel.querySelector(".reel-toggle");
-      var preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-      function respectPreference(){{
-        toggle.checked = preference.matches;
-        panel.classList.toggle("motion-enabled", !preference.matches);
-      }}
-      respectPreference();
-      toggle.addEventListener("change", function(){{
-        if (!toggle.checked) panel.classList.add("motion-enabled");
-      }});
-      if (preference.addEventListener) preference.addEventListener("change", respectPreference);
-    }})();
-    </script>'''
+      <p class="logo-physics-hint">Grab a logo. Give it a flick.</p>
+      <p class="visually-hidden" id="logo-keyboard-help">Press Space to grab a logo. Use arrow keys to move it, Space to release, or Escape to return it. Touch anywhere outside a badge to scroll the page.</p>
+      <span class="logo-status visually-hidden" role="status" aria-live="polite"></span>
+    </section>'''
 
 
 def women_card():
@@ -188,7 +195,15 @@ def module(rel, p):
     if p.get("module") == "mtrx":
         credits = "".join(
             f'<div class="row client-credit" id="{x["id"]}"><h2>{e(x["name"])}</h2>'
-            + (f'<p>{e(x["detail"])}</p>' if x["detail"] else "") + "</div>"
+            + (f'<p>{e(x["detail"])}</p>' if x["detail"] else "")
+            + (
+                '<div class="ggrid uploaded-gallery" style="--cols:3">' + "".join(
+                    f'<figure><a href="{rel}assets/img/{src}" target="_blank" rel="noopener" aria-label="Open full image">'
+                    f'<img src="{rel}assets/img/{src}" alt="" loading="lazy"></a></figure>'
+                    for src in PHOTOS[x["id"]]
+                ) + "</div>"
+                if x["id"] in PHOTOS else ""
+            ) + "</div>"
             for x in CLIENTS
         )
         return original_module(rel, p) + f'''<section class="gallery" id="studio-work">
@@ -198,7 +213,14 @@ def module(rel, p):
           {mtrx_clients(rel)}{credits}
           <a class="pill more" href="https://mtrxdigital.com" target="_blank" rel="noopener">Visit MTRX ↗</a>
         </section>'''
-    return original_module(rel, p)
+    content = original_module(rel, p)
+    document = {
+        "stax-living": ("stax-living/stax-living-brand-book.pdf", "Brand book (PDF)"),
+        "designecho": ("designecho/designecho-brand-style-guide.pdf", "Brand style guide (PDF)"),
+    }.get(p["slug"])
+    if document and (ROOT / "assets/documents" / document[0]).is_file():
+        content += f'<p class="more"><a class="pill" href="{rel}assets/documents/{document[0]}" target="_blank" rel="noopener">{document[1]} ↗</a></p>'
+    return content
 
 
 def group_style(group_id):
@@ -293,7 +315,7 @@ def home():
     out.append(f'''<section class="sec wrap v1-about" aria-labelledby="about-h">
       {sec_head('<span id="about-h">About</span>', "(Ishika)", g["ink_link"]("about/", "About", "mono") + "Full story →</a>")}
       <div class="about-grid">
-        <img class="portrait reveal" src="assets/img/ishika-portrait.webp" alt="Ishika Thakkar">
+        <img class="portrait reveal" src="assets/img/{PHOTOS.get("about", ["ishika-portrait.webp"])[0]}" alt="Ishika Thakkar">
         <div>
           <p class="statement">{e(a["statement"])}</p>
           <p class="lead">{e(a["short"])}</p>
@@ -363,11 +385,30 @@ def grouped_page(group_id, summary):
       </article>''' + g["footer"]("../../")
 
 
+def project_with_uploads(p, index):
+    page = original_project(p, index)
+    if p["slug"] in PHOTOS:
+        def link_images(match):
+            gallery = match.group(0).replace('class="ggrid"', 'class="ggrid uploaded-gallery"', 1)
+            return re.sub(
+                r'(<figure\b[^>]*>)(<img\b[^>]*src="([^"]+)"[^>]*>)(</figure>)',
+                lambda image: image[1] + f'<a href="{image[3]}" target="_blank" rel="noopener" aria-label="Open full image">' + image[2] + "</a>" + image[4],
+                gallery,
+            )
+        page = re.sub(r'<div class="ggrid"[^>]*>.*?</div>', link_images, page, flags=re.S)
+        if p["slug"] == "stax-living":
+            page = page.replace('<div class="daynight">', '<p class="mono muted">Concept illustrations</p><div class="daynight">', 1)
+    return page
+
+
 g.update(head=head, header=header, module=module, footer=footer)
 write("index.html", home())
-write("about/index.html", g["about"]())
+about_page = g["about"]()
+if "about" in PHOTOS:
+    about_page = about_page.replace("assets/img/ishika-portrait.webp", "assets/img/" + PHOTOS["about"][0])
+write("about/index.html", about_page)
 for i, p in enumerate(g["ORDER"]):
-    write(f'work/{p["slug"]}/index.html', original_project(p, i))
+    write(f'work/{p["slug"]}/index.html', project_with_uploads(p, i))
 write("work/stage-and-hosting/index.html", grouped_page(
     "stage-and-hosting", "Hosting live stages, writing for them, and stepping onto them."
 ))

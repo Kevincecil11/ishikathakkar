@@ -1,11 +1,9 @@
-# Upload all logos here
+# Logos: open the brand folder
 
-Stay on `version-2`. Use **Add file > Upload files**, drag the logos in, then commit.
+Use branch **version-2**. Open a brand folder below, choose **Add file > Upload files**, drag its logo in and commit. Keep any filename.
 
-SVG is best; transparent PNG or WebP also works. Keep the original brand artwork, with enough clear space around it.
+One final SVG, PNG, JPG or WebP per folder keeps the choice clear. If several files exist, the first filename in natural alphabetical order is used. The next publish connects it to that brand.
 
-Suggested names:
+Your existing flat-folder logos are preserved and still mapped. A logo in its brand subfolder overrides that older upload without deleting it.
 
-`the-loud-table.svg`, `mtrx.svg`, `stax-living.svg`, `indravansh.svg`, `designecho.svg`, `finance-solutions.svg`, `swati-interiors.svg`, `spaces-and-design.svg`, `birc.svg`, `hanswild.svg`, `mitti.svg`, `trinity-preschool.svg`, `tedx.svg`, `gusec.svg`.
-
-Use the real file extension. Missing logos are fine: do not invent replacement marks. Tell Brain when uploaded so it can map them to the homepage cards, project pages and/or interactive orbit. Uploads do not automatically overwrite the current logos.
+Missing marks remain honest name badges, never fabricated artwork.

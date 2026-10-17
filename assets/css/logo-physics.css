@@ -1,0 +1,42 @@
+/* A constellation of tangible badges around Ishika's two studios.
+   Static, complete and scrollable without JavaScript; direct physics with it. */
+.logo-playground { min-height:300px; width:100%; min-width:0; }
+.v2-pair:has(> #women-of-ahmedabad) #mitti .story-image { min-height:300px; width:100%; min-width:0; }
+.logo-playground .reel-head { pointer-events:none; }
+.logo-stage-area { position:absolute; inset:66px 12px 30px; touch-action:pan-y; }
+.logo-playground .studio-hub { display:flex !important; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:auto; max-width:none; gap:7px; pointer-events:none; }
+.logo-playground .studio-hub .hub-loud { width:36px; height:36px; }
+.logo-playground .studio-hub .hub-mtrx { width:52px; height:26px; }
+.logo-playground .studio-hub .hub-plus { font-size:18px; }
+.logo-bodies { position:absolute; inset:0; display:flex; flex-wrap:wrap; align-content:flex-start; justify-content:center; gap:10px; margin:0; padding:0; list-style:none; overflow:auto; }
+.logo-body { width:clamp(48px,9cqw,68px); height:clamp(48px,9cqw,68px); flex:none; }
+.logo-grab { box-sizing:border-box; display:flex; align-items:center; justify-content:center; width:100%; height:100%; border:1px solid rgba(18,18,17,.12); border-radius:50%; padding:5px; margin:0; color:#121211; background:#FFF; font:500 14px/1 var(--sans); letter-spacing:-.045em; text-align:center; box-shadow:0 2px 4px rgba(18,18,17,.035); user-select:none; -webkit-user-select:none; touch-action:none; -webkit-touch-callout:none; cursor:grab; }
+.logo-grab:disabled { opacity:1; cursor:default; }
+.logo-grab img { display:block; width:100%; height:100%; object-fit:contain; border-radius:50%; pointer-events:none; -webkit-user-drag:none; }
+.logo-grab span { display:block; pointer-events:none; }
+.logo-grab:has(.logo-text) { padding:2px; }
+.logo-word { white-space:nowrap; }
+.logo-grab:focus-visible { outline:2px solid #101D40; outline-offset:3px; }
+.logo-body.is-held { z-index:4; }
+.logo-body.is-held .logo-grab { cursor:grabbing; border-color:#101D40; box-shadow:0 8px 18px rgba(18,18,17,.13); }
+.logo-physics-hint { position:absolute; bottom:9px; left:18px; margin:0; font:400 14px/1.2 var(--sans); color:#555650; pointer-events:none; }
+.logo-playground:not(.physics-ready) .studio-hub { display:none !important; }
+.physics-ready .logo-bodies { display:block; overflow:visible; }
+.physics-ready .logo-body { position:absolute; left:0; top:0; will-change:transform; }
+@container(max-width:450px) {
+  .logo-stage-area { inset:58px 8px 30px; }
+  .logo-playground .studio-hub { flex-direction:row; gap:3px; }
+  .logo-playground .studio-hub .hub-loud { width:24px; height:24px; }
+  .logo-playground .studio-hub .hub-mtrx { width:34px; height:18px; }
+  .logo-playground .studio-hub .hub-plus { font-size:14px; }
+  .logo-physics-hint { left:14px; }
+  .logo-text { width:calc(100% / .84); flex:none; transform:scaleX(.84); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .logo-body { will-change:auto; }
+  .logo-grab { transition:none; }
+}
+.uploaded-gallery { align-items:start; }
+.uploaded-gallery figure { aspect-ratio:auto; background:transparent; }
+.uploaded-gallery a { display:block; }
+.uploaded-gallery img { height:auto; object-fit:contain; }

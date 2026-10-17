@@ -1,5 +1,13 @@
 # Footer, buttons and section assets
 
+## Current asset and interaction update
+
+The current upload workflow is [UPLOAD-IMAGES.md](UPLOAD-IMAGES.md). Its project folders and automatic scanning supersede the older filename examples below. `asset_library.py` accepts original filenames and converts HEIC/HEIF at publish time using `requirements-images.txt`.
+
+`src/logo-physics.ts` replaces the controlled orbit with individual two-axis dragging, release velocity, spring forces, impulse collisions, hub/edge constraints and sleeping. GSAP 3.13.0 provides the ticker and transform setters. There are no visible slider, arrow or playback controls and no autoplay.
+
+Real uploaded galleries are connected on V2; the disabled contact form, existing portfolio prose, React footer and V1 design remain separate. General unassigned photographs are stored under `portfolio-highlights`, not attributed to a named event.
+
 ## Architecture
 
 V2 keeps its existing Python-generated HTML and GitHub Pages routes. A React

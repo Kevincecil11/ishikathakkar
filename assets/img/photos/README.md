@@ -1,25 +1,13 @@
-# Upload your photos here
+# Photos: choose a folder, not a filename
 
-Stay on the `version-2` branch. Click **Add file > Upload files**, drag your photos in, then commit.
+On branch **version-2**, open the matching project folder below, choose **Add file > Upload files**, drag the photos in, and commit.
 
-Use the section name at the start so files group together:
+Keep any original filename, including spaces. The next publish puts the photos in that project's gallery.
 
-- `about-portrait.jpg`
-- `stax-01.jpg`, `stax-02.jpg`
-- `indravansh-01.jpg`
-- `designecho-01.jpg`
-- `finance-solutions-01.jpg`
-- `swati-interiors-01.jpg`
-- `spaces-and-design-01.jpg`
-- `birc-01.jpg`
-- `hanswild-01.jpg`
-- `women-of-ahmedabad-edition-1-01.jpg`
-- `mitti-01.jpg`
-- `tedx-01.jpg`, `gusec-01.jpg`
-- `just-a-khwab-01.jpg`
-- `tech-kaushalya-01.jpg`
-- `trinity-preschool-01.jpg`
+For a specific main image, put one photo in its `cover/` subfolder. No rename needed. Without a cover folder, the first filename in natural alphabetical order is used.
 
-These are naming examples, not required photos. Use original JPG, PNG or WebP files, preferably 1600px or wider. Avoid spaces in filenames. Add `cover` to a filename for the main image, e.g. `stax-cover.jpg`.
+HEIC and HEIF are converted automatically, as are JPG and PNG. WebP, AVIF and GIF are also accepted.
 
-After uploading, tell Brain which section to connect, and supply exact captions/alt text. Uploading a file does not automatically replace a live photo: this prevents accidental changes to the wrong section. Do not upload private or sensitive documents.
+`about` supplies the portrait. MTRX client folders feed their sections on the MTRX story page. `portfolio-highlights` stores general event photos without guessing their project.
+
+See [the full upload guide](../../../UPLOAD-IMAGES.md).
