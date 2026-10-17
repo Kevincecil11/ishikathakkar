@@ -102,18 +102,46 @@ STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexd
 HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
 PHYSICS_REV = hashlib.sha256((ROOT / "assets/css/logo-physics.css").read_bytes()).hexdigest()[:12]
 MAIN_REV = hashlib.sha256((ROOT / "assets/js/main.js").read_bytes()).hexdigest()[:12]
+PREMIUM_REV = hashlib.sha256((ROOT / "assets/css/premium-motion.css").read_bytes()).hexdigest()[:12]
 MOTION_JS = ROOT / "assets/js/portfolio-motion.js"
 MOTION_READY = MOTION_JS.exists() and (ROOT / "assets/css/motion.css").exists()
 MOTION_REV = hashlib.sha256(MOTION_JS.read_bytes()).hexdigest()[:12] if MOTION_READY else ""
 
 
+# Set before first paint so the opening screen is staged, never flashed.
+# Reduced Motion never opts in; a stalled bundle releases content after 3.5s.
+MOTION_BOOT = (
+    "<script>(function(d){try{if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches)"
+    "{d.classList.add('motion-on');setTimeout(function(){if(!window.__itMotion)d.classList.add('motion-fallback')},3500)}}"
+    "catch(e){}})(document.documentElement)</script>\n"
+)
+
+
 def head(title, desc, rel):
-    motion_css = f'<link rel="stylesheet" href="{rel}assets/css/motion.css?v={MOTION_REV}">\n' if MOTION_READY else ""
+    motion_css = (
+        f'<link rel="stylesheet" href="{rel}assets/css/motion.css?v={MOTION_REV}">\n'
+        f'<link rel="stylesheet" href="{rel}assets/css/premium-motion.css?v={PREMIUM_REV}">\n' + MOTION_BOOT
+    ) if MOTION_READY else ""
     return original_head(title, desc, rel).replace(
         "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n'
         f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n'
         f'<link rel="stylesheet" href="{rel}assets/css/logo-physics.css?v={PHYSICS_REV}">\n{motion_css}</head>'
     )
+
+
+# Real organisations only, coloured by the same system as the section dots.
+MARQUEE = [
+    ("The Loud Table", "#101D40"), ("MTRX Digital", "#ED691D"), ("Women of Ahmedabad", "#F4A623"),
+    ("Mitti", "#121211"), ("TEDx", "#69388C"), ("GUSEC HerStart", "#69388C"),
+    ("Tech Kaushalya", "#24564C"), ("Trinity Preschool", "#24564C"),
+]
+
+
+def marquee():
+    items = "".join(
+        f'<span class="it-marquee-item"><i style="--dot:{color}"></i>{e(name)}</span>' for name, color in MARQUEE
+    )
+    return f'<div class="it-marquee" aria-hidden="true"><div class="it-marquee-track">{items}{items}</div></div>'
 
 
 def header(rel, current):
@@ -376,6 +404,7 @@ def home():
       <div class="pills hero-actions"><a class="pill dark" href="#work">See my work ↘</a>
       <a class="pill" href="#contact">Get in touch ↗</a></div>
     </section>''')
+    out.append(marquee())
     stubs = "".join(
         f'{g["go"]("", h["slug"], "stub")}<b>{e(h["n"])}</b>'
         f'<span class="tear"><span>{e(h["label"])}</span><small>{e(BY[h["slug"]]["name"])} ↗</small></span></a>'
