@@ -40,10 +40,10 @@ MEMBERS = {
     "leadership-and-teaching": ["tech-kaushalya", "trinity-preschool"],
 }
 CLIENTS = [
-    {"id": "swati-interiors", "name": "Swati Interiors", "credit": "Website design", "detail": "Website design and Next.js development."},
-    {"id": "spaces-and-design", "name": "Spaces & Design", "credit": "Website design", "detail": "Website design and WordPress."},
-    {"id": "birc", "name": "BIRC", "credit": "Website design", "detail": "Website design."},
-    {"id": "hanswild", "name": "HansWild", "credit": "Wildlife website", "detail": "Website design and Next.js development for a wildlife photographer."},
+    {"id": "swati-interiors", "name": "Swati Interiors", "credit": "Website design", "detail": "Website design and Next.js development.", "url": "https://www.swatiinterior.com/"},
+    {"id": "spaces-and-design", "name": "Spaces & Design", "credit": "Website design", "detail": "Website design and WordPress.", "url": "https://www.spacesanddesign.com/"},
+    {"id": "birc", "name": "BIRC", "credit": "Website design", "detail": "Website design.", "url": "https://birc.in/"},
+    {"id": "hanswild", "name": "HansWild", "credit": "Wildlife website", "detail": "Website design and Next.js development for a wildlife photographer.", "url": "https://hanswild.in/"},
 ]
 BY = {p["slug"]: p for p in PROJECTS}
 BY["stax-living"]["logo"] = "logo-stax.svg"
@@ -58,6 +58,40 @@ BY["the-loud-table"]["sections"] = [
 ]
 PHOTOS, LOGOS = load_library(ROOT)
 BANNERS = load_banners(ROOT)
+EDITORIAL_ORIGINALS = {}
+# These are presentation crops, never replacements for the complete originals.
+# The image viewer still opens the uncropped supplied photo.
+def editorial_crop(source, box, label):
+    from PIL import Image
+    file = ROOT / "assets/img" / unquote(source)
+    digest = hashlib.sha256(file.read_bytes() + repr(box).encode()).hexdigest()[:16]
+    display = f"_generated/{label}-{digest}.webp"
+    target = ROOT / "assets/img" / display
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not target.exists():
+        with Image.open(file) as image:
+            image.convert("RGB").crop(box).save(target, "WEBP", quality=92, method=6)
+    EDITORIAL_ORIGINALS[display] = source
+    return display
+
+
+PEOPLE_CROPS = {
+    "women-of-ahmedabad": editorial_crop(
+        "photos/women-of-ahmedabad/cover/community-group-photo.webp",
+        (0, 1180, 1950, 2170), "women-complete-group",
+    ),
+    "mitti": editorial_crop(
+        "photos/mitti/cover/event-conversation.webp",
+        (0, 180, 1950, 1160), "mitti-conversation-faces",
+    ),
+}
+MITTI_POSTERS = [
+    ("Workshop", "#FFBD17", "#121211", "-3deg", "painting-workshop.webp", "People painting around a workshop table"),
+    ("Rave", "#E83E8C", "#FFFFFF", "2deg", "music-evening.webp", "A performer at a Mitti music evening"),
+    ("Screening", "#4D6CFA", "#FFFFFF", "0deg", "audience-conversation.webp", "Audience members at a Mitti event"),
+    ("Lecture", "#B499F4", "#121211", "2deg", "ishika-at-mitti.webp", "Ishika speaking at Mitti"),
+    ("Community brunch", "#79D89C", "#121211", "-2deg", "community-table.webp", "People gathered around the community table"),
+]
 CROP_MAP_PATH = ROOT / "assets/image-crops.json"
 CROPS = json.loads(CROP_MAP_PATH.read_text()) if CROP_MAP_PATH.exists() else {}
 for slug, files in PHOTOS.items():
@@ -248,10 +282,14 @@ def brand_grid():
     for name, destination, logo in entries:
         slug, _, anchor = destination.partition("#")
         href = f'work/{slug}/' + (f"#{anchor}" if anchor else "")
+        client = next((x for x in CLIENTS if x["id"] == anchor), None)
+        external = ' target="_blank" rel="noopener noreferrer"' if client else ""
+        if client:
+            href = client["url"]
         mark = (f'<img src="assets/img/{e(logo)}" alt="{e(name)}" loading="lazy">'
                 if logo else f'<strong>{e(name)}</strong>')
         contrast = " identity-dark" if name in {"TEDx", "Tech Kaushalya"} else " identity-green" if name == "DesignEcho" else ""
-        tiles.append(f'<a class="brand identity-tile{contrast}" href="{href}" aria-label="{e(name)}" '
+        tiles.append(f'<a class="brand identity-tile{contrast}" href="{href}"{external} aria-label="{e(name)}" '
                      f'data-logo-state="{"supplied" if logo else "name-only"}">{mark}</a>')
     return f'''<section class="brand-index" aria-labelledby="brands-h">
       {sec_head('<span id="brands-h">Brands &amp; stages</span>', f'({len(entries):02d})', '<span class="mono muted">Across my work</span>')}
@@ -271,15 +309,11 @@ def women_card():
 
 
 def mtrx_clients(rel):
-    color = GROUP["mtrx-digital"]
     cards = []
     visible_clients = [x for x in CLIENTS if rel or x["id"] != "mordevs-seeds"]
     for client in visible_clients:
-        href = f'#{client["id"]}' if rel == "../../" else f'{rel}work/mtrx-digital/#{client["id"]}'
-        transition = "" if rel == "../../" else (
-            f'data-color="{color["color"]}" data-on="{color["on"]}" data-label="{e(client["name"])}"'
-        )
-        cards.append(f'''<a class="client-tile" href="{href}" {transition}>
+        cards.append(f'''<a class="client-tile" href="{client["url"]}" target="_blank" rel="noopener noreferrer"
+          aria-label="Visit {e(client["name"])} website (opens in a new tab)">
           {logo_slot(client["name"], rel, client.get("logo"))}
           <span class="logo-caption"><strong>{e(client["name"])}</strong><span aria-hidden="true">↗</span></span>
           {f'<span class="logo-result">{e(client["credit"])}</span>' if client["credit"] else ""}
@@ -288,6 +322,20 @@ def mtrx_clients(rel):
 
 
 def module(rel, p):
+    if p.get("module") == "posters":
+        posters = []
+        for title, color, on, rotation, file, alt in MITTI_POSTERS:
+            src = f'{rel}assets/img/photos/mitti/{file}'
+            posters.append(
+                f'<article class="poster poster-photo" style="--pc:{color};--pon:{on};--r:{rotation}">'
+                f'<b>{e(title)}</b><a href="{src}" data-original="{src}" aria-label="Enlarge {e(title)} photo">'
+                f'<img src="{src}" alt="{e(alt)}" loading="lazy"></a><span class="mono">At Mitti</span></article>'
+            )
+        return (
+            '<section class="gallery noticeboard">' +
+            sec_head("On the noticeboard", "(4-5 a month)", '<span class="mono muted">Every format, one community</span>') +
+            '<div class="board">' + "".join(posters) + '</div></section>'
+        )
     if p.get("module") == "clients":
         return f'''<section class="gallery">
           {sec_head("Work from The Loud Table", "(04)", '<span class="mono muted">Client case studies</span>')}
@@ -508,6 +556,22 @@ def project_banner(p):
             ("crops/designecho-social-profile-overview.webp", "DesignEcho supplied social artwork", ""),
             ("crops/designecho-social-content-grid.webp", "DesignEcho supplied content grid", ""),
         ],
+        "finance-solutions": [
+            ("photos/finance-solutions/cover/award-presentation-group.webp", "Finance Solutions receiving an award", ""),
+            ("photos/finance-solutions/award-presentation-portrait.webp", "Finance Solutions at the award presentation", ""),
+        ],
+        "mtrx-digital": [
+            ("mtrx-studio-home.webp", "MTRX Digital studio website: Design and Develop", ""),
+        ],
+        "women-of-ahmedabad": [
+            (PEOPLE_CROPS["women-of-ahmedabad"], "The complete Women of Ahmedabad group, including the seated women", ""),
+        ],
+        "mitti": [
+            (PEOPLE_CROPS["mitti"], "A conversation at Mitti, with all three faces in frame", ""),
+        ],
+        "on-stage": [
+            ("photos/on-stage/gusec-at-the-lectern.webp", "Ishika hosting at the GUSEC lectern", ""),
+        ],
     }
     custom = BANNERS.get(p["slug"], [])
     items = [(src, f'{p["name"]} supplied banner image {i + 1}', "") for i, src in enumerate(custom)]
@@ -515,17 +579,20 @@ def project_banner(p):
         items = defaults.get(p["slug"], [(p["image"], f'{p["name"]} project photograph', "")])
     originals = {entry["display"]: source for source, entry in CROPS.items()}
     originals.update({display: source for source, display in TRINITY_CLEAN.items()})
+    originals.update(EDITORIAL_ORIGINALS)
+    safe = p["slug"] in {"women-of-ahmedabad", "mitti", "finance-solutions", "mtrx-digital", "on-stage"}
     links = []
     for src, alt, cls in items:
         original = originals.get(src, src)
         links.append(
-            f'<a class="banner-image {cls}" href="../../assets/img/{e(original)}" '
+            f'<a class="banner-image {cls}"{" data-safe-frame" if safe else ""} href="../../assets/img/{e(original)}" '
             f'data-original="../../assets/img/{e(original)}" aria-label="Open full image: {e(alt)}">'
             f'<img src="../../assets/img/{e(src)}" alt="{e(alt)}" decoding="async"></a>'
         )
     is_indra = p["slug"] == "indravansh" and not custom
     classes = "project-banner" + (" campaign-collage" if is_indra else "")
-    columns = "1fr 1fr 1.2fr" if is_indra else f"repeat({len(items)},minmax(0,1fr))"
+    columns = ("1fr 1fr 1.2fr" if is_indra else "2.67fr 1fr" if p["slug"] == "finance-solutions" and not custom
+               else f"repeat({len(items)},minmax(0,1fr))")
     return (
         f'<div class="{classes}" data-project-banner="{e(p["slug"])}" '
         f'data-banner-source="{"upload-folder" if custom else "default"}" '
@@ -536,6 +603,26 @@ def project_banner(p):
 
 def project_with_uploads(p, index):
     display_project = dict(p)
+    if p["slug"] in {"designecho", "finance-solutions"}:
+        display_project.pop("gallery", None)
+    if p["slug"] == "finance-solutions":
+        display_project["flow"] = False
+    if p["slug"] in {"mitti", "women-of-ahmedabad"} and p.get("gallery"):
+        used = {EDITORIAL_ORIGINALS[PEOPLE_CROPS[p["slug"]]]}
+        if p["slug"] == "mitti":
+            used.update(f"photos/mitti/{entry[4]}" for entry in MITTI_POSTERS)
+        seen = set()
+        items = []
+        for src in p["gallery"]["items"]:
+            file = ROOT / "assets/img" / unquote(src)
+            digest = hashlib.sha256(file.read_bytes()).hexdigest() if file.is_file() else src
+            if src in used or digest in seen:
+                continue
+            seen.add(digest)
+            items.append(src)
+        display_project["gallery"] = dict(p["gallery"], items=items)
+        if not items:
+            display_project.pop("gallery", None)
     if p["slug"] == "stax-living":
         display_project["module"] = ""
     page = original_project(display_project, index)
@@ -582,20 +669,25 @@ def project_with_uploads(p, index):
                 gallery,
             )
         page = re.sub(r'<div class="ggrid"[^>]*>.*?</div>', link_images, page, flags=re.S)
-    # A single result needs a purposeful two-part composition, not a full-width
-    # empty statistics grid. Preserve the exact result and labels.
-    if len(p.get("stats", [])) == 1:
-        number, caption = p["stats"][0]
-        old = (
-            f'<div class="panel"><div class="panel-label"><span class="mono">What came of it</span><span class="mono">{e(p["name"])}</span></div>\n'
-            f'  <div class="stats" style="--n:1"><div class="stat"><b>{e(number)}</b><span>{e(caption)}</span></div></div></div>'
+    # All results panels use the unchanged Indravansh panel as their sizing
+    # reference. Its responsive, content-led height is measured, not guessed.
+    if p.get("stats"):
+        page = page.replace(
+            '<div class="panel"><div class="panel-label"><span class="mono">What came of it',
+            f'<div class="panel outcome-panel" data-outcome-panel="{e(p["slug"])}" '
+            f'data-outcome-count="{len(p["stats"])}"><div class="panel-label"><span class="mono">What came of it',
+            1,
         )
-        replacement = (
-            f'<section class="panel outcome-single" aria-label="What came of it">'
-            f'<div class="outcome-label"><span class="mono">What came of it</span><span class="mono">{e(p["name"])}</span></div>'
-            f'<div class="stat"><b>{e(number)}</b><span>{e(caption)}</span></div></section>'
+        reference_stats = "".join(
+            f'<div class="stat"><b>{e(number)}</b><span>{e(caption)}</span></div>'
+            for number, caption in BY["indravansh"]["stats"]
         )
-        page = page.replace(old, replacement)
+        template = (
+            '<template data-outcome-reference><div class="panel">'
+            '<div class="panel-label"><span class="mono">What came of it</span><span class="mono">Indravansh</span></div>'
+            f'<div class="stats" style="--n:4">{reference_stats}</div></div></template>'
+        )
+        page = page.replace("</article>", template + "</article>", 1)
     # Reserve each photo's natural dimensions before loading and supply ratios
     # to the justified-row layout. No image is cropped, repeated or omitted.
     from PIL import Image

@@ -190,8 +190,9 @@ function pageIn(arriving: boolean) {
     const panels = take(all(":scope > .project-banner .banner-image", article))
     panels.forEach((panel, i) => {
       const image = panel.querySelector<HTMLElement>("img")
-      wipe(panel, { scroll: false, delay: base + 0.5 + i * 0.12 }, 1.14)
-      if (image) gsap.fromTo(image, { "--it-y": "-5%" }, {
+      const safe = panel.hasAttribute("data-safe-frame")
+      wipe(panel, { scroll: false, delay: base + 0.5 + i * 0.12 }, safe ? 1 : 1.14)
+      if (image && !safe) gsap.fromTo(image, { "--it-y": "-5%" }, {
         "--it-y": "5%", ease: "none",
         scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: 0.6 },
       })
@@ -305,7 +306,7 @@ function magnetic() {
 function cursorBadge() {
   if (!fine.matches) return
   const rules: [string, string][] = [
-    [".proof-board a,.project-banner a", "View"],
+    [".proof-board a,.project-banner a,.poster-photo a", "View"],
     [".loud-clients .card,.grid.gallery .card,.connected-feature", "Open"],
     ["a.next", "Next"],
   ]

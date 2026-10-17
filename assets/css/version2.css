@@ -392,6 +392,45 @@ main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
 .project-banner .banner-image { display:block; min-width:0; min-height:0; width:100%; height:100%; padding:0; margin:0; overflow:hidden; cursor:zoom-in; background:transparent; }
 .project-banner img { width:100%; height:100%; display:block; object-fit:cover; object-position:center; padding:0; margin:0; transform:none !important; }
 .project-banner a:focus-visible { outline:3px solid #FFFFFF; outline-offset:-4px; }
+/* People and full website artwork must never be zoomed out of the frame.
+   Crops remove ceiling, not faces. The shared Indravansh frame is untouched. */
+.project-banner[data-project-banner="women-of-ahmedabad"] img,
+.project-banner[data-project-banner="mitti"] img,
+.project-banner[data-project-banner="finance-solutions"] img,
+.project-banner[data-project-banner="mtrx-digital"] img { object-fit:contain; }
+.project-banner[data-project-banner="on-stage"] img { object-position:50% 44%; }
+/* The reference is the real, responsive Indravansh panel, not a fixed guess. */
+.outcome-panel { height:var(--outcome-height,auto); }
+.outcome-panel:not([data-outcome-panel="indravansh"]) { display:flex; flex-direction:column; }
+.outcome-panel:not([data-outcome-panel="indravansh"]) .stats { flex:1; align-content:center; align-items:start; }
+.outcome-panel:not([data-outcome-panel="indravansh"]) .stat { text-align:center; min-width:0; }
+.outcome-panel:not([data-outcome-panel="indravansh"]) .stat span { margin-left:auto; margin-right:auto; }
+.outcome-panel[data-outcome-count="1"] .stats { grid-template-columns:1fr; }
+.outcome-panel[data-outcome-count="1"] .stat { display:flex; align-items:center; justify-content:center; gap:clamp(24px,6vw,88px); }
+.outcome-panel[data-outcome-count="1"] .stat span { max-width:23ch; margin:0; text-align:left; font-size:clamp(22px,2.2vw,34px); }
+.outcome-panel[data-outcome-count="2"] .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.outcome-panel[data-outcome-count="2"] .stat b { font-size:clamp(46px,7vw,112px); }
+/* Real Mitti photographs sit within the existing colourful noticeboard. */
+.board .poster-photo { gap:16px; padding:16px 14px; min-width:0; }
+.poster-photo b { flex:none; font-size:clamp(26px,2.7vw,46px); min-height:2em; }
+.poster-photo > a { display:block; flex:1; min-height:0; overflow:hidden; border-radius:2px; cursor:zoom-in; }
+.poster-photo img { width:100%; height:100%; display:block; object-fit:cover; }
+.poster-photo > .mono { flex:none; font-size:14px; }
+.poster-photo a:focus-visible { outline:3px solid currentColor; outline-offset:3px; }
+.poster-photo:nth-child(2) img { object-position:50% 22%; }
+.poster-photo:nth-child(4) img { object-position:50% 85%; }
+@media(max-width:960px) {
+  .outcome-panel[data-outcome-count="3"] .stat:last-child { grid-column:1/-1; }
+}
+@media(max-width:600px) {
+  .outcome-panel[data-outcome-count="1"] .stat { flex-direction:column; gap:24px; }
+  .outcome-panel[data-outcome-count="1"] .stat span { text-align:center; }
+  .outcome-panel[data-outcome-count="2"] .stats { gap:16px; }
+  .outcome-panel[data-outcome-count="2"] .stat b { font-size:clamp(31px,8.6vw,51px); }
+  .outcome-panel:not([data-outcome-panel="indravansh"]) .stat span { font-size:17px; }
+  .board .poster-photo { min-height:360px; aspect-ratio:auto; }
+  .poster-photo b { font-size:clamp(22px,5vw,26px); }
+}
 .brand-index { margin:0 0 clamp(40px,4.45vw,64px); }
 .identity-grid { padding-top:16px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 .identity-grid .identity-tile { display:flex; align-items:center; justify-content:center; min-height:112px; padding:20px; background:var(--paper); border-radius:8px; }
