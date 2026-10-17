@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build:motion": "esbuild src/portfolio-motion.tsx --bundle --minify --format=iife --target=es2020 --outfile=assets/js/portfolio-motion.js && tailwindcss -c tailwind.config.ts -i src/styles/motion.css -o assets/css/motion.css --minify",
+    "build:motion": "esbuild src/portfolio-motion.tsx --bundle --minify --format=iife --target=es2020 --banner:js=\"/* CSS $(sha256sum src/styles/motion.css | cut -c1-12) */\" --outfile=assets/js/portfolio-motion.js && tailwindcss -c tailwind.config.ts -i src/styles/motion.css -o assets/css/motion.css --minify",
     "build": "npm run typecheck && npm run build:motion && python3 build_version2.py"
   },
   "dependencies": {
