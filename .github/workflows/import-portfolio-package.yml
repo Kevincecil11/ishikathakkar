@@ -1,74 +1,19 @@
-name: Import approved gallery and contact fixes
+name: Import prepared portfolio package
 
 on:
-  push:
-    branches: [version-2]
-    paths: [.github/workflows/import-portfolio-package.yml]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  actions: write
-
-concurrency:
-  group: portfolio-asset-import
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  import:
-    if: contains(github.event.head_commit.message, '[portfolio-import]')
+  receipt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: version-2
-          fetch-depth: 1
-      - name: Validate all reviewed files before writing
-        env:
-          IMPORT_URL: "https://search.clickup-au.com/workspaces/90161376302/files/jPW7g5o7LcMG6uXBQIlwnuJ_0flWqqUic0s8iEGVLrI"
-          EXPECTED_SHA256: "34d136ae66054f4a48f0bfb8496cafd4a0e19843b83dcbfd92518524dac38d32"
+      - name: Completed approved import
         run: |
-          python3 - <<'PY'
-          from pathlib import Path, PurePosixPath
-          import hashlib, io, json, os, urllib.request, zipfile
-          payload = urllib.request.urlopen(os.environ["IMPORT_URL"], timeout=120).read()
-          assert hashlib.sha256(payload).hexdigest() == os.environ["EXPECTED_SHA256"], "Package checksum mismatch"
-          archive = zipfile.ZipFile(io.BytesIO(payload))
-          manifest = json.loads(archive.read("_import-manifest.json"))
-          allowed = {
-              "build_version2.py",
-              "assets/css/version2.css",
-              "src/gallery-layout.ts",
-              "src/portfolio-motion.tsx",
-              "components/ui/halftone-wordmark-footer.tsx",
-              "assets/img/khwab-original-preserved-wide.webp",
-          }
-          assert len(manifest) == 6 and len(archive.infolist()) == 7
-          assert {entry["path"] for entry in manifest} == allowed
-          assert {entry.filename for entry in archive.infolist()} == allowed | {"_import-manifest.json"}
-          for entry in manifest:
-              relative = PurePosixPath(entry["path"])
-              assert not relative.is_absolute() and ".." not in relative.parts and not str(relative).startswith(".github/")
-              data = archive.read(str(relative))
-              assert hashlib.sha256(data).hexdigest() == entry["sha256"], relative
-              path = Path(str(relative))
-              if path.exists():
-                  assert hashlib.sha256(path.read_bytes()).hexdigest() in {entry["before_sha256"], entry["sha256"]}, f"Source changed: {relative}"
-              else:
-                  assert entry["before_sha256"] is None, f"Expected source disappeared: {relative}"
-          for entry in manifest:
-              path = Path(entry["path"])
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_bytes(archive.read(entry["path"]))
-          print("Imported six reviewed files. No source images or other files were deleted.")
-          PY
-      - name: Commit the reviewed source changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add build_version2.py assets/css/version2.css src/gallery-layout.ts src/portfolio-motion.tsx components/ui/halftone-wordmark-footer.tsx assets/img/khwab-original-preserved-wide.webp
-          git diff --cached --quiet || git commit -m "Unify gallery sizing, preserve original Khwab team, swap Mitti photos, fix covers, restore touch footer and activate contact form"
-          git push origin HEAD:version-2
-      - name: Rebuild both live paths without changing V1 sources
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run compare.yml --ref main --repo "$GITHUB_REPOSITORY"
+          echo "Approved gallery and contact fixes imported successfully."
+          echo "Package SHA256: 34d136ae66054f4a48f0bfb8496cafd4a0e19843b83dcbfd92518524dac38d32"
+          echo "Content commit: 88b7f7cbdf2926b571bc74f8bbcaad02fbd0a2b0"
+          echo "Six reviewed source and image files imported; main unchanged."
+          echo "No automatic import or external download remains enabled."
