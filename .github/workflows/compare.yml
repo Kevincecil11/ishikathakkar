@@ -60,6 +60,11 @@ jobs:
             npm run typecheck
             npm run build:motion
           fi
+      - name: Set up image conversion for original-filename uploads
+        run: |
+          if [ -f source-v2/requirements-images.txt ]; then
+            python3 -m pip install -r source-v2/requirements-images.txt
+          fi
       - name: Build both versions
         run: |
           python3 source-v1/build.py
