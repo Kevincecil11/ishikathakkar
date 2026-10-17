@@ -18,7 +18,27 @@
     el.classList.add("ready");
   }
   var fits = [].slice.call(document.querySelectorAll(".fit"));
+  var preset = fits.filter(function (el) { return el.hasAttribute("data-fit") && el.firstElementChild; });
+  fits = fits.filter(function (el) { return !el.hasAttribute("data-fit"); });
+  function trimPreset() {
+    // Sizes already come from CSS; only correct for kerning, all reads then all writes.
+    preset.forEach(function (el) { el.firstElementChild.style.fontSize = ""; });
+    var sizes = preset.map(function (el) {
+      var span = el.firstElementChild, w = el.clientWidth, tw = span.getBoundingClientRect().width;
+      if (!tw || !w) return null;
+      var max = parseFloat(el.getAttribute("data-max")) || Infinity;
+      return Math.min(max, parseFloat(getComputedStyle(span).fontSize) * (w / tw) * 0.995);
+    });
+    preset.forEach(function (el, i) {
+      if (sizes[i] != null) el.firstElementChild.style.fontSize = Math.floor(sizes[i] * 10) / 10 + "px";
+      el.classList.add("ready");
+    });
+  }
+  function antonReady() {
+    try { return !document.fonts || document.fonts.check("400 100px Anton"); } catch (e) { return true; }
+  }
   function fitAll() {
+    if (preset.length && antonReady()) trimPreset();
     var live = fits.filter(function (el) { return el.firstElementChild; });
     live.forEach(function (el) { el.style.fontSize = "100px"; });
     var sizes = live.map(function (el) {
@@ -34,6 +54,7 @@
     });
   }
   fitAll();
+  if (document.fonts && document.fonts.load) document.fonts.load("400 100px Anton").then(fitAll, fitAll);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
   var t;
   window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(fitAll, 80); });
