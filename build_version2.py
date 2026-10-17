@@ -572,8 +572,9 @@ def project_banner(p):
             ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
         ],
         "stax-living": [
-            ("stax-sierra-supplied.webp", "Stax Living Sierra poster bed, supplied product image", ""),
-            ("stax-aximo-supplied.webp", "Stax Living Aximo side table, supplied product image", ""),
+            ("stax-ronin-bench.webp", "Stax Living Ronin Bench campaign artwork", ""),
+            ("stax-brava-armchair.webp", "Stax Living Brava Armchair campaign artwork", ""),
+            ("stax-material-narratives.webp", "Stax Living Material Narratives campaign artwork", ""),
         ],
         "trinity-preschool": [
             ("photos/trinity-preschool/classroom-portrait.webp", "Ishika with children in the classroom", ""),
@@ -694,6 +695,24 @@ def project_with_uploads(p, index):
         display_project["gallery"] = dict(
             p["gallery"], items=[src for src in p["gallery"]["items"] if src not in excluded],
         )
+    if p["slug"] == "stax-living":
+        # Keep the five existing social proofs and move the previous two
+        # banner photographs here: fifteen images, five complete rows.
+        display_project["gallery"] = dict(
+            p["gallery"],
+            items=p["gallery"]["items"] + [
+                "stax-verdura-wing-shelf.webp",
+                "stax-material-narratives.webp",
+                "stax-gallery-campaign.webp",
+                "stax-intentional-spaces.webp",
+                "stax-honest-materials.webp",
+                "stax-art-of-living.webp",
+                "stax-customisation.webp",
+                "stax-chair-balloon.webp",
+                "stax-sierra-supplied.webp",
+                "stax-aximo-supplied.webp",
+            ],
+        )
     if p["slug"] in {"stax-living", "just-a-khwab", "tech-kaushalya"}:
         display_project["module"] = ""
     page = original_project(display_project, index)
@@ -740,6 +759,26 @@ def project_with_uploads(p, index):
                 gallery,
             )
         page = re.sub(r'<div class="ggrid"[^>]*>.*?</div>', link_images, page, flags=re.S)
+    if p["slug"] == "mitti":
+        # A full-width film row follows the twelve-photo grid. No photos are
+        # removed or repeated merely to fill the new video row.
+        film = (
+            '<figure class="proof-video" aria-label="Mitti workshop film">'
+            '<div class="banner-video" data-video-tile>'
+            '<video playsinline preload="none" poster="../../assets/img/mitti-workshop-film-poster.webp" '
+            'aria-label="Mitti workshop film" controlslist="nodownload">'
+            '<source src="../../assets/video/mitti/workshop-film.mp4" type="video/mp4">'
+            'Your browser cannot play this video. <a href="../../assets/video/mitti/workshop-film.mp4">Open video</a>'
+            '</video>'
+            '<button class="video-play" type="button" aria-label="Play Mitti workshop film">'
+            '<span class="play-symbol" aria-hidden="true">▶</span><span>Click to play</span></button>'
+            '<span class="video-error" role="status" hidden>Playback could not start. Use the video controls to try again.</span>'
+            '</div></figure>'
+        )
+        page = re.sub(
+            r'(<div class="ggrid uploaded-gallery proof-board"[^>]*>.*?)(</div>)',
+            lambda match: match[1] + film + match[2], page, count=1, flags=re.S,
+        )
     # All results panels use the unchanged Indravansh panel as their sizing
     # reference. Its responsive, content-led height is measured, not guessed.
     if p.get("stats"):

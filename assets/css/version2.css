@@ -409,7 +409,8 @@ main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
 .hero-actions .hero-work.it-roll:hover .it-roll-icon,
 .hero-actions .hero-work.it-roll:active .it-roll-icon,
 .hero-actions .hero-work.it-roll:focus-visible .it-roll-icon { background:#FFFFFF; color:var(--ink); }
-.project-banner[data-project-banner="stax-living"] img { object-fit:cover; object-position:50% 50%; }
+.project-banner[data-project-banner="stax-living"] .banner-image { background:#121211; }
+.project-banner[data-project-banner="stax-living"] img { object-fit:contain; object-position:50% 50%; }
 .project-banner[data-project-banner="indravansh"] .campaign-portrait img { object-position:50% 0%; }
 .project-banner[data-project-banner="just-a-khwab"] img { object-fit:cover; object-position:50% 45%; }
 @media(max-width:960px) {
@@ -520,6 +521,11 @@ article:has([data-project-banner="women-of-ahmedabad"]) .ggrid.uploaded-gallery.
 .ggrid.uploaded-gallery.proof-board figure { width:100%; height:100%; min-width:0; min-height:0; margin:0; padding:0; overflow:hidden; border-radius:0; background:transparent; }
 .ggrid.uploaded-gallery.proof-board a { display:block; width:100%; height:100%; cursor:zoom-in; }
 .ggrid.uploaded-gallery.proof-board img { display:block; width:100%; height:100%; padding:0; object-fit:cover; transform:none !important; }
+.ggrid.uploaded-gallery.proof-board:has(>figure.proof-video) {
+  grid-template-rows:repeat(var(--proof-photo-rows,4),var(--proof-row-height,260px)) clamp(300px,52vw,680px);
+}
+.ggrid.uploaded-gallery.proof-board figure.proof-video { grid-column:1/-1; background:#121211; }
+.proof-video .banner-video { width:100%; height:100%; }
 .proof-board a:focus-visible { outline:3px solid var(--ink); outline-offset:-4px; }
 .portfolio-image-viewer { width:min(1100px,calc(100vw - 32px)); max-width:none; max-height:calc(100svh - 32px); padding:20px; border:0; border-radius:10px; background:#E8E8E4; color:#121211; }
 .portfolio-image-viewer::backdrop { background:rgb(18 18 17 / .86); }

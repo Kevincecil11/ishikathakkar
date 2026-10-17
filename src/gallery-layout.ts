@@ -63,7 +63,7 @@ export function initGalleryLayout() {
   }
   const allLinks: HTMLAnchorElement[] = []
   document.querySelectorAll<HTMLElement>(".uploaded-gallery").forEach(gallery => {
-    const figures = Array.from(gallery.querySelectorAll<HTMLElement>("figure"))
+    const figures = Array.from(gallery.querySelectorAll<HTMLElement>("figure:not(.proof-video)"))
     if (!figures.length) return
     gallery.classList.add("proof-board")
     let frame = 0
@@ -72,12 +72,13 @@ export function initGalleryLayout() {
       const width = gallery.clientWidth
       if (width < 1) return
       const gap = 8
-      const triples = !!gallery.closest('article:has([data-project-banner="mitti"]),article:has([data-project-banner="indravansh"])')
+      const triples = !!gallery.closest('article:has([data-project-banner="mitti"]),article:has([data-project-banner="indravansh"]),article:has([data-project-banner="stax-living"])')
       const columns = triples ? 3 : Math.min(figures.length,
         width >= 1200 ? 6 : width >= 900 ? 5 : width >= 650 ? 4 : width >= 420 ? 3 : 2)
       const cellWidth = (width - gap * (columns - 1)) / columns
       const rowHeight = triples ? Math.min(480, Math.max(140, cellWidth * 1.15)) : Math.min(300, Math.max(140, cellWidth * 1.15))
       gallery.style.setProperty("--proof-columns", String(columns))
+      gallery.style.setProperty("--proof-photo-rows", String(Math.ceil(figures.length / columns)))
       gallery.style.setProperty("--proof-row-height", `${rowHeight}px`)
       gallery.style.setProperty("--proof-gap", `${gap}px`)
       gallery.dataset.galleryLayout = "edge-to-edge-thumbnails"
