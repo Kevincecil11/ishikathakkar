@@ -2,6 +2,10 @@
 
 ## Current asset and interaction update
 
+Geometry pass: uploaded galleries now carry natural image dimensions and use `src/gallery-layout.ts` to choose responsive justified rows. Each row fills its width with equal image heights, preserving original source order and the full photos. A compact masonry fallback works without JavaScript. Single-result panels use a balanced label/number/caption grid, and takeaways align with project copy rather than occupying a narrow left column. Project section gaps follow a 32-64px rhythm. Studio banners are about 15% taller, paired community/other banners about 20%, with larger display type. The rejected "my own marketing firm" wording is removed from V2 only.
+
+Footer update: 220px maximum influence radius, responsive circular exclusion field, eased pointer tracking and critically damped time-based return. Tiny square particles stay monochrome; no glow, click wave or idle animation. The canvas batches its draw and sleeps after settling, offscreen or while hidden. Reduced Motion stays static.
+
 Latest UX polish: all five section headers are full clickable cards with hover/focus result reveals, matching Women of Ahmedabad. Small directional arrows use a two-face roll. All work uses native hash navigation after font fitting, with a cache-versioned navigation script. Indravansh uses the original landscape campaign sheet; Women of Ahmedabad shows the full original group photo. Both fit the viewport without cropping or parallax. Uploaded galleries no longer zoom/crop on hover. The footer now uses monochrome pointer-only particles, batched into one canvas fill, with time-based damped springs and no warmth, grain or click-wave effects.
 
 The current upload workflow is [UPLOAD-IMAGES.md](UPLOAD-IMAGES.md). Its project folders and automatic scanning supersede the older filename examples below. `asset_library.py` accepts original filenames and converts HEIC/HEIF at publish time using `requirements-images.txt`.

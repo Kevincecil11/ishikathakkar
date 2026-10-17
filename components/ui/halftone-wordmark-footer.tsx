@@ -56,11 +56,11 @@ export function hwfStep(x: number, y: number, vx: number, vy: number, hx: number
   const dx = hx - px, dy = hy - py, d2 = dx * dx + dy * dy
   let tx = hx, ty = hy
   if (r > 0 && d2 < r * r) {
-    const d = Math.sqrt(d2) + 0.001, f = Math.pow(1 - d / r, 2) * 30
+    const d = Math.sqrt(d2) + 0.001, u = d / r, f = r * (.7 + .3 * u * u) - d
     tx += dx / d * f; ty += dy / d * f
   }
-  vx += ((tx - x) * 220 - vx * 27) * dt
-  vy += ((ty - y) * 220 - vy * 27) * dt
+  vx += ((tx - x) * 200 - vx * 28) * dt
+  vy += ((ty - y) * 200 - vy * 28) * dt
   return [x + vx * dt, y + vy * dt, vx, vy]
 }
 export function hwfWarmth(x: number, y: number, hx: number, hy: number, span: number) {
@@ -110,7 +110,7 @@ export default function HalftoneWordmarkFooter({
     if (!ctx) return
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
     let reduced = preference.matches, w = 0, h = 0, dpr = 1
-    let px = -1e5, py = -1e5, raf = 0, visible = true, awake = true, alive = true
+    let px = -1e5, py = -1e5, smoothX = -1e5, smoothY = -1e5, raf = 0, visible = true, awake = true, alive = true
     let lastTime = 0, frames = 0
     let dots = new Float32Array(0), count = 0
 
@@ -125,7 +125,7 @@ export default function HalftoneWordmarkFooter({
       if (!m) return
       m.font = `${o.fontWeight} 100px ${o.fontFamily}`
       const word = o.wordmark || " "
-      const fit = hwfFitSize(m.measureText(word).width, w * 1.02)
+      const fit = hwfFitSize(m.measureText(word).width, w * 0.96)
       m.font = `${o.fontWeight} ${fit}px ${o.fontFamily}`
       const box = m.measureText(word), cap = box.actualBoundingBoxAscent || fit * 0.72
       m.fillStyle = "#000"; m.textBaseline = "alphabetic"
@@ -148,46 +148,56 @@ export default function HalftoneWordmarkFooter({
       }
       dots = new Float32Array(tmp); count = tmp.length / 7
       root.dataset.hwfDots = String(count)
-      root.dataset.hwfEffect = "monochrome-pointer"
+      root.dataset.hwfEffect = "wide-circular-scatter"
       awake = true; lastTime = 0
     }
     const draw = (now: number) => {
       const o = opts.current
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.fillStyle = o.colors.background; ctx.fillRect(0, 0, w, h)
-      const r = o.interactive && !reduced ? Math.max(0, o.radius) : 0
+      const r = o.interactive && !reduced ? Math.min(Math.max(0, o.radius), w * .42) : 0
       const elapsed = lastTime ? Math.min((now - lastTime) / 1000, 0.04) : 1 / 60
       lastTime = now
+      if (px > -1e4) {
+        const follow = 1 - Math.exp(-elapsed * 22)
+        smoothX += (px - smoothX) * follow; smoothY += (py - smoothY) * follow
+      } else { smoothX = px; smoothY = py }
       const steps = Math.max(1, Math.ceil(elapsed / (1 / 120))), dt = elapsed / steps
-      let moving = false
+      let moving = Math.abs(px - smoothX) + Math.abs(py - smoothY) > .1, maxOffset2 = 0
       // A single fill for the entire wordmark avoids per-dot colour and draw calls.
       ctx.fillStyle = o.colors.ink; ctx.beginPath()
       for (let i = 0; i < count; i++) {
         const j = i * 7, hx = dots[j + 4], hy = dots[j + 5]
         let x = dots[j], y = dots[j + 1], vx = dots[j + 2], vy = dots[j + 3]
         if (!reduced) {
-          const dx = hx - px, dy = hy - py, distance2 = dx * dx + dy * dy
+          const dx = hx - smoothX, dy = hy - smoothY, distance2 = dx * dx + dy * dy
           let tx = hx, ty = hy
           if (r > 0 && distance2 < r * r) {
-            const distance = Math.sqrt(distance2) + 0.001, force = Math.pow(1 - distance / r, 2) * 30
+            const distance = Math.sqrt(distance2) + 0.001, u = distance / r
+            // A broad exclusion disc: dots inside the cursor's core move
+            // to its rim, fading to zero displacement at the field boundary.
+            const force = r * (.7 + .3 * u * u) - distance
             tx += dx / distance * force; ty += dy / distance * force
           }
           for (let step = 0; step < steps; step++) {
-            vx += ((tx - x) * 220 - vx * 27) * dt
-            vy += ((ty - y) * 220 - vy * 27) * dt
+            vx += ((tx - x) * 200 - vx * 28) * dt
+            vy += ((ty - y) * 200 - vy * 28) * dt
             x += vx * dt; y += vy * dt
           }
           if (Math.abs(vx) + Math.abs(vy) > 0.06) moving = true
           else { vx = 0; vy = 0 }
           dots[j] = x; dots[j + 1] = y; dots[j + 2] = vx; dots[j + 3] = vy
         }
-        ctx.moveTo(x + dots[j + 6], y)
-        ctx.arc(x, y, dots[j + 6], 0, Math.PI * 2)
+        maxOffset2 = Math.max(maxOffset2, (x - hx) * (x - hx) + (y - hy) * (y - hy))
+        const size = dots[j + 6] * 1.6
+        ctx.rect(x - size / 2, y - size / 2, size, size)
       }
       ctx.fill()
       awake = !reduced && moving
       root.dataset.hwfFrames = String(++frames)
       root.dataset.hwfAwake = String(awake)
+      root.dataset.hwfRadius = r.toFixed(1)
+      root.dataset.hwfDisplacement = Math.sqrt(maxOffset2).toFixed(1)
     }
     const loop = (now: number) => {
       raf = 0
@@ -205,7 +215,9 @@ export default function HalftoneWordmarkFooter({
     }
     const onMove = (e: PointerEvent) => {
       if (!opts.current.interactive || reduced || e.pointerType === "touch") return
+      const entering = px < -1e4
       ;[px, py] = toLocal(e); wake()
+      if (entering) { smoothX = px; smoothY = py }
     }
     const onLeave = () => { px = -1e5; py = -1e5; wake() }
     const onPreference = () => { reduced = preference.matches; onLeave(); layout(); wake() }

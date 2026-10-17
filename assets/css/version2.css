@@ -83,6 +83,8 @@ a.group-top { text-decoration:none; color:var(--on); }
 .hero-img-natural img { display:block; width:100%; height:auto; max-height:calc(100svh - 120px); object-fit:contain; border-radius:var(--radius); transform:none !important; }
 .uploaded-gallery img,.uploaded-gallery figure:hover img { transform:none !important; }
 @media(max-width:600px) {
+  .words span { font-size:clamp(36px,9vw,54px); line-height:.98; overflow-wrap:anywhere; }
+  .next b { font-size:clamp(38px,10vw,60px); line-height:.98; min-width:0; overflow-wrap:anywhere; }
   .group-top.hover-card { padding-bottom:80px; }
   .hover-band { padding:16px 20px; }
   .hover-arrow { right:20px; }
@@ -268,4 +270,106 @@ a.group-top { text-decoration:none; color:var(--on); }
   .orbit-position-1 { left:76%; }
   .orbit-position-2 { top:76%; }
   .orbit-position-3 { left:24%; }
+}
+
+/* Geometry audit: content-driven rows, aligned baselines, 8px spacing rhythm.
+   Photos remain whole. Larger colour banners carry larger type, not dead air. */
+.fit,.fit > span { transition-property:none !important; }
+.v1-about { padding-top:clamp(48px,5vw,72px); }
+.v2-work { padding-top:clamp(48px,5vw,72px); }
+.studio-group,.v2-pair { margin-bottom:clamp(40px,4.45vw,64px); }
+.category-heading { gap:16px; padding-bottom:24px; align-items:center; }
+.category-heading h2 { font-size:clamp(46px,6vw,96px); }
+.studio-group > .group-top {
+  --studio-baseline:calc(clamp(22px,3vw,40px) + 118.3px + clamp(48px,6.2vw,98px) * .94);
+  min-height:calc(var(--studio-baseline) * 1.15);
+  grid-template-columns:minmax(0,1.35fr) minmax(0,.85fr);
+  align-items:center; padding:32px 36px 64px; gap:24px;
+}
+.studio-group > .group-top h2 { font-size:clamp(56px,7.2vw,114px); line-height:.98; letter-spacing:-.015em; }
+.studio-group > .group-top .mono { margin-bottom:18px; }
+.studio-group > .group-top .group-intro { align-self:center; }
+.group-top .group-intro p { max-width:40ch; }
+.v2-pair .group-top { min-height:432px; gap:24px; padding:32px 32px 76px; }
+.v2-pair .group-top h2 { font-size:clamp(46px,5vw,80px); line-height:.98; max-width:13ch; letter-spacing:-.01em; }
+.v2-pair .group-top .mono { margin-bottom:18px; }
+.woa-card,.hover-card { padding-bottom:76px; }
+.hover-arrow,.woa-arrow { top:28px; right:28px; }
+.woa-band,.hover-band { min-height:52px; padding:14px 28px; align-items:center; }
+.group-services { margin-top:16px; }
+
+/* Project pages: one rhythm between copy, results, images and takeaways. */
+main > article > .row:first-of-type { margin-top:clamp(32px,3.3vw,48px); }
+main > article > .row { padding:20px 0 24px; }
+main > article > .panel { margin-top:clamp(32px,3.9vw,56px); }
+main > article > .gallery { padding-top:clamp(32px,3.9vw,56px); }
+main > article > .next { margin-top:clamp(40px,4.45vw,64px); }
+.panel-label { margin-bottom:32px; align-items:baseline; }
+.outcome-single { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:24px; align-items:center; padding:28px 32px; }
+.outcome-label { display:flex; flex-direction:column; gap:10px; }
+.outcome-single .stat { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:center; }
+.outcome-single .stat b { font-size:clamp(88px,9vw,144px); line-height:.9; justify-self:center; }
+.outcome-single .stat span { margin:0; max-width:21ch; justify-self:end; font-size:clamp(22px,2.2vw,34px); line-height:1.15; }
+.learned-note { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:24px; align-items:start; margin-top:clamp(32px,3.9vw,56px); padding-top:24px; border-top:1px solid var(--rule); }
+.learned-note > .mono { padding-top:8px; }
+.learned-note blockquote { margin:0; max-width:none; font:italic 400 clamp(30px,3.1vw,48px)/1.12 var(--serif); letter-spacing:-.01em; }
+.v2-contact { padding-top:clamp(32px,3.3vw,48px); }
+[data-halftone-footer] { margin-top:clamp(40px,4.45vw,64px); }
+
+/* Natural, compact masonry is the no-JS fallback. JS creates justified rows
+   so every row has a common top/bottom and fills the available width. */
+.ggrid.uploaded-gallery { display:block; column-count:3; column-gap:12px; padding-top:16px; }
+.ggrid.uploaded-gallery figure { break-inside:avoid; margin:0 0 12px; aspect-ratio:auto; background:transparent; }
+.ggrid.uploaded-gallery img { width:100%; height:auto; transform:none !important; }
+.ggrid.uploaded-gallery.is-justified { display:flex; flex-direction:column; gap:12px; columns:auto; }
+.ggrid.uploaded-gallery.is-justified .gallery-row { display:flex; gap:12px; width:100%; min-width:0; }
+.ggrid.uploaded-gallery.is-justified figure { min-width:0; margin:0; height:100%; }
+.ggrid.uploaded-gallery.is-justified a { display:block; width:100%; height:100%; }
+.ggrid.uploaded-gallery.is-justified img { display:block; width:100%; height:100%; object-fit:contain; }
+
+@media(min-width:1200px) {
+  .v2-pair .group-top { min-height:440px; }
+  .v2-pair .compact-group .group-top { min-height:432px; }
+}
+@media(max-width:960px) {
+  .studio-group > .group-top { min-height:344px; grid-template-columns:1fr; align-content:space-between; gap:20px; }
+  .studio-group > .group-top h2 { font-size:clamp(52px,8vw,76px); }
+  .v2-pair .group-top { min-height:468px; }
+  .v2-pair .group-top h2 { font-size:clamp(42px,5.8vw,56px); }
+  .ggrid.uploaded-gallery { column-count:2; }
+}
+@media(max-width:600px) {
+  .category-heading { gap:12px; padding-bottom:20px; }
+  .category-heading h2 { font-size:42px; }
+  .category-heading i { width:14px; height:14px; }
+  .studio-group > .group-top { min-height:344px; padding:28px 24px 72px; }
+  #mtrx-digital > .group-top { min-height:373px; }
+  .studio-group > .group-top h2 { font-size:56px; padding-right:0; }
+  .v2-pair .group-top { min-height:350px; padding:28px 24px 76px; }
+  #women-of-ahmedabad > .group-top { min-height:392px; }
+  #leadership-and-teaching > .group-top { min-height:402px; }
+  .v2-pair .group-top h2 { font-size:52px; }
+  .hover-arrow,.woa-arrow { top:24px; right:20px; }
+  .woa-band,.hover-band { min-height:56px; gap:10px; padding:12px 24px; }
+  .woa-band > span:first-child,.hover-band > span:first-child { max-width:29ch; font-size:15px; }
+  .outcome-single { grid-template-columns:1fr; gap:24px; padding:24px; }
+  .outcome-label { flex-direction:row; justify-content:space-between; align-items:start; gap:20px; }
+  .outcome-label .mono { font-size:14px; }
+  .outcome-label .mono:last-child { text-align:right; max-width:17ch; }
+  .outcome-single .stat { display:grid; grid-template-columns:auto minmax(0,1fr); gap:20px; }
+  .outcome-single .stat b,.outcome-single .stat span { min-width:0; justify-self:start; }
+  .learned-note { grid-template-columns:1fr; gap:16px; padding-top:20px; }
+  .learned-note blockquote { font-size:34px; }
+}
+@media(max-width:360px) {
+  .outcome-single .stat b { font-size:72px; }
+  .outcome-single .stat span { font-size:20px; }
+  .studio-group > .group-top { min-height:425px; }
+  #mtrx-digital > .group-top { min-height:454px; }
+  #women-of-ahmedabad > .group-top { min-height:422px; }
+  #stage-and-hosting > .group-top { min-height:402px; }
+  .studio-group > .group-top h2 { font-size:52px; }
+  .v2-pair .group-top h2 { font-size:48px; }
+  .group-top .mono { max-width:22ch; }
+  .ggrid.uploaded-gallery { column-count:1; }
 }

@@ -8,6 +8,7 @@ from pathlib import Path
 import hashlib
 import re
 import runpy
+from urllib.parse import unquote
 from asset_library import load_library
 
 ROOT = Path(__file__).resolve().parent
@@ -47,6 +48,14 @@ CLIENTS = [
 BY = {p["slug"]: p for p in PROJECTS}
 BY["stax-living"]["logo"] = "logo-stax.svg"
 BY["indravansh"]["logo"] = "logo-indravansh.webp"
+# Remove the explicitly rejected self-description from V2 without inventing
+# replacement claims or changing the source content used by V1.
+BY["the-loud-table"]["result"] = ""
+BY["the-loud-table"]["org"] = "The Loud Table"
+BY["the-loud-table"]["sections"] = [
+    (heading, text.replace("The Loud Table is my own marketing firm. ", ""))
+    for heading, text in BY["the-loud-table"]["sections"]
+]
 PHOTOS, LOGOS = load_library(ROOT)
 for slug, files in PHOTOS.items():
     if slug not in BY:
@@ -247,12 +256,15 @@ def group_top(group_id, role, summary):
     x = GROUP[group_id]
     result = BY[group_id]["result"] if group_id in BY else " · ".join(BY[s]["name"] for s in MEMBERS[group_id])
     inverse = " hover-card-inverse" if group_id == "mitti" else ""
+    band = f'<span class="hover-band"><span>{e(result)}</span><span aria-hidden="true">Open →</span></span>' if result else (
+        '<span class="hover-band"><span>Full story</span><span aria-hidden="true">Open →</span></span>'
+    )
     return f'''<a class="group-top hover-card{inverse}" href="work/{group_id}/"
       data-color="{x["color"]}" data-on="{x["on"]}" data-label="{e(x["name"])}" style="{group_style(group_id)}">
       <div class="hover-title"><p class="mono">{e(role)}</p><h2>{e(x["name"])}</h2></div>
       <div class="group-intro"><p>{e(summary)}</p><span class="group-link">Full story ↗</span></div>
       <span class="hover-arrow" aria-hidden="true">↗</span>
-      <span class="hover-band"><span>{e(result)}</span><span aria-hidden="true">Open →</span></span>
+      {band}
     </a>'''
 
 
@@ -434,6 +446,41 @@ def project_with_uploads(p, index):
         page = re.sub(r'<div class="ggrid"[^>]*>.*?</div>', link_images, page, flags=re.S)
         if p["slug"] == "stax-living":
             page = page.replace('<div class="daynight">', '<p class="mono muted">Concept illustrations</p><div class="daynight">', 1)
+    # A single result needs a purposeful two-part composition, not a full-width
+    # empty statistics grid. Preserve the exact result and labels.
+    if len(p.get("stats", [])) == 1:
+        number, caption = p["stats"][0]
+        old = (
+            f'<div class="panel"><div class="panel-label"><span class="mono">What came of it</span><span class="mono">{e(p["name"])}</span></div>\n'
+            f'  <div class="stats" style="--n:1"><div class="stat"><b>{e(number)}</b><span>{e(caption)}</span></div></div></div>'
+        )
+        replacement = (
+            f'<section class="panel outcome-single" aria-label="What came of it">'
+            f'<div class="outcome-label"><span class="mono">What came of it</span><span class="mono">{e(p["name"])}</span></div>'
+            f'<div class="stat"><b>{e(number)}</b><span>{e(caption)}</span></div></section>'
+        )
+        page = page.replace(old, replacement)
+    # Reserve each photo's natural dimensions before loading and supply ratios
+    # to the justified-row layout. No image is cropped, repeated or omitted.
+    from PIL import Image
+    def dimensions(match):
+        tag, src = match[0], match[1]
+        if "assets/img/" not in src or re.search(r'\bwidth=', tag):
+            return tag
+        file = ROOT / "assets/img" / unquote(src.split("assets/img/", 1)[1].split("?", 1)[0])
+        if not file.is_file() or file.suffix.lower() == ".svg":
+            return tag
+        with Image.open(file) as image:
+            width, height = image.size
+        return tag.replace("<img ", f'<img width="{width}" height="{height}" ', 1)
+    page = re.sub(r'<img\b[^>]*\bsrc="([^"]+)"[^>]*>', dimensions, page)
+    page = re.sub(
+        r'<p class="learned reveal">(.*?)</p>',
+        r'<aside class="learned-note"><span class="mono">What I took from it</span><blockquote>\1</blockquote></aside>',
+        page, flags=re.S,
+    )
+    if p["slug"] == "the-loud-table":
+        page = page.replace("The Loud Table, my marketing firm", "The Loud Table")
     return page
 
 

@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 import { ArrowUpRight } from "lucide-react"
 import HalftoneWordmarkFooter from "@/components/ui/halftone-wordmark-footer"
 import { startSiteChoreography } from "./site-choreography"
+import { initGalleryLayout } from "./gallery-layout"
 
 const mount = document.querySelector<HTMLElement>("[data-halftone-footer]")
 if (mount) {
@@ -29,8 +30,8 @@ if (mount) {
         monoFamily={'"IBM Plex Mono", ui-monospace, monospace'}
         height="clamp(360px, 39vw, 560px)"
         dotGap={6}
-        radius={100}
-        crop={0.12}
+        radius={220}
+        crop={0}
         grain={0}
       />
     )
@@ -101,4 +102,5 @@ function enhanceInlineArrows() {
   })
 }
 enhanceInlineArrows()
+initGalleryLayout()
 startSiteChoreography()
