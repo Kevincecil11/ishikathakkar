@@ -3,13 +3,15 @@ import { gsap } from "gsap"
 type Body = {
   el: HTMLElement; button: HTMLButtonElement
   x: number; y: number; hx: number; hy: number; vx: number; vy: number; r: number
+  tx: number; ty: number; offset: number
   setX: (value: number) => void; setY: (value: number) => void
 }
 
 /**
  * A small, real fixed-step spring/impulse simulation, rendered by GSAP.
- * No autoplay, angular proxy, slider, premium plugin or background RAF loop.
- * Individual badges have mass, release velocity, collisions and elastic homes.
+ * Moving spring targets create a continuous circular orbit, without spinning
+ * the logo artwork. Badges retain their own mass, velocity and 2D collisions.
+ * No sliders, arrow controls or premium plugin. Sleeps offscreen/when hidden.
  */
 export function initLogoPhysics(preference: MediaQueryList) {
   const panel = document.querySelector<HTMLElement>(".logo-playground")
@@ -17,18 +19,35 @@ export function initLogoPhysics(preference: MediaQueryList) {
   const hub = panel?.querySelector<HTMLElement>(".studio-hub")
   if (!panel || !plane || !hub) return
   const status = panel.querySelector<HTMLElement>(".logo-status")!
+  // Keep the runtime preference callback independent of GSAP matchMedia cleanup.
+  const physicsPreference = window.matchMedia("(prefers-reduced-motion: reduce)")
   let width = 1, height = 1, visible = false, attached = false, accumulator = 0, frames = 0
+  let phase = 0, radius = 1, focusPaused = false
+  const angularSpeed = Math.PI * 2 / 84
   let selected: Body | null = null, pointer = -1, keyboardGrab = false
   let offsetX = 0, offsetY = 0, samples: { x: number; y: number; t: number }[] = []
   let obstacle = { left: 0, right: 0, top: 0, bottom: 0 }
   const bodies: Body[] = Array.from(plane.querySelectorAll<HTMLElement>(".logo-body")).map(el => ({
     el, button: el.querySelector<HTMLButtonElement>("button")!,
-    x: 0, y: 0, hx: 0, hy: 0, vx: 0, vy: 0, r: 24,
+    x: 0, y: 0, hx: 0, hy: 0, vx: 0, vy: 0, r: 24, tx: 0, ty: 0, offset: 0,
     setX: gsap.quickSetter(el, "x", "px") as (value: number) => void,
     setY: gsap.quickSetter(el, "y", "px") as (value: number) => void,
   }))
   const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value))
   const announce = (text: string) => { status.textContent = text }
+  const targets = (dt = 0) => {
+    const moving = !preference.matches && !selected && !focusPaused
+    if (moving) phase = (phase + angularSpeed * dt) % (Math.PI * 2)
+    for (const b of bodies) {
+      const angle = phase + b.offset
+      b.hx = width / 2 + Math.cos(angle) * radius
+      b.hy = height / 2 + Math.sin(angle) * radius
+      b.tx = moving ? -Math.sin(angle) * radius * angularSpeed : 0
+      b.ty = moving ? Math.cos(angle) * radius * angularSpeed : 0
+    }
+    panel.dataset.orbitPhase = phase.toFixed(5)
+    panel.dataset.orbitLooping = String(moving)
+  }
   const draw = () => {
     for (const b of bodies) {
       b.setX(b.x - b.el.offsetWidth / 2); b.setY(b.y - b.el.offsetHeight / 2)
@@ -95,10 +114,11 @@ export function initLogoPhysics(preference: MediaQueryList) {
     bodies.forEach(b => keepInBounds(b, impulses && b !== selected))
   }
   const step = (dt: number) => {
+    targets(dt)
     for (const b of bodies) {
       if (b === selected) continue
-      b.vx = (b.vx + (b.hx - b.x) * 3.5 * dt) * Math.exp(-2.25 * dt)
-      b.vy = (b.vy + (b.hy - b.y) * 3.5 * dt) * Math.exp(-2.25 * dt)
+      b.vx = b.tx + (b.vx - b.tx + (b.hx - b.x) * 3.5 * dt) * Math.exp(-2.25 * dt)
+      b.vy = b.ty + (b.vy - b.ty + (b.hy - b.y) * 3.5 * dt) * Math.exp(-2.25 * dt)
       b.x += b.vx * dt; b.y += b.vy * dt
       keepInBounds(b, true)
     }
@@ -110,7 +130,7 @@ export function initLogoPhysics(preference: MediaQueryList) {
     while (accumulator >= 1 / 120) { step(1 / 120); accumulator -= 1 / 120 }
     draw()
     const settled = bodies.every(b => Math.hypot(b.vx, b.vy) < 0.8 && Math.hypot(b.x - b.hx, b.y - b.hy) < 0.65)
-    if (!selected && settled) {
+    if (!selected && settled && (preference.matches || focusPaused)) {
       bodies.forEach(b => { b.x = b.hx; b.y = b.hy; b.vx = b.vy = 0 })
       draw(); stop()
     }
@@ -129,9 +149,11 @@ export function initLogoPhysics(preference: MediaQueryList) {
     b.button.setAttribute("aria-pressed", "false"); b.el.classList.remove("is-held")
     selected = null; pointer = -1; keyboardGrab = false; samples = []
     panel.classList.remove("is-dragging")
+    targets()
     if (preference.matches || cancelled) {
       bodies.forEach(body => { body.x = body.hx; body.y = body.hy; body.vx = body.vy = 0 })
       draw(); stop()
+      if (!preference.matches && !focusPaused && visible) wake()
     } else wake()
     announce(`${b.button.dataset.name} released.`)
   }
@@ -148,10 +170,11 @@ export function initLogoPhysics(preference: MediaQueryList) {
     b.button.addEventListener("pointerdown", e => {
       if (e.button !== 0 || !e.isPrimary) return
       e.preventDefault(); begin(b); pointer = e.pointerId
+      focusPaused = false
       const rect = plane.getBoundingClientRect()
       offsetX = e.clientX - rect.left - b.x; offsetY = e.clientY - rect.top - b.y
       samples = [{ x: b.x, y: b.y, t: performance.now() }]
-      b.button.setPointerCapture(pointer); b.button.focus({ preventScroll: true })
+      b.button.setPointerCapture(pointer); b.button.focus({ preventScroll: true }); focusPaused = false
     })
     b.button.addEventListener("pointermove", e => {
       if (selected !== b || e.pointerId !== pointer) return
@@ -166,7 +189,9 @@ export function initLogoPhysics(preference: MediaQueryList) {
       for (let i = 0; i < 5; i++) contacts(false)
       draw(); wake()
     })
-    b.button.addEventListener("pointerup", e => { if (e.pointerId === pointer) finish() })
+    b.button.addEventListener("pointerup", e => {
+      if (e.pointerId === pointer) { finish(); b.button.blur(); focusPaused = false; wake() }
+    })
     b.button.addEventListener("pointercancel", e => { if (e.pointerId === pointer) finish(true) })
     b.button.addEventListener("lostpointercapture", () => { if (selected === b && !keyboardGrab && pointer >= 0) finish(true) })
     b.button.addEventListener("keydown", e => {
@@ -194,26 +219,18 @@ export function initLogoPhysics(preference: MediaQueryList) {
     width = plane.clientWidth; height = plane.clientHeight
     const rect = plane.getBoundingClientRect(), h = hub.getBoundingClientRect()
     obstacle = { left: h.left - rect.left - 6, right: h.right - rect.left + 6, top: h.top - rect.top - 6, bottom: h.bottom - rect.top + 6 }
-    const diameter = bodies[0].el.offsetWidth, r = diameter / 2 + 1
-    const columns = Math.max(1, Math.floor(width / (diameter + 2)))
-    const rows = Math.max(1, Math.floor(height / (diameter + 2)))
-    const candidates: { x: number; y: number; angle: number; radial: number }[] = []
-    for (let row = 0; row < rows; row++) for (let col = 0; col < columns; col++) {
-      const x = r + (width - 2 * r) * (columns === 1 ? 0.5 : col / (columns - 1))
-      const y = r + (height - 2 * r) * (rows === 1 ? 0.5 : row / (rows - 1))
-      if (Math.hypot(x - clamp(x, obstacle.left, obstacle.right), y - clamp(y, obstacle.top, obstacle.bottom)) < r + 1) continue
-      candidates.push({ x, y, angle: Math.atan2(y - height / 2, x - width / 2), radial: Math.hypot((x - width / 2) / width, (y - height / 2) / height) })
-    }
-    // Prefer an open constellation around the hub, with a packed-grid fallback.
-    const chosen = candidates.sort((a, b) => Math.abs(a.radial - 0.44) - Math.abs(b.radial - 0.44)).slice(0, bodies.length).sort((a, b) => a.angle - b.angle)
+    const diameter = bodies[0].el.offsetWidth, r = diameter / 2
+    radius = Math.min(width, height) / 2 - r - 3
     bodies.forEach((b, i) => {
-      const home = chosen[i] ?? { x: r + (i % columns) * (diameter + 5), y: r + Math.floor(i / columns) * (diameter + 5) }
-      b.r = r; b.x = b.hx = home.x; b.y = b.hy = home.y; b.vx = b.vy = 0
+      b.r = r; b.offset = i * Math.PI * 2 / bodies.length - Math.PI / 2
+      b.vx = b.vy = 0
     })
+    targets()
+    bodies.forEach(b => { b.x = b.hx; b.y = b.hy; b.vx = b.tx; b.vy = b.ty })
     for (let i = 0; i < 30; i++) contacts(false)
-    bodies.forEach(b => { b.hx = b.x; b.hy = b.y })
     draw(); panel.dataset.physicsEngine = "spring-impulse-gsap"; panel.dataset.physicsCount = String(bodies.length)
     panel.dataset.physicsSleeping = "true"
+    if (!preference.matches && visible) wake()
   }
   panel.classList.add("physics-ready")
   gsap.set(bodies.map(b => b.el), { xPercent: 0, yPercent: 0 })
@@ -221,12 +238,19 @@ export function initLogoPhysics(preference: MediaQueryList) {
   const io = new IntersectionObserver(entries => {
     visible = entries[0]?.isIntersecting ?? true
     if (!visible) { if (selected) finish(true); stop() }
-    else if (bodies.some(b => Math.hypot(b.vx, b.vy) > 0.8 || Math.hypot(b.x - b.hx, b.y - b.hy) > 0.65)) wake()
+    else if (!preference.matches || bodies.some(b => Math.hypot(b.vx, b.vy) > 0.8 || Math.hypot(b.x - b.hx, b.y - b.hy) > 0.65)) wake()
   })
   io.observe(panel)
   document.addEventListener("visibilitychange", () => { if (document.hidden) { finish(true); stop() } else if (visible) wake() })
-  preference.addEventListener("change", () => {
-    finish(true); bodies.forEach(b => { b.x = b.hx; b.y = b.hy; b.vx = b.vy = 0 }); draw(); stop()
+  const onPreferenceChange = () => {
+    finish(true); targets(); bodies.forEach(b => { b.x = b.hx; b.y = b.hy; b.vx = b.vy = 0 }); draw(); stop()
+    if (!preference.matches) wake()
+  }
+  preference.addEventListener("change", onPreferenceChange)
+  physicsPreference.onchange = onPreferenceChange
+  panel.addEventListener("focusin", () => { if (pointer < 0) { focusPaused = true; targets(); wake() } })
+  panel.addEventListener("focusout", e => {
+    if (!panel.contains(e.relatedTarget as Node | null)) { focusPaused = false; targets(); if (!preference.matches) wake() }
   })
   window.addEventListener("blur", () => { if (selected) finish(true) })
   layout()

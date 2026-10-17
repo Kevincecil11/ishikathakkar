@@ -110,9 +110,23 @@ def logo_slot(name, rel, filename=None):
 
 
 def loud_clients(rel):
-    # Keep the photographed Loud Table section exactly as in Kevin's reference.
-    cards = "".join(g["card"](rel, BY[s], i) for i, s in enumerate(MEMBERS["the-loud-table"][1:]))
-    return '<div class="loud-clients">' + cards + "</div>"
+    # Curated covers stay separate from uploaded evidence and gallery ordering.
+    # Stax: interior rendering from the supplied Brand Book, page 2.
+    # DesignEcho: stationery mockup from the supplied Style Guide, page 22.
+    # Finance: the same advisory photograph used on its official supplied site:
+    # https://financesolutions2.vercel.app/ (Insurance, Unsplash 1450101499163).
+    covers = {
+        "stax-living": ("stax-living-interior.webp", "50% 55%"),
+        "designecho": ("designecho-editorial-stationery.webp", "50% 45%"),
+        "finance-solutions": ("finance-solutions-advisory.webp", "50% 50%"),
+    }
+    cards = []
+    for i, slug in enumerate(MEMBERS["the-loud-table"][1:]):
+        p = dict(BY[slug])
+        if slug in covers:
+            p["image"], p["pos"] = covers[slug]
+        cards.append(g["card"](rel, p, i))
+    return '<div class="loud-clients">' + "".join(cards) + "</div>"
 
 
 def client_ribbon():

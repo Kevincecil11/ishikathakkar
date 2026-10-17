@@ -1,7 +1,7 @@
 /* A constellation of tangible badges around Ishika's two studios.
    Static, complete and scrollable without JavaScript; direct physics with it. */
-.logo-playground { min-height:300px; width:100%; min-width:0; }
-.v2-pair:has(> #women-of-ahmedabad) #mitti .story-image { min-height:300px; width:100%; min-width:0; }
+.logo-playground { min-height:360px; width:100%; min-width:0; }
+.v2-pair:has(> #women-of-ahmedabad) #mitti .story-image { min-height:360px; width:100%; min-width:0; }
 .logo-playground .reel-head { pointer-events:none; }
 .logo-stage-area { position:absolute; inset:66px 12px 30px; touch-action:pan-y; }
 .logo-playground .studio-hub { display:flex !important; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:auto; max-width:none; gap:7px; pointer-events:none; }

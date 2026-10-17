@@ -4,7 +4,9 @@
 
 The current upload workflow is [UPLOAD-IMAGES.md](UPLOAD-IMAGES.md). Its project folders and automatic scanning supersede the older filename examples below. `asset_library.py` accepts original filenames and converts HEIC/HEIF at publish time using `requirements-images.txt`.
 
-`src/logo-physics.ts` replaces the controlled orbit with individual two-axis dragging, release velocity, spring forces, impulse collisions, hub/edge constraints and sleeping. GSAP 3.13.0 provides the ticker and transform setters. There are no visible slider, arrow or playback controls and no autoplay.
+`src/logo-physics.ts` provides continuous upright circular motion with individual two-axis dragging, release velocity, spring forces, impulse collisions and hub/edge constraints. Grabbing interrupts the moving spring targets; release blends the bodies back into the loop. GSAP 3.13.0 provides the ticker and transform setters. There are no visible slider, arrow or playback controls. Keyboard focus and Reduced Motion pause the orbit; offscreen/hidden-tab detection sleeps the ticker.
+
+The Loud Table client cards use curated covers separately from uploaded project evidence. Stax uses an interior rendering from its supplied Brand Book (page 2); DesignEcho uses its supplied stationery mockup (Style Guide, page 22). Finance Solutions uses the same stock advisory photograph as the Insurance section of https://financesolutions2.vercel.app/, not an invented office or founder portrait. Indravansh remains unchanged.
 
 Real uploaded galleries are connected on V2; the disabled contact form, existing portfolio prose, React footer and V1 design remain separate. General unassigned photographs are stored under `portfolio-highlights`, not attributed to a named event.
 

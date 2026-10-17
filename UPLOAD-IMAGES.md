@@ -34,6 +34,8 @@ Images were resized and converted to WebP for the website. Original full-resolut
 
 Grab a badge itself and move it in either direction. A quick release throws it; a slow release lets it settle. Badges collide with one another, the panel edges and the parent-studio hub.
 
-No speed slider, arrow buttons, Pause/Play controls or automatic spin. Pointer speed supplies the energy. Springs and damping settle the scene, then the GSAP ticker sleeps.
+The badges follow a slow, continuous circular loop while their artwork stays upright. Grab one to interrupt the loop, drag or flick freely, then release: springs and damping blend the badge back into the moving circle. No speed slider or visible arrow/playback controls.
+
+The loop pauses for keyboard focus and Reduced Motion. It sleeps offscreen and when the tab is hidden.
 
 Touch dragging is captured only on a badge. The rest of the panel scrolls normally. Keyboard: Space or Enter grabs, arrows move, Space releases, Escape resets. Reduced Motion disables throwing and animated settling.
