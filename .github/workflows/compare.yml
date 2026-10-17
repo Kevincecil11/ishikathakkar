@@ -48,6 +48,18 @@ jobs:
           ref: version-2
           path: source-v2
           persist-credentials: false
+      - name: Set up Node for V2's React island
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build V2 React and Tailwind assets when present
+        working-directory: source-v2
+        run: |
+          if [ -f package.json ]; then
+            npm install --no-audit --no-fund
+            npm run typecheck
+            npm run build:motion
+          fi
       - name: Build both versions
         run: |
           python3 source-v1/build.py
@@ -74,8 +86,6 @@ jobs:
               html = notfound.read_text(encoding="utf-8")
               html = re.sub(r"<script>.*?</script>", '<base href="' + prefix + '">', html, count=1, flags=re.S)
               notfound.write_text(html, encoding="utf-8")
-              # Comparison controls live in the shared publisher so both
-              # branch designs keep their original structure and content.
               other_version = "2" if source.name == "source-v1" else "1"
               other_url = base + "version-2/" if other_version == "2" else base
               button = (
@@ -105,6 +115,10 @@ jobs:
           assert 'aria-label="Switch to version 1"' in (root / "version-2/index.html").read_text()
           assert (root / "version-2/assets/css/version2.css").is_file()
           assert (root / "version-2/assets/img/ishika-portrait.webp").is_file()
+          if (Path("source-v2") / "package.json").is_file():
+              assert (root / "version-2/assets/js/portfolio-motion.js").is_file()
+              assert (root / "version-2/assets/css/motion.css").is_file()
+              assert 'data-halftone-footer' in (root / "version-2/index.html").read_text()
           PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
