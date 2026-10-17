@@ -36,7 +36,7 @@ a { color: inherit; text-decoration: none; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* header */
-.hdr { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px var(--pad); background: color-mix(in srgb, var(--canvas) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.hdr { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px var(--pad); background: color-mix(in srgb, var(--canvas) 96%, transparent); }
 .logo { font-family: var(--display); font-size: 22px; line-height: 1; text-transform: uppercase; }
 .logo sup { font-family: var(--mono); font-size: 14px; top: -0.4em; margin-left: 2px; }
 .pills { display: flex; flex-wrap: wrap; gap: 6px; }

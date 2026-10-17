@@ -54,8 +54,10 @@ function enhanceButtons() {
     const hasArrow = /[↗↘→↑]/.test(label)
     const name = label.replace(/\s*[↗↘→↑]\s*$/, "")
     button.classList.add("it-roll")
-    // Preserve the original accessible name and all original link attributes.
-    if (!button.getAttribute("aria-label")) button.setAttribute("aria-label", label)
+    // Preserve the accessible name: links/buttons get aria-label, plain spans
+    // (labels inside a larger card link) keep a visually hidden text copy.
+    const interactive = button.matches("a,button")
+    if (interactive && !button.getAttribute("aria-label")) button.setAttribute("aria-label", name)
     const text = document.createElement("span")
     text.className = "it-roll-window"
     text.setAttribute("aria-hidden", "true")
@@ -69,6 +71,12 @@ function enhanceButtons() {
     }
     text.append(track)
     button.replaceChildren(text)
+    if (!interactive) {
+      const spoken = document.createElement("span")
+      spoken.className = "visually-hidden"
+      spoken.textContent = name
+      button.prepend(spoken)
+    }
     if (hasArrow) {
       const icon = document.createElement("span")
       icon.className = "it-roll-icon"

@@ -146,6 +146,8 @@ STYLE_REV = hashlib.sha256((ROOT / "assets/css/version2.css").read_bytes()).hexd
 HUB_REV = hashlib.sha256((ROOT / "assets/css/logo-hub.css").read_bytes()).hexdigest()[:12]
 PHYSICS_REV = hashlib.sha256((ROOT / "assets/css/logo-physics.css").read_bytes()).hexdigest()[:12]
 MAIN_REV = hashlib.sha256((ROOT / "assets/js/main.js").read_bytes()).hexdigest()[:12]
+UI_REV = hashlib.sha256((ROOT / "assets/js/site-ui.js").read_bytes()).hexdigest()[:12]
+BASE_REV = hashlib.sha256((ROOT / "assets/css/style.css").read_bytes()).hexdigest()[:12]
 PREMIUM_REV = hashlib.sha256((ROOT / "assets/css/premium-motion.css").read_bytes()).hexdigest()[:12]
 MOTION_JS = ROOT / "assets/js/portfolio-motion.js"
 MOTION_READY = MOTION_JS.exists() and (ROOT / "assets/css/motion.css").exists()
@@ -155,7 +157,7 @@ MOTION_REV = hashlib.sha256(MOTION_JS.read_bytes()).hexdigest()[:12] if MOTION_R
 # Set before first paint so the opening screen is staged, never flashed.
 # Reduced Motion never opts in; a stalled bundle releases content after 3.5s.
 MOTION_BOOT = (
-    "<script>(function(d){try{if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches)"
+    "<script>(function(d){d.classList.add('js');try{if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches)"
     "{d.classList.add('motion-on');setTimeout(function(){if(!window.__itMotion)d.classList.add('motion-fallback')},3500)}}"
     "catch(e){}})(document.documentElement)</script>\n"
 )
@@ -167,6 +169,8 @@ def head(title, desc, rel):
         f'<link rel="stylesheet" href="{rel}assets/css/premium-motion.css?v={PREMIUM_REV}">\n' + MOTION_BOOT
     ) if MOTION_READY else ""
     return original_head(title, desc, rel).replace(
+        f'href="{rel}assets/css/style.css"', f'href="{rel}assets/css/style.css?v={BASE_REV}"'
+    ).replace(
         "</head>", f'<link rel="stylesheet" href="{rel}assets/css/version2.css?v={STYLE_REV}">\n'
         f'<link rel="stylesheet" href="{rel}assets/css/logo-hub.css?v={HUB_REV}">\n'
         f'<link rel="stylesheet" href="{rel}assets/css/logo-physics.css?v={PHYSICS_REV}">\n{motion_css}</head>'
@@ -198,7 +202,8 @@ def header(rel, current):
     )
     return f'''<header class="hdr">
       {g["ink_link"](rel or "./", "Ishika Thakkar", "logo")}Ishika T.<sup>©</sup></a>
-      <nav class="v2-nav" aria-label="Main">{items}<a href="#contact">Contact</a></nav>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="menu-toggle-label">Menu</span><span class="menu-toggle-icon" aria-hidden="true"><i></i><i></i></span></button>
+      <nav class="v2-nav" id="site-nav" aria-label="Main">{items}<a href="#contact">Contact</a></nav>
     </header><main id="main">'''
 
 
@@ -306,7 +311,6 @@ def brand_grid():
     return f'''<section class="brand-index" aria-labelledby="brands-h">
       {sec_head('<span id="brands-h">Brands &amp; stages</span>', f'({len(entries):02d})', '<span class="mono muted">Across my work</span>')}
       <div class="brands identity-grid">{"".join(tiles)}</div>
-      <p class="brand-source-note">Original logo artwork, extracted from supplied files and the MTRX selected-work board.</p>
     </section>'''
 
 
@@ -418,26 +422,29 @@ def footer(rel):
           <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
           <span class="contact-signature">Let's find the story.</span>
         </div>
-        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST" aria-label="Contact Ishika">
+        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST" accept-charset="UTF-8" aria-label="Contact Ishika" data-contact-form>
           <input type="hidden" name="access_key" value="6756b89f-e818-4c12-8f40-cdc5628ee0f7">
           <input type="hidden" name="subject" value="New enquiry from Ishika's portfolio">
           <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" aria-hidden="true">
           <fieldset>
             <legend class="visually-hidden">Contact details</legend>
             <div class="form-two">
-              <label>Your name<input type="text" name="name" required autocomplete="name" placeholder="The name behind the idea"></label>
-              <label>Email address<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
+              <label>Your name<input type="text" name="name" required maxlength="120" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="The name behind the idea"></label>
+              <label>Email address<input type="email" name="email" required maxlength="254" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" placeholder="you@example.com"></label>
             </div>
-            <label>What's on your mind?<textarea name="message" required rows="4" placeholder="A little about what you have in mind..."></textarea></label>
-            <div class="form-bottom"><button type="submit">Send message <span aria-hidden="true">↗</span></button>
-              <p>Sent securely through Web3Forms.</p>
+            <label>What's on your mind?<textarea name="message" required minlength="2" maxlength="5000" rows="4" placeholder="A little about what you have in mind..."></textarea></label>
+            <div class="form-bottom"><button type="submit"><span class="btn-label">Send message</span> <span class="btn-arrow" aria-hidden="true">↗</span></button>
+              <p class="form-status" role="status" aria-live="polite"></p>
             </div>
           </fieldset>
         </form>
       </div>
     </section>'''
     tail = original_footer(rel)
+    tail = re.sub(r'<p class="footer-note">.*?</p>', "", tail, flags=re.S)
+    tail = tail.replace('<p class="fit" aria-label="Say hello">', '<p class="fit">')
     tail = tail.replace(f'{rel}assets/js/main.js"', f'{rel}assets/js/main.js?v={MAIN_REV}"')
+    tail = tail.replace("</body>", f'<script src="{rel}assets/js/site-ui.js?v={UI_REV}" defer></script>\n</body>', 1)
     tail = tail.replace('id="contact"', 'id="say-hello"')
     tail = re.sub(r'<a class="pill" href="https://mtrxdigital\.com"[^>]*>MTRX Digital ↗</a>', "", tail)
     if MOTION_READY:
@@ -447,11 +454,16 @@ def footer(rel):
         enhanced = (
             f'<div id="say-hello" data-halftone-footer data-relative="{e(rel)}">'
             + fallback + "</div>"
-            + f'<p class="footer-note wrap">{e(SITE["note"])}</p>'
         )
         tail = re.sub(r"<footer\b.*?</footer>", lambda _: enhanced, tail, count=1, flags=re.S)
         tail = tail.replace("</body>", f'<script src="{rel}assets/js/portfolio-motion.js?v={MOTION_REV}" defer></script>\n</body>')
     return contact + tail
+
+
+def kinetic(text):
+    """Highlight the two key words in the About statement, as static markup."""
+    text = re.sub(r"\b(stories)\b", r'<span class="kinetic-word kinetic-story">\1</span>', text, count=1, flags=re.I)
+    return re.sub(r"\b(strategy)\b", r'<span class="kinetic-word kinetic-strategy">\1</span>', text, count=1, flags=re.I)
 
 
 def home():
@@ -482,7 +494,7 @@ def home():
       <div class="about-grid">
         <img class="portrait reveal" src="assets/img/{PHOTOS.get("about", ["ishika-portrait.webp"])[0]}" alt="Ishika Thakkar">
         <div>
-          <p class="statement">{e(a["statement"])}</p>
+          <p class="statement">{kinetic(e(a["statement"]))}</p>
           <p class="lead">{e(a["short"])}</p>
           <ul class="roles">{role_rows}</ul>
           {g["ink_link"]("about/", "About", "pill dark more")}Read my story →</a>
@@ -574,7 +586,7 @@ def project_banner(p):
     defaults = {
         "indravansh": [
             ("photos/indravansh/blue-sari-bracelet-detail.webp", "Bracelets and ring against a blue sari", "campaign-bracelet"),
-            ("indravansh-portrait-centered.webp", "Blue-sari campaign portrait, AI-recomposed with a centered subject and balanced drapery", "campaign-portrait"),
+            ("indravansh-portrait-centered.webp", "Blue-sari campaign portrait with silver jewellery", "campaign-portrait"),
             ("photos/indravansh/silver-earring-detail.webp", "Silver earring close-up", "campaign-earring"),
         ],
         "stax-living": [
@@ -805,12 +817,6 @@ def project_with_uploads(p, index):
         before, separator, after = page.rpartition("</article>")
         if separator:
             page = before + template + separator + after
-    if p["slug"] == "indravansh" and not BANNERS.get(p["slug"]):
-        note = "Center portrait: AI-recomposed for a balanced layout; the original photograph is retained."
-        start = page.find(f'data-project-banner="{p["slug"]}"')
-        end = page.find("</div>", start)
-        if end != -1:
-            page = page[:end + 6] + f'<p class="image-treatment-note">{note}</p>' + page[end + 6:]
     # Reserve each photo's natural dimensions before loading and supply ratios
     # to the justified-row layout. No image is cropped, repeated or omitted.
     from PIL import Image
