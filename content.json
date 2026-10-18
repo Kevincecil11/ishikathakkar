@@ -2,7 +2,7 @@
   "site": {
     "name": "Ishika Thakkar",
     "title": "Ishika Thakkar · Brand strategist, founder & co-founder",
-    "description": "Ishika Thakkar builds brands, communities and stories. Founder & Creative Director of The Loud Table, co-founder of MTRX Digital, founder of Women of Ahmedabad.",
+    "description": "Ishika Thakkar builds brands, communities and stories. Founder & Creative Director of The Loud Table, co-founder of MTRX Digital, curator of Women of Ahmedabad.",
     "positioning": "I build brands, communities and stories.",
     "roles": [
       "Founder & Creative Director, The Loud Table",
@@ -57,9 +57,9 @@
       "lane": "ventures",
       "name": "The Loud Table",
       "role": "Founder & Creative Director",
-      "org": "The Loud Table, my marketing firm",
-      "summary": "The marketing and brand studio I founded and run.",
-      "result": "My own marketing firm",
+      "org": "The Loud Table",
+      "summary": "The marketing and brand studio we run.",
+      "result": "Our marketing and brand studio",
       "image": "ishika-hosting.webp",
       "pos": "50% 30%",
       "placeholder": false,
@@ -67,11 +67,11 @@
       "sections": [
         [
           "What it is",
-          "The Loud Table is my own marketing firm. I ask what a brand stands for, beneath what looks good in a deck."
+          "We ask what a brand stands for, beneath what looks good in a deck."
         ],
         [
-          "How I work",
-          "I build on instinct already proven, ahead of promises still being tested. I sell trust you can leave alone, the kind that needs no checking up on."
+          "How we work",
+          "We build on instinct already proven, ahead of promises still being tested. We sell trust you can leave alone, the kind that needs no checking up on."
         ]
       ],
       "did_title": "What the studio does",
@@ -118,6 +118,7 @@
     },
     {
       "slug": "stax-living",
+      "did_title": "What we did",
       "lane": "brand",
       "name": "Stax Living",
       "role": "Market research, creative direction, social media",
@@ -165,6 +166,7 @@
     },
     {
       "slug": "indravansh",
+      "did_title": "What we did",
       "lane": "brand",
       "name": "Indravansh",
       "role": "Personal branding & creative direction",
@@ -225,6 +227,7 @@
     },
     {
       "slug": "designecho",
+      "did_title": "What we did",
       "lane": "brand",
       "name": "DesignEcho",
       "role": "Brand strategy & creative direction",
@@ -258,6 +261,7 @@
     },
     {
       "slug": "finance-solutions",
+      "did_title": "What we did",
       "lane": "brand",
       "name": "Finance Solutions",
       "role": "Brand strategy, PR & outreach",
@@ -304,7 +308,7 @@
       "slug": "women-of-ahmedabad",
       "lane": "community",
       "name": "Women of Ahmedabad",
-      "role": "Founder, curator & moderator",
+      "role": "Curator & Moderator",
       "org": "Mitti Lifestyle Store & Café",
       "summary": "Open conversations between women from every industry in the city.",
       "result": "Four editions · newspaper coverage",
@@ -346,7 +350,7 @@
       "slug": "mitti",
       "lane": "community",
       "name": "Mitti",
-      "role": "Events Manager",
+      "role": "Events Co-ordinator",
       "org": "Mitti Lifestyle Store & Café",
       "summary": "Building a café’s events programme from the ground up.",
       "result": "₹4,00,000+ through experiential programming",
@@ -445,7 +449,7 @@
       "sections": [
         [
           "The role",
-          "Handled marketing, customer outreach, and teaching young children, and organized and hosted the school’s first annual function."
+          "Handled marketing, customer outreach, teaching young children, and organising and hosting the school’s first annual function."
         ]
       ],
       "did": [
@@ -570,12 +574,12 @@
         "mtrx-digital"
       ],
       [
-        "Founder",
+        "Curator",
         "Women of Ahmedabad",
         "women-of-ahmedabad"
       ],
       [
-        "Events Manager",
+        "Events Co-ordinator",
         "Mitti Lifestyle Store & Café",
         "mitti"
       ],

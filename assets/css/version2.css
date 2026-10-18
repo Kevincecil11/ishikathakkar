@@ -653,3 +653,39 @@ article:has([data-project-banner]) .ggrid.uploaded-gallery.proof-board {
   .contact-direct li { grid-template-columns:1fr; gap:4px; padding:12px 0; }
   .portfolio-download .pd-label { font-size:16px; }
 }
+
+/* Compact contact composition: two balanced columns, then a shared link row. */
+.contact-sheet { grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); column-gap:clamp(36px,5vw,76px); row-gap:28px; padding:clamp(28px,3.4vw,48px); align-items:start; }
+.contact-sheet .contact-kicker { margin-bottom:24px; }
+.contact-sheet .contact-intro h2 { font-size:clamp(48px,5.2vw,78px); }
+.contact-sheet .contact-intro > p:not(.mono) { margin-top:20px; font-size:18px; }
+.contact-sheet .contact-signature { margin-top:22px; font-size:30px; }
+.contact-bottom { grid-column:1/-1; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:28px; padding-top:24px; border-top:1px solid rgba(18,18,17,.14); }
+.contact-bottom .contact-direct { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr); gap:clamp(16px,2vw,30px); margin:0; max-width:none; border:0; }
+.contact-bottom .contact-direct li { display:flex; flex-direction:column; gap:8px; padding:4px 0; border:0; }
+.contact-bottom .contact-direct .mono { font-size:11px; }
+.contact-bottom .contact-direct a { font-size:16px; padding:3px 0; }
+.contact-bottom .portfolio-download { margin:0; }
+@media (min-width:901px) and (max-width:1100px) {
+  .contact-bottom { grid-template-columns:1fr; gap:20px; }
+  .contact-bottom .portfolio-download { justify-self:start; }
+}
+@media (max-width:900px) {
+  .contact-sheet { grid-template-columns:1fr; gap:28px; }
+  .contact-bottom { grid-template-columns:1fr; gap:22px; }
+  .contact-bottom .portfolio-download { justify-self:start; }
+}
+@media (max-width:600px) {
+  .contact-sheet { padding:26px 18px; gap:26px; }
+  .contact-sheet .contact-intro h2 { font-size:clamp(42px,12.6vw,56px); }
+  .contact-sheet .contact-intro > p:not(.mono) { font-size:18px; }
+  .contact-sheet .contact-signature { font-size:28px; }
+  .contact-bottom { padding-top:18px; gap:22px; }
+  .contact-bottom .contact-direct { grid-template-columns:1fr; gap:0; }
+  .contact-bottom .contact-direct li { display:grid; grid-template-columns:84px minmax(0,1fr); gap:10px; align-items:baseline; padding:12px 0; border-bottom:1px solid rgba(18,18,17,.14); }
+  .contact-bottom .contact-direct a { padding:4px 0; }
+  .contact-bottom .portfolio-download { width:100%; justify-self:stretch; }
+}
+@media (max-width:380px) {
+  .contact-bottom .contact-direct li { grid-template-columns:1fr; gap:4px; padding:10px 0; }
+}

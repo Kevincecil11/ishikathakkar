@@ -26,7 +26,7 @@ if (mount) {
         palette={{ background: "#E8E8E4", ink: "#121211", warm: "#121211" }}
         columns={[
           { title: "Work", links: [{ label: "The Loud Table", href: rel + "work/the-loud-table/" }, { label: "MTRX", href: rel + "work/mtrx-digital/" }] },
-          { title: "About", links: [{ label: "Ishika Thakkar", href: rel + "about/" }, { label: "Download my portfolio ↓", href: rel + "assets/documents/ishika-thakkar-portfolio.pdf", download: "Ishika Thakkar Portfolio.pdf" }] },
+          { title: "About", links: [{ label: "Ishika Thakkar", href: rel + "about/" }, { label: "Download my portfolio ↓", href: rel + "assets/documents/ishika-thakkar-portfolio.pdf?v=final-20261018", download: "Ishika Thakkar Portfolio.pdf" }] },
           { title: "Contact", links: [
             { label: "Email", href: "mailto:ishikathakkar16@gmail.com" },
             { label: "LinkedIn ↗", href: "https://www.linkedin.com/in/ishikathakkar4904/", external: true },
