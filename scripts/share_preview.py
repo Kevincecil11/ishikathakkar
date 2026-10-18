@@ -122,8 +122,9 @@ def update_metadata(image, icon, apple):
         head = "\n".join(f'<meta {kind}="{key}" content="{html.escape(value, quote=True)}">'
                          for kind, key, value in tags)
         head += f'\n<link rel="canonical" href="{url}">'
-        head += f'\n<link rel="icon" type="image/png" sizes="64x64" href="{ORIGIN}/assets/img/{icon}">'
-        head += f'\n<link rel="apple-touch-icon" sizes="180x180" href="{ORIGIN}/assets/img/{apple}">'
+        root_rel = "../" * (len(page.relative_to(OUT).parts) - 1)
+        head += f'\n<link rel="icon" type="image/png" sizes="64x64" href="{root_rel}assets/img/{icon}">'
+        head += f'\n<link rel="apple-touch-icon" sizes="180x180" href="{root_rel}assets/img/{apple}">'
         source = source.replace("</head>", head + "\n</head>", 1)
         assert source.count('property="og:image"') == 1
         assert source.count('rel="canonical"') == 1

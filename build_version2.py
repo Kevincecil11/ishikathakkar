@@ -11,6 +11,7 @@ import re
 import runpy
 from urllib.parse import unquote
 from asset_library import load_library, load_banners
+from gallery_final import refine_gallery
 
 ROOT = Path(__file__).resolve().parent
 api = runpy.run_path(str(ROOT / "build.py"), run_name="__main__")
@@ -424,12 +425,6 @@ def footer(rel):
           <h2 id="contact-heading">Good things<br>start here.</h2>
           <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
           <span class="contact-signature">Let's find the story.</span>
-          <ul class="contact-direct" aria-label="Other ways to reach me">
-            <li><span class="mono">Email</span><a href="mailto:{email}">{email}</a></li>
-            <li><span class="mono">LinkedIn</span><a href="{linkedin}" target="_blank" rel="noopener noreferrer">ishikathakkar4904 <i aria-hidden="true">↗</i></a></li>
-            <li><span class="mono">Instagram</span><a href="{instagram}" target="_blank" rel="noopener noreferrer">@theloudtable.in <i aria-hidden="true">↗</i></a></li>
-          </ul>
-          <a class="portfolio-download" href="{pdf}" download="Ishika Thakkar Portfolio.pdf"><span class="pd-label">Download my portfolio</span><span class="pd-meta mono">PDF · 18 pages</span><i aria-hidden="true">↓</i></a>
         </div>
         <form class="contact-form" action="https://api.web3forms.com/submit" method="POST" accept-charset="UTF-8" aria-label="Contact Ishika" data-contact-form>
           <input type="hidden" name="access_key" value="6756b89f-e818-4c12-8f40-cdc5628ee0f7">
@@ -447,10 +442,18 @@ def footer(rel):
             </div>
           </fieldset>
         </form>
+        <div class="contact-bottom">
+          <ul class="contact-direct" aria-label="Other ways to reach me">
+            <li><span class="mono">Email</span><a href="mailto:{email}">{email}</a></li>
+            <li><span class="mono">LinkedIn</span><a href="{linkedin}" target="_blank" rel="noopener noreferrer">ishikathakkar4904 <i aria-hidden="true">↗</i></a></li>
+            <li><span class="mono">Instagram</span><a href="{instagram}" target="_blank" rel="noopener noreferrer">@theloudtable.in <i aria-hidden="true">↗</i></a></li>
+          </ul>
+          <a class="portfolio-download" href="{pdf}" download="Ishika Thakkar Portfolio.pdf"><span class="pd-label">Download my portfolio</span><span class="pd-meta mono">PDF · 18 pages</span><i aria-hidden="true">↓</i></a>
+        </div>
       </div>
     </section>'''
     ct = SITE["contact"]
-    pdf = f"{rel}{PORTFOLIO_PDF}"
+    pdf = f"{rel}{PORTFOLIO_PDF}?v=final-20261018"
     contact = (contact.replace("{email}", e(ct["email"])).replace("{linkedin}", e(ct["linkedin"]))
                .replace("{instagram}", e(ct["instagram"])).replace("{pdf}", e(pdf)))
     tail = original_footer(rel)
@@ -530,7 +533,7 @@ def home():
     </section>''')
     out.append(category_heading("Community & Events", "community"))
     out.append('<div class="v2-pair">')
-    for slug, role in [("women-of-ahmedabad", "Founder, curator & moderator"), ("mitti", "Events Manager")]:
+    for slug, role in [("women-of-ahmedabad", "Curator & Moderator"), ("mitti", "Events Co-ordinator")]:
         p = BY[slug]
         top = women_card() if slug == "women-of-ahmedabad" else group_top(slug, role, p["summary"])
         out.append(f'''<section class="work-group story-group" id="{slug}" style="{group_style(slug)}">
@@ -745,6 +748,7 @@ def project_with_uploads(p, index):
         )
     if p["slug"] in {"stax-living", "just-a-khwab", "tech-kaushalya"}:
         display_project["module"] = ""
+    display_project = refine_gallery(display_project)
     page = original_project(display_project, index)
     page = re.sub(
         r'<figure class="hero-img">.*?</figure>',
