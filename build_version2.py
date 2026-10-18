@@ -11,6 +11,7 @@ import re
 import runpy
 from urllib.parse import unquote
 from asset_library import load_library, load_banners
+from gallery_final import refine_gallery
 
 ROOT = Path(__file__).resolve().parent
 api = runpy.run_path(str(ROOT / "build.py"), run_name="__main__")
@@ -747,6 +748,7 @@ def project_with_uploads(p, index):
         )
     if p["slug"] in {"stax-living", "just-a-khwab", "tech-kaushalya"}:
         display_project["module"] = ""
+    display_project = refine_gallery(display_project)
     page = original_project(display_project, index)
     page = re.sub(
         r'<figure class="hero-img">.*?</figure>',
