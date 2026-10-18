@@ -1,19 +1,49 @@
 name: Import prepared portfolio package
 
 on:
+  push:
+    branches: [site/portfolio-download]
+    paths: [.github/workflows/import-portfolio-package.yml]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  receipt:
+  import:
     runs-on: ubuntu-latest
     steps:
-      - name: Completed approved import
+      - uses: actions/checkout@v4
+        with:
+          ref: site/portfolio-download
+      - name: Download and verify the approved package
         run: |
-          echo "Approved gallery and contact fixes imported successfully."
-          echo "Package SHA256: 34d136ae66054f4a48f0bfb8496cafd4a0e19843b83dcbfd92518524dac38d32"
-          echo "Content commit: 88b7f7cbdf2926b571bc74f8bbcaad02fbd0a2b0"
-          echo "Six reviewed source and image files imported; main unchanged."
-          echo "No automatic import or external download remains enabled."
+          set -euo pipefail
+          curl -fsSL --retry 3 -o /tmp/pkg.zip "https://search.clickup-au.com/workspaces/90161376302/files/-zpK_PmrX0IFWwARPF5soa0R7lwiOm6YV_PyGAS9oy4"
+          echo "9d274873685d96c95aca6945ff1ea3f1d00fa909a07615319132a0c0f0d5362b  /tmp/pkg.zip" | sha256sum -c -
+          unzip -o /tmp/pkg.zip -d .
+          rm -f /tmp/pkg.zip
+      - name: Check every file matches the reviewed copy
+        run: |
+          set -euo pipefail
+          while read -r sha path; do
+            got=$(git hash-object "$path")
+            if [ "$got" != "$sha" ]; then echo "Mismatch: $path"; exit 1; fi
+          done <<'EOF'
+          4c110fb3c89377c8240f58f34517e75e87810390 content.json
+          880387ee74fe79330b352bc072446b334eb0cb57 build_version2.py
+          a6df07eb143d24f0d450c69aff164febff0172c5 src/portfolio-motion.tsx
+          469816f5e0e9880b2ce369f4e95c79c7710a29dc components/ui/halftone-wordmark-footer.tsx
+          90db7ed27e775940122513954ee37210fa078918 assets/css/version2.css
+          a01d3ce26d5653e1100ecd9562b7de8e92038726 scripts/export_site.py
+          93cc432389b80c4a165540049ba71f8c0a24efff assets/documents/ishika-thakkar-portfolio.pdf
+          EOF
+      - name: Commit the reviewed files
+        run: |
+          set -euo pipefail
+          git config user.name "Kevin Cecil"
+          git config user.email "kevincecil824@gmail.com"
+          git add content.json build_version2.py src/portfolio-motion.tsx components/ui/halftone-wordmark-footer.tsx assets/css/version2.css scripts/export_site.py assets/documents/ishika-thakkar-portfolio.pdf
+          git status --short
+          git commit -m "Portfolio PDF download, contact details in contact section and footer, footer fits its links"
+          git push origin HEAD:site/portfolio-download
