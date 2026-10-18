@@ -7,31 +7,32 @@ on:
 permissions:
   contents: write
 jobs:
-  import:
+  wire_gallery:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: final/copy-contact-layout
-      - name: Import approved package
+      - name: Wire reviewed gallery helper into the site builder
         run: |
-          set -euo pipefail
-          curl -fsSL --retry 3 -o /tmp/pkg.zip "https://search.clickup-au.com/workspaces/90161376302/files/7g9sgJtrzOxk8t7MDpZdvCVi71P6lA2FF528FxAlJlw"
-          echo "8100cba5ef82b551b57700cf176dc1e09c6841e6b71acb7b0a2d9ebe7dad6cbd  /tmp/pkg.zip" | sha256sum -c -
-          unzip -o /tmp/pkg.zip -d .
-          rm -f /tmp/pkg.zip
-          while read -r sha path; do
-            test "$(git hash-object "$path")" = "$sha"
-          done <<'EOF'
-          75d9739de06c82f7039bc0be52de56a085285939 content.json
-          3ccabf710e7b200a2daf347abcefef5ae990e4f3 build_version2.py
-          206599e9ff6de24cd37495ef069e483d96fd84fd assets/css/version2.css
-          51bd2ecedbd3b07edd6386ba06bc4128e12fd339 src/portfolio-motion.tsx
-          24c6b892c2da69bd00610050ed63860fdf91e74a scripts/share_preview.py
-          d0eb14a3bd84f614792752024f39045fe356062d assets/documents/ishika-thakkar-portfolio.pdf
-          EOF
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('build_version2.py')
+          s = p.read_text()
+          a = 'from asset_library import load_library, load_banners\n'
+          b = a + 'from gallery_final import refine_gallery\n'
+          assert a in s
+          if 'from gallery_final import refine_gallery' not in s:
+              s = s.replace(a, b, 1)
+          a = '    page = original_project(display_project, index)'
+          b = '    display_project = refine_gallery(display_project)\n' + a
+          assert a in s
+          if '    display_project = refine_gallery(display_project)' not in s:
+              s = s.replace(a, b, 1)
+          p.write_text(s)
+          PY
           git config user.name "Kevin Cecil"
           git config user.email "kevincecil824@gmail.com"
-          git add content.json build_version2.py assets/css/version2.css src/portfolio-motion.tsx scripts/share_preview.py assets/documents/ishika-thakkar-portfolio.pdf
-          git commit -m "Final studio team voice, accurate roles, compact contact layout and final PDF"
+          git add build_version2.py
+          git commit -m "Apply website-only screenshot crops and mixed gallery order"
           git push origin HEAD:final/copy-contact-layout
