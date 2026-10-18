@@ -1,19 +1,37 @@
 name: Import prepared portfolio package
-
 on:
+  push:
+    branches: [final/copy-contact-layout]
+    paths: [.github/workflows/import-portfolio-package.yml]
   workflow_dispatch:
-
 permissions:
-  contents: read
-
+  contents: write
 jobs:
-  receipt:
+  import:
     runs-on: ubuntu-latest
     steps:
-      - name: Completed approved import
+      - uses: actions/checkout@v4
+        with:
+          ref: final/copy-contact-layout
+      - name: Import approved package
         run: |
-          echo "Approved portfolio download and contact update imported successfully."
-          echo "Package SHA256: 9d274873685d96c95aca6945ff1ea3f1d00fa909a07615319132a0c0f0d5362b"
-          echo "Content commit: cd25fa772271278a7ffd73efe2ba1c3bcd73a688"
-          echo "Seven reviewed files imported (six source files and the portfolio PDF); main unchanged."
-          echo "No automatic import or external download remains enabled."
+          set -euo pipefail
+          curl -fsSL --retry 3 -o /tmp/pkg.zip "https://search.clickup-au.com/workspaces/90161376302/files/7g9sgJtrzOxk8t7MDpZdvCVi71P6lA2FF528FxAlJlw"
+          echo "8100cba5ef82b551b57700cf176dc1e09c6841e6b71acb7b0a2d9ebe7dad6cbd  /tmp/pkg.zip" | sha256sum -c -
+          unzip -o /tmp/pkg.zip -d .
+          rm -f /tmp/pkg.zip
+          while read -r sha path; do
+            test "$(git hash-object "$path")" = "$sha"
+          done <<'EOF'
+          75d9739de06c82f7039bc0be52de56a085285939 content.json
+          3ccabf710e7b200a2daf347abcefef5ae990e4f3 build_version2.py
+          206599e9ff6de24cd37495ef069e483d96fd84fd assets/css/version2.css
+          51bd2ecedbd3b07edd6386ba06bc4128e12fd339 src/portfolio-motion.tsx
+          24c6b892c2da69bd00610050ed63860fdf91e74a scripts/share_preview.py
+          d0eb14a3bd84f614792752024f39045fe356062d assets/documents/ishika-thakkar-portfolio.pdf
+          EOF
+          git config user.name "Kevin Cecil"
+          git config user.email "kevincecil824@gmail.com"
+          git add content.json build_version2.py assets/css/version2.css src/portfolio-motion.tsx scripts/share_preview.py assets/documents/ishika-thakkar-portfolio.pdf
+          git commit -m "Final studio team voice, accurate roles, compact contact layout and final PDF"
+          git push origin HEAD:final/copy-contact-layout
