@@ -1,38 +1,19 @@
 name: Import prepared portfolio package
+
 on:
-  push:
-    branches: [final/copy-contact-layout]
-    paths: [.github/workflows/import-portfolio-package.yml]
   workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  wire_gallery:
+  receipt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: final/copy-contact-layout
-      - name: Wire reviewed gallery helper into the site builder
+      - name: Completed approved import
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('build_version2.py')
-          s = p.read_text()
-          a = 'from asset_library import load_library, load_banners\n'
-          b = a + 'from gallery_final import refine_gallery\n'
-          assert a in s
-          if 'from gallery_final import refine_gallery' not in s:
-              s = s.replace(a, b, 1)
-          a = '    page = original_project(display_project, index)'
-          b = '    display_project = refine_gallery(display_project)\n' + a
-          assert a in s
-          if '    display_project = refine_gallery(display_project)' not in s:
-              s = s.replace(a, b, 1)
-          p.write_text(s)
-          PY
-          git config user.name "Kevin Cecil"
-          git config user.email "kevincecil824@gmail.com"
-          git add build_version2.py
-          git commit -m "Apply website-only screenshot crops and mixed gallery order"
-          git push origin HEAD:final/copy-contact-layout
+          echo "Final copy, compact contact section, and portfolio PDF imported."
+          echo "Package SHA256: 8100cba5ef82b551b57700cf176dc1e09c6841e6b71acb7b0a2d9ebe7dad6cbd"
+          echo "Content commit: 67d716b68f64a3b7e0fbae4a7fbcf42d8b767222"
+          echo "Website-only gallery crop and interleaving commit: dd9ca4e39f5971e4c0ab7bb3fbd4e4413eb261bd"
+          echo "No automatic import or external download remains enabled."
