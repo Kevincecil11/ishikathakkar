@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Completed approved import
         run: |
-          echo "Approved gallery and contact fixes imported successfully."
-          echo "Package SHA256: 34d136ae66054f4a48f0bfb8496cafd4a0e19843b83dcbfd92518524dac38d32"
-          echo "Content commit: 88b7f7cbdf2926b571bc74f8bbcaad02fbd0a2b0"
-          echo "Six reviewed source and image files imported; main unchanged."
+          echo "Approved portfolio download and contact update imported successfully."
+          echo "Package SHA256: 9d274873685d96c95aca6945ff1ea3f1d00fa909a07615319132a0c0f0d5362b"
+          echo "Content commit: cd25fa772271278a7ffd73efe2ba1c3bcd73a688"
+          echo "Seven reviewed files imported (six source files and the portfolio PDF); main unchanged."
           echo "No automatic import or external download remains enabled."
