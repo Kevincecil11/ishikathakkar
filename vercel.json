@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "npm install --no-audit --no-fund",
-  "buildCommand": "python3 -m pip install --target .python-build -r requirements-images.txt && PYTHONPATH=.python-build npm run build && PYTHONPATH=.python-build python3 scripts/export_site.py",
+  "buildCommand": "python3 -m pip install --target .python-build -r requirements-images.txt && PYTHONPATH=.python-build npm run build && PYTHONPATH=.python-build python3 scripts/export_site.py && PYTHONPATH=.python-build python3 scripts/share_preview.py",
   "outputDirectory": "dist",
   "trailingSlash": true,
   "headers": [
