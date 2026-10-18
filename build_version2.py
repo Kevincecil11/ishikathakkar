@@ -412,6 +412,9 @@ def category_heading(title, anchor=None):
     return f'<div class="category-heading"{attr} style="--category:{color}"><i aria-hidden="true"></i><h2>{e(title)}</h2></div>'
 
 
+PORTFOLIO_PDF = "assets/documents/ishika-thakkar-portfolio.pdf"
+
+
 def footer(rel):
     # User-supplied Web3Forms access key. The provider handles submission.
     contact = '''<section class="wrap v2-contact" id="contact" aria-labelledby="contact-heading">
@@ -421,6 +424,12 @@ def footer(rel):
           <h2 id="contact-heading">Good things<br>start here.</h2>
           <p>Tell me what you're thinking. A brand, a room full of people, or an idea that doesn't fit a box yet.</p>
           <span class="contact-signature">Let's find the story.</span>
+          <ul class="contact-direct" aria-label="Other ways to reach me">
+            <li><span class="mono">Email</span><a href="mailto:{email}">{email}</a></li>
+            <li><span class="mono">LinkedIn</span><a href="{linkedin}" target="_blank" rel="noopener noreferrer">ishikathakkar4904 <i aria-hidden="true">↗</i></a></li>
+            <li><span class="mono">Instagram</span><a href="{instagram}" target="_blank" rel="noopener noreferrer">@theloudtable.in <i aria-hidden="true">↗</i></a></li>
+          </ul>
+          <a class="portfolio-download" href="{pdf}" download="Ishika Thakkar Portfolio.pdf"><span class="pd-label">Download my portfolio</span><span class="pd-meta mono">PDF · 18 pages</span><i aria-hidden="true">↓</i></a>
         </div>
         <form class="contact-form" action="https://api.web3forms.com/submit" method="POST" accept-charset="UTF-8" aria-label="Contact Ishika" data-contact-form>
           <input type="hidden" name="access_key" value="6756b89f-e818-4c12-8f40-cdc5628ee0f7">
@@ -440,7 +449,12 @@ def footer(rel):
         </form>
       </div>
     </section>'''
+    ct = SITE["contact"]
+    pdf = f"{rel}{PORTFOLIO_PDF}"
+    contact = (contact.replace("{email}", e(ct["email"])).replace("{linkedin}", e(ct["linkedin"]))
+               .replace("{instagram}", e(ct["instagram"])).replace("{pdf}", e(pdf)))
     tail = original_footer(rel)
+    tail = tail.replace('<div class="pills">', f'<div class="pills"><a class="pill" href="{e(pdf)}" download="Ishika Thakkar Portfolio.pdf">Download my portfolio ↓</a>', 1)
     tail = re.sub(r'<p class="footer-note">.*?</p>', "", tail, flags=re.S)
     tail = tail.replace('<p class="fit" aria-label="Say hello">', '<p class="fit">')
     tail = tail.replace(f'{rel}assets/js/main.js"', f'{rel}assets/js/main.js?v={MAIN_REV}"')

@@ -625,3 +625,31 @@ article:has([data-project-banner]) .ggrid.uploaded-gallery.proof-board {
   #say-hello .hwf-up { padding:8px 0; }
 }
 .hover-band > span { min-width:0; overflow-wrap:anywhere; }
+
+/* ---------- Direct contact + portfolio download ---------- */
+.contact-direct { list-style:none; margin:34px 0 0; padding:0; border-top:1px solid rgba(18,18,17,.14); max-width:440px; }
+.contact-direct li { display:grid; grid-template-columns:96px minmax(0,1fr); align-items:baseline; gap:12px; padding:13px 0; border-bottom:1px solid rgba(18,18,17,.14); }
+.contact-direct .mono { margin:0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.contact-direct a { color:var(--ink); font:500 17px/1.3 var(--sans); text-decoration:none; overflow-wrap:anywhere; }
+.contact-direct a i { font-style:normal; opacity:.55; }
+.contact-direct a:focus-visible,.portfolio-download:focus-visible { outline:2px solid #ED691D; outline-offset:4px; border-radius:4px; }
+.portfolio-download { display:inline-grid; grid-template-columns:auto auto; grid-template-areas:"label icon" "meta icon"; align-items:center; column-gap:22px; row-gap:4px; margin-top:28px; padding:16px 20px 16px 24px; border-radius:999px; background:var(--ink); color:var(--canvas); text-decoration:none; transition:background-color .25s ease, transform .25s ease; }
+.portfolio-download .pd-label { grid-area:label; font:500 17px/1.1 var(--sans); }
+.portfolio-download .pd-meta { grid-area:meta; font-size:11px; letter-spacing:.1em; opacity:.68; color:inherit; }
+.portfolio-download i { grid-area:icon; display:grid; place-items:center; width:40px; height:40px; border-radius:50%; background:#ED691D; color:#121211; font-style:normal; font-size:18px; }
+@media (hover:hover) { .contact-direct a:hover { text-decoration:underline; text-underline-offset:4px; } .portfolio-download:hover { background:#101D40; transform:translateY(-1px); } }
+@media (max-width:600px) {
+  .contact-direct { margin-top:26px; max-width:none; }
+  .contact-direct li { grid-template-columns:84px minmax(0,1fr); padding:14px 0; }
+  .contact-direct a { font-size:16px; padding:2px 0; }
+  .portfolio-download { display:grid; width:100%; grid-template-columns:1fr auto; margin-top:24px; padding:14px 14px 14px 22px; border-radius:18px; }
+}
+@media (prefers-reduced-motion:reduce) { .portfolio-download { transition:none; } }
+/* Footer grows with its link columns so the wordmark never sits under them. */
+@media (max-width:1100px) {
+  #say-hello .hwf-root { height:auto !important; padding-bottom:calc(23vw + 28px); }
+}
+@media (max-width:380px) {
+  .contact-direct li { grid-template-columns:1fr; gap:4px; padding:12px 0; }
+  .portfolio-download .pd-label { font-size:16px; }
+}

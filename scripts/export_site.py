@@ -31,6 +31,9 @@ assert (ROOT / "assets/js/portfolio-motion.js").is_file(), "Motion bundle is mis
 assert (ROOT / "assets/js/site-ui.js").is_file(), "Interface script is missing"
 assert "khwab-original-preserved-wide.webp" in (ROOT / "work/just-a-khwab/index.html").read_text()
 assert "stax-ronin-bench.webp" in (ROOT / "work/stax-living/index.html").read_text()
+PORTFOLIO_PDF = ROOT / "assets/documents/ishika-thakkar-portfolio.pdf"
+assert PORTFOLIO_PDF.is_file() and PORTFOLIO_PDF.read_bytes()[:5] == b"%PDF-", "Portfolio PDF is missing"
+assert "assets/documents/ishika-thakkar-portfolio.pdf" in home, "Portfolio download link is missing"
 
 if OUT.exists():
     shutil.rmtree(OUT)

@@ -7,7 +7,7 @@ import * as React from "react"
 
 export interface HalftonePalette { background: string; ink: string; warm: string }
 export type HalftonePreset = "night" | "paper" | "ember" | "cobalt"
-export interface FooterLink { label: string; href?: string }
+export interface FooterLink { label: string; href?: string; external?: boolean; download?: string }
 export interface FooterColumn { title: string; links: FooterLink[] }
 export interface HalftoneWordmarkFooterProps {
   wordmark?: string
@@ -283,7 +283,8 @@ export default function HalftoneWordmarkFooter({
           <nav className="hwf-col" key={col.title} aria-label={col.title}>
             <h3>{col.title}</h3>
             <ul>{col.links.map(l => <li key={l.label}>
-              {l.href ? <a href={l.href}>{l.label}</a> : <span>{l.label}</span>}
+              {l.href ? <a href={l.href} target={l.external ? "_blank" : undefined} rel={l.external ? "noopener noreferrer" : undefined}
+                download={l.download}>{l.label}</a> : <span>{l.label}</span>}
             </li>)}</ul>
           </nav>
         ))}
