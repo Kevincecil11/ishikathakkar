@@ -94,6 +94,14 @@ def update_metadata(image, icon, apple):
     pages = sorted(OUT.rglob("*.html"))
     for page in pages:
         source = page.read_text(encoding="utf-8")
+        # Keep the homepage browser/search and sharing titles concise.
+        # Project and About page titles remain unchanged.
+        if page == OUT / "index.html":
+            home_title = html.escape("Ishika Thakkar · Portfolio", quote=True)
+            source, count = re.subn(r"<title>.*?</title>", f"<title>{home_title}</title>", source, count=1, flags=re.S)
+            assert count == 1, "Homepage title is missing"
+            source = re.sub(r'<meta\b[^>]*property=["\']og:title["\'][^>]*>\s*', "", source)
+            source = source.replace("</head>", f'<meta property="og:title" content="{home_title}">\n</head>', 1)
         title = html.unescape(re.search(r"<title>(.*?)</title>", source, re.S)[1])
         desc = html.unescape(re.search(r'<meta name="description" content="([^"]*)"', source)[1])
         source = re.sub(r'<meta\b[^>]*(?:property|name)=["\'](?:og:image(?::[\w]+)?|og:url|og:site_name|og:locale|twitter:[\w:]+)["\'][^>]*>\s*', "", source)
